@@ -1,0 +1,102 @@
+# Thiết kế màn hình
+
+Thư mục này chứa bản thiết kế (mockup) các màn hình **trước khi** viết code UI. Luồng, hành vi và tương tác vẫn lấy theo tài liệu UX của từng game (vd `docs/o-an-quan/02-thiet-ke-ux.md`). Ở đây chỉ chốt **giao diện trông thế nào**.
+
+## Cấu trúc
+
+```
+docs/design/
+  README.md        ← file này: quy ước + danh sách màn hình
+  canvas.html      ← xem mọi màn hình cạnh nhau trong khung điện thoại
+  shared/          ← tokens.css (màu, component), desktop.css (bố cục ≥ 1024px), board.js (vẽ bàn Ô ăn quan cho mockup)
+  nen-tang/        ← màn hình dùng chung mọi game: trang chủ, nickname, phòng chờ, mất kết nối
+  o-an-quan/       ← màn hình riêng của Ô ăn quan: bàn chơi, kết quả, lật bàn, hướng dẫn luật
+  <game-khac>/     ← thêm khi làm Tiến lên, Cờ tướng, Caro
+```
+
+## Quy ước
+
+- Mỗi màn hình một file, đặt tên tiếng Việt không dấu theo kebab-case: `phong-cho.md`, `ban-choi.png`.
+- Định dạng: `.md` (wireframe ASCII + ghi chú), ảnh `.png` / `.svg`, hoặc `.html` tĩnh để mở thử trên điện thoại.
+- Thiết kế cho điện thoại trước, khung **360 × 740**. Vùng chạm tối thiểu **44px**.
+- Desktop (**≥ 1024px**) có bố cục riêng, khung **1280 × 800**, file đặt tên `<man-hinh>-desktop.html`. Màn hình nào chưa có bản desktop thì dùng bố cục điện thoại, căn giữa, rộng tối đa 420px.
+- Từ 420px đến 1023px (máy tính bảng, cửa sổ hẹp): dùng bố cục điện thoại, căn giữa.
+- Toàn bộ chữ trên giao diện viết bằng tiếng Việt.
+- Mỗi file ghi rõ: màn hình nào, thuộc mốc nào (M2–M5), các trạng thái (rỗng, đang tải, lỗi, đến lượt / chờ lượt…).
+- Thiết kế đã chốt thì cập nhật cột **Trạng thái** bên dưới. Nếu thiết kế làm thay đổi luồng hay hành vi thì sửa tài liệu UX trong cùng thay đổi.
+
+## Xem thiết kế
+
+Mở `canvas.html` trong trình duyệt. Mỗi khung là một file HTML tĩnh, có thể mở riêng, kể cả trên điện thoại. Font: **Be Vietnam Pro** (Google Fonts), máy không có mạng thì dùng font hệ thống.
+
+`shared/board.js` chỉ dùng để vẽ mockup, **không** phải code sản phẩm. Code UI chỉ cần lấy lại giao diện (CSS, bố cục), còn hành vi thì làm theo tài liệu UX.
+
+## Hệ màu đang dùng
+
+Lấy từ `packages/client/style.css` (bản M2), cộng thêm vài token mới đánh dấu **mới** bên dưới. Toàn bộ token nằm trong `shared/tokens.css`. Khi làm UI, cần thêm các token mới này vào `style.css`.
+
+| Token | Màu | Dùng cho |
+|---|---|---|
+| `--bg` | `#f4ead8` | Nền trang |
+| `--ink` | `#2b2118` | Chữ chính, nút chọn |
+| `--muted` | `#6f5f4f` | Chữ phụ |
+| `--board` / `--board-edge` | `#8a5a2e` / `#6b421f` | Bàn gỗ |
+| `--cell` / `--cell-shade` | `#b07a45` / `#8e5b2c` | Ô trên bàn |
+| `--stone` | `#eee6d4` | Viên dân |
+| `--quan` | `#33251b` | Viên quan |
+| `--accent` | `#f2b33d` | Ô đang chọn, tay cầm, bốc rải tiếp |
+| `--capture` | `#3fa36b` | Ăn quân |
+| `--primary` | `#b5462f` | Nút chính, bù dân |
+| `--surface` | `#fffaf0` | Thẻ, hộp hỏi, bảng kết quả |
+| `--surface-2` (mới) | `#fbf2e2` | Nền phụ trong thẻ, segmented control |
+| `--line` (mới) | `#e2d4bb` | Đường kẻ, nút bị khoá |
+| `--danger` (mới) | `#c2412d` | Mất kết nối, sắp hết giờ |
+| `--cat-co` / `--cat-bai` (mới) | `#2f6b5a` / `#3a4f8f` | Màu nhóm Cờ / Bài trên trang chủ (nhóm Dân gian dùng `--primary`) |
+
+## Danh sách màn hình
+
+| Màn hình | File | Mốc | Tài liệu UX | Trạng thái |
+|---|---|---|---|---|
+| Trang chủ + danh sách trò chơi | `nen-tang/trang-chu.html` | M3 | Ô ăn quan UX mục 2.1 | **Đã chốt** (Q20), đã làm |
+| Vào bằng link mời (nhập nickname) | `nen-tang/nhap-nickname.html` | M3 | mục 2.2 | Bản nháp 1 |
+| Phòng chờ (chủ phòng, chờ người thứ 2) | `nen-tang/phong-cho.html` | M3 | mục 2.3 | Bản nháp 1 |
+| Mất kết nối / đối thủ rời phòng | `nen-tang/mat-ket-noi.html` | M4 | mục 5 | Bản nháp 1 |
+| Bàn chơi: lượt của mình, đang chọn chiều | `o-an-quan/ban-choi.html` | M2 | mục 2.4, 3 | **Đã chốt** (Q20), đã làm |
+| Bàn chơi: đối thủ đi, hiệu ứng ăn quân, emoji | `o-an-quan/ban-choi-doi-thu.html` | M2/M5 | mục 4, 6 | **Đã chốt** (Q20), đã làm |
+| Hộp hỏi Lật bàn | `o-an-quan/lat-ban.html` | M2 | mục 3 | **Đã chốt** (Q20), đã làm |
+| Kết quả ván | `o-an-quan/ket-qua.html` | M2/M5 | mục 2.5 | **Đã chốt** (Q20), đã làm |
+| Hướng dẫn luật (thẻ 2/4) | `o-an-quan/huong-dan.html` | M5 | mục 6 | Bản nháp 1, mới có thẻ 2 |
+| **Desktop**: Trang chủ | `nen-tang/trang-chu-desktop.html` | M3 | mục 2.1 | **Đã chốt** (Q20), đã làm |
+| **Desktop**: Phòng chờ (đã đủ 2 người) | `nen-tang/phong-cho-desktop.html` | M3 | mục 2.3 | Bản nháp 1 |
+| **Desktop**: Bàn chơi + cột nhật ký | `o-an-quan/ban-choi-desktop.html` | M2/M3 | mục 2.4, 3, 4 | **Đã chốt** (Q20), đã làm |
+| **Desktop**: Hộp hỏi Lật bàn (modal) | `o-an-quan/lat-ban-desktop.html` | M2 | mục 3 | **Đã chốt** (Q20), đã làm |
+| **Desktop**: Kết quả (modal) | `o-an-quan/ket-qua-desktop.html` | M2/M5 | mục 2.5 | **Đã chốt** (Q20), đã làm |
+| Desktop: nhập nickname, mất kết nối, hướng dẫn | — | — | — | Dùng bố cục điện thoại căn giữa (nickname), modal (hướng dẫn = tab "Luật chơi" ở cột phải bàn chơi) |
+| Màn hình bắt đầu `/offline` | — | M2 | mục 2.6 | Chỉ để phát triển, không cần thiết kế |
+
+Trạng thái: **Bản nháp 1** → chờ duyệt. Khi duyệt xong thì đổi thành **Đã chốt**, từ đó code UI phải theo đúng thiết kế.
+
+### Bản code tạm khác mockup (đến M3–M5)
+
+Theo Q19 và Q20, các màn hình đã chốt được làm cho chế độ chơi trên một máy (`/offline`). Những chỗ dưới đây cố ý khác mockup và sẽ làm đúng mockup khi tới mốc tương ứng:
+
+- **Trang chủ:** nút chính của Ô ăn quan ghi **Chơi ngay** (dẫn tới `/offline`) thay cho **Tạo phòng**. Ẩn chip nickname, ô "Có mã phòng", mục "Phòng gần đây", nút "Luật chơi", dòng ba bước trên desktop. Dòng mô tả dưới khẩu hiệu tạm ghi "Chọn trò rồi chơi ngay, không cần đăng ký."
+- **Bàn chơi:** "bạn" là người đang đến lượt. Thanh trên ghi "Chơi trên một máy · Lượt N". Ẩn đồng hồ, âm thanh, nút `?`, biểu cảm, người xem, tab Luật chơi. Cột phải trên desktop chỉ có Nhật ký ván và Phím tắt.
+- **Lật bàn:** ẩn dòng "Đồng hồ vẫn chạy".
+- **Kết quả:** tiêu đề "Người chơi A thắng!". Ẩn dòng "… muốn chơi ván nữa". Nút phụ là **Đổi tuỳ chọn** và **Về trang chủ**.
+
+## Điểm mới so với tài liệu UX
+
+Các điểm dưới đây thiết kế thêm vào. Khi chốt thiết kế thì cần cập nhật `02-thiet-ke-ux.md` cho khớp:
+
+- **Trang chủ** có thêm mục "Phòng gần đây" (vào lại phòng cũ) và lưới trò chơi lọc theo nhóm. Game chưa làm có nhãn "Sắp có".
+- **Bàn chơi** ghi nhãn "Hàng của …" trên và dưới bàn, hàng đối thủ tối hơn hàng mình. Mỗi thẻ người chơi hiện kho điểm (dân · quan).
+- **Đối thủ đi** có dòng mô tả nước vừa đi (vd: "ăn ô 4 của bạn (5 dân)").
+- **Kết quả** hiện ai đã bấm Ván nữa và ai sẽ đi trước ván sau.
+- **Desktop không còn là "cùng bố cục, chỉ phóng to"** như UX mục 2.4 đang ghi. Trên desktop:
+  - Trang chủ có hero chia đôi; lưới trò chơi 4 cột.
+  - Phòng chờ chia hai cột, hiện sẵn mã QR (desktop không có Web Share).
+  - Bàn chơi có cột phải gồm nhật ký ván, biểu cảm, người xem và phím tắt. Bàn to hơn: mỗi ô cao 124px.
+  - Hộp hỏi (Lật bàn, Kết quả) là modal giữa màn hình thay cho bottom sheet.
+  - Phím tắt mới: `Esc` chọn lại / giữ bên, `L` lật bàn, `Space` tua nhanh hiệu ứng, `Enter` ván nữa.
+- **Nhật ký ván** (chỉ có trên desktop) cần dữ liệu từ `events` của mỗi nước đi. Không cần sửa engine.

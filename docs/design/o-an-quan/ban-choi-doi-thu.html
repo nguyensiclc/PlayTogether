@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đối thủ đang đi</title>
+<!-- Mockup: Bàn chơi, đối thủ vừa đi, hiệu ứng đang chạy (vừa ăn ô 4 được 5 dân) + đối thủ gửi emoji · Mốc M2/M5 · UX mục 4, 6 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<script src="../shared/board.js"></script>
+<style>
+  .screen { gap: 12px; }
+  .topbar { margin-bottom: -4px; }
+  .topbar .title small { display: block; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .board-wrap { position: relative; margin: 30px 0 4px; }
+  .row-label.top { top: -20px; left: 4px; }
+  .row-label.bottom { bottom: -20px; left: 4px; color: var(--ink); }
+  .player { position: relative; }
+  .bubble { position: absolute; left: 34px; top: 46px; z-index: 6; font-size: 30px; filter: drop-shadow(0 4px 6px rgba(0,0,0,.25)); }
+  .bubble::before { content: ""; position: absolute; inset: -6px -8px; background: var(--surface); border-radius: 18px; z-index: -1; box-shadow: var(--shadow); }
+  .playback { display: flex; gap: 8px; justify-content: center; }
+  .playback .btn { min-height: 44px; }
+  .delta { color: var(--capture); font-weight: 800; font-size: 13px; }
+  .log { text-align: center; font-size: 13px; color: var(--muted); }
+  .log b { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="topbar">
+    <a class="icon-btn" aria-label="Về phòng chờ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="title">Ô ăn quan<small>Phòng ABCD · Lượt 13</small></div>
+    <a class="icon-btn" aria-label="Âm thanh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4V5zM15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg></a>
+    <a class="icon-btn" aria-label="Luật chơi" style="font-weight:800">?</a>
+  </div>
+
+  <div class="player active">
+    <span class="avatar av3">MM</span>
+    <div class="info">
+      <div class="name">Mèo Mun</div>
+      <div class="kho"><span class="ddot"></span>15 dân · <span class="qdot"></span>0 quan <span class="delta">+5</span></div>
+    </div>
+    <div class="score"><b>15</b><span class="tiny muted">điểm</span></div>
+    <span class="bubble">😂</span>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="board-wrap">
+    <span class="row-label top">Hàng của Mèo Mun</span>
+    <div id="b"></div>
+    <span class="row-label bottom">Hàng của bạn</span>
+  </div>
+
+  <div class="spacer"></div>
+
+  <p class="log"><b>Mèo Mun</b> rải một vòng → ăn ô 4 của bạn (<b>5 dân</b>)</p>
+  <div class="playback">
+    <a class="btn sm">⏩ Tua nhanh ×4</a>
+    <a class="btn sm ghost">Bỏ qua hiệu ứng</a>
+  </div>
+
+  <div class="player">
+    <span class="avatar av1">CT</span>
+    <div class="info">
+      <div class="name">Cò Trắng 42 <span class="small muted">(bạn)</span></div>
+      <div class="kho"><span class="ddot"></span>6 dân · <span class="qdot"></span>0 quan</div>
+      <div class="timer"><i style="width:100%;background:var(--line)"></i></div>
+    </div>
+    <div class="score"><b>6</b><span class="tiny muted">chờ lượt</span></div>
+  </div>
+
+  <div class="emote-bar"><span>😂</span><span>😮</span><span>😡</span><span>👏</span><span>🤝</span><span>😭</span></div>
+</div>
+<script>
+  renderBoard(document.getElementById("b"), {
+    //     Q0 A1 A2 A3 A4 A5 Q6 B7 B8 B9 B10 B11
+    dan:  [3, 4, 1, 0, 0, 5, 3, 3, 6, 0, 8, 2],
+    quan: [true, true],
+    capture: { cell: 4, gain: 5 },
+  });
+</script>
+</body>
+</html>

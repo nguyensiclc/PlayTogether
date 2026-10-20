@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phòng chờ desktop</title>
+<!-- Mockup desktop 1280 × 800: Phòng chờ, chủ phòng, đã đủ 2 người · Mốc M3 · UX mục 2.3 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/desktop.css">
+<style>
+  .head { display: flex; align-items: center; gap: 16px; padding: 30px 0 22px; }
+  .head .mini { width: 60px; height: 60px; border-radius: 16px; background: #f3d9cf; display: grid; place-items: center; }
+  .head .code b { letter-spacing: .15em; }
+  .cols { display: grid; grid-template-columns: 1fr 380px; gap: 28px; align-items: start; }
+
+  .seats { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; }
+  .seat { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); padding: 22px; text-align: center; }
+  .seat .avatar { width: 64px; height: 64px; font-size: 22px; margin: 0 auto 10px; }
+  .seat .side { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .vs { font-weight: 800; color: var(--muted); font-size: 18px; }
+  .spect { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; padding: 6px 20px; }
+  .opts .opt-row { border-top: 1px solid var(--line); }
+  .opts .opt-row:nth-child(-n+2) { border-top: 0; }
+
+  .invite { background: var(--ink); color: #fff; padding: 22px; }
+  .invite .link { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.1); border-radius: 10px; padding: 0 5px 0 12px; min-height: 46px; margin: 12px 0; }
+  .invite .link span { flex: 1; font-weight: 600; font-size: 14px; }
+  .qr { display: flex; gap: 16px; align-items: center; margin-top: 6px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); }
+  .qr .code { width: 112px; height: 112px; background: #fff; border-radius: 10px; padding: 8px; flex: none; }
+  .start { margin-top: 16px; }
+  .start .btn { min-height: 56px; font-size: 17px; }
+  .start p { text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body class="desk">
+<nav class="dk-nav">
+  <div class="logo"><span class="logo-mark"><i></i></span>PlayTogether</div>
+  <div class="spacer"></div>
+  <a class="btn sm ghost">Luật chơi</a>
+  <a class="btn sm">Rời phòng</a>
+</nav>
+
+<main class="dk-wrap">
+  <div class="head">
+    <span class="mini"><svg width="44" height="44" viewBox="0 0 40 40"><rect x="3" y="12" width="34" height="16" rx="8" fill="#8a5a2e"/><g fill="#eee6d4"><circle cx="13" cy="17" r="2"/><circle cx="20" cy="17" r="2"/><circle cx="27" cy="17" r="2"/><circle cx="13" cy="23" r="2"/><circle cx="20" cy="23" r="2"/><circle cx="27" cy="23" r="2"/></g></svg></span>
+    <div><h1>Ô ăn quan</h1><div class="muted code">Phòng chờ · Mã phòng <b style="color:var(--ink)">ABCD</b></div></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="section-head" style="margin-top:0"><h2>Người chơi</h2><span class="small muted">2/2 · đủ người</span></div>
+      <div class="seats">
+        <div class="seat">
+          <span class="avatar av1">CT</span>
+          <b>Cò Trắng 42 <span class="muted" style="font-weight:500">(bạn)</span></b>
+          <div style="margin-top:8px"><span class="badge host">Chủ phòng</span></div>
+        </div>
+        <span class="vs">VS</span>
+        <div class="seat">
+          <span class="avatar av3">MM</span>
+          <b>Mèo Mun</b>
+          <div style="margin-top:8px"><span class="badge live">● Đã vào</span></div>
+        </div>
+      </div>
+      <div class="spect small muted"><span class="avatar sm av2">SN</span>Sóc Nâu đang xem · <a style="color:var(--ink);font-weight:600">Mời thêm người xem</a></div>
+
+      <div class="section-head"><h2>Tuỳ chọn luật</h2><span class="small muted">Chỉ chủ phòng chỉnh được</span></div>
+      <section class="card opts">
+        <div class="opt-row stack"><b>Giá trị quan</b><div class="seg"><span class="on">10 dân</span><span>5 dân</span></div></div>
+        <div class="opt-row stack"><b>Thời gian mỗi lượt</b><div class="seg"><span>15s</span><span class="on">30s</span><span>60s</span><span>∞</span></div></div>
+        <div class="opt-row"><div><b>Quan Già</b><div class="small muted">Chỉ ăn được ô quan có từ 5 dân</div></div><span class="toggle"></span></div>
+        <div class="opt-row"><div><b>Lật bàn</b><div class="small muted">Người đi sau được đổi bên 1 lần</div></div><span class="toggle on"></span></div>
+      </section>
+    </div>
+
+    <aside>
+      <section class="card invite">
+        <h2>Mời bạn bè</h2>
+        <div class="link"><span>playtogether.vn/r/ABCD</span><a class="btn sm" style="background:#fff;color:var(--ink);border:0">Sao chép</a></div>
+        <div class="qr">
+          <svg class="code" viewBox="0 0 21 21" shape-rendering="crispEdges">
+            <rect width="21" height="21" fill="#fff"/>
+            <g fill="#2b2118">
+              <path d="M0 0h7v7H0zM1 1v5h5V1zM2 2h3v3H2zM14 0h7v7h-7zM15 1v5h5V1zM16 2h3v3h-3zM0 14h7v7H0zM1 15v5h5v-5zM2 16h3v3H2z" fill-rule="evenodd"/>
+              <path d="M8 0h1v2H8zM10 1h2v1h-2zM9 3h2v2H9zM12 4h1v3h-1zM8 6h2v2H8zM0 8h2v1H0zM3 8h3v1H3zM7 9h3v1H7zM11 8h2v2h-2zM14 8h2v1h-2zM17 8h4v1h-4zM1 10h2v2H1zM5 10h1v2H5zM9 11h3v1H9zM13 10h2v2h-2zM16 10h1v3h-1zM19 10h2v2h-2zM8 12h1v2H8zM11 13h2v1h-2zM14 13h1v1h-1zM18 13h2v2h-2zM9 15h2v2H9zM12 15h3v1h-3zM16 15h1v2h-1zM8 18h3v1H8zM13 17h2v2h-2zM17 18h4v1h-4zM10 20h2v1h-2zM15 20h1v1h-1zM19 20h2v1h-2z"/>
+            </g>
+          </svg>
+          <p class="small" style="opacity:.8">Quét bằng camera điện thoại để vào phòng. Hoặc đọc mã <b style="opacity:1;letter-spacing:.15em">ABCD</b> cho bạn nhập ở trang chủ.</p>
+        </div>
+      </section>
+      <div class="start">
+        <a class="btn primary block">Bắt đầu ván</a>
+        <p class="small muted">Người đi trước được chọn ngẫu nhiên khi bắt đầu</p>
+      </div>
+    </aside>
+  </div>
+</main>
+</body>
+</html>

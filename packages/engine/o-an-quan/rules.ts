@@ -1,16 +1,20 @@
 // Luật Ô ăn quan, khớp 01-luat-choi.md và thuật toán ở mục 5 tài liệu kỹ thuật.
 // Hàm thuần: không sửa state đầu vào, không I/O, không ngẫu nhiên.
 import type { GameModule, GameResult, SeatId } from "../game-module.ts";
-import type { Dir, GameEvent, Move, Options, ScoreDetail, Seat, State } from "./types.ts";
+import type { Dir, EndReason, GameEvent, Move, Options, ScoreDetail, Seat, SowMove, State } from "./types.ts";
 
-export const defaultOptions: Options = { giaTriQuan: 10, camAnQuanNon: false, thoiGianLuot: 30 };
+export const defaultOptions: Options = { giaTriQuan: 10, camAnQuanNon: false, latBan: false, thoiGianLuot: 30 };
 
-/** Số dân rải lại khi hàng trống (mục 6 luật) */
-const SPREAD = 5;
+/** Số điểm trừ khi bù dân (luật mục 6) */
+const BU_DAN = 5;
+/** Số dân tối thiểu để ăn ô quan còn quan khi bật Quan Già (luật mục 5) */
+const QUAN_GIA_MIN = 5;
+/** Số nước rải gần nhất cần giữ để phát hiện lặp nước (luật mục 8) */
+const REPEAT_WINDOW = 6;
 /** Giới hạn an toàn số viên rải trong một lượt, để phát hiện lỗi vòng lặp */
 const MAX_DROPS_PER_TURN = 10_000;
 
-const ROWS: Record<Seat, readonly number[]> = {
+export const ROWS: Record<Seat, readonly number[]> = {
   0: [1, 2, 3, 4, 5],
   1: [7, 8, 9, 10, 11],
 };
@@ -34,9 +38,17 @@ const at = (s: State, i: number): number => s.dan[i] ?? 0;
 /** Ô trống hẳn: không dân, và nếu là ô quan thì cũng không còn quan */
 export const isEmpty = (s: State, i: number): boolean => at(s, i) === 0 && !quanAt(s, i);
 
-const isSeat = (seat: SeatId): seat is Seat => seat === 0 || seat === 1;
-
 const rowEmpty = (s: State, seat: Seat): boolean => ROWS[seat].every((i) => at(s, i) === 0);
+
+const other = (seat: Seat): Seat => (seat === 0 ? 1 : 0);
+
+/** Người đang được đi (ghế điều khiển bên đến lượt) */
+const toMove = (s: State): SeatId => s.controller[s.turn];
+
+const sameSow = (a: SowMove | undefined, b: SowMove | undefined): boolean =>
+  !!a && !!b && a.square === b.square && a.dir === b.dir;
+
+const canLatBan = (s: State): boolean => s.options.latBan && !s.latBanUsed && s.moveNo === 1;
 
 function clone(s: State): State {
   return {
@@ -44,13 +56,17 @@ function clone(s: State): State {
     dan: [...s.dan],
     quan: [s.quan[0], s.quan[1]],
     captured: [{ ...s.captured[0] }, { ...s.captured[1] }],
-    debt: [s.debt[0], s.debt[1]],
+    controller: [s.controller[0], s.controller[1]],
+    recentSows: s.recentSows.map((m) => ({ ...m })),
+    buDanCount: [s.buDanCount[0], s.buDanCount[1]],
     options: { ...s.options },
   };
 }
 
-export function setup(options: Options, _seats: SeatId[], firstPlayer: SeatId): State {
-  if (!isSeat(firstPlayer)) throw new Error(`firstPlayer không hợp lệ: ${firstPlayer}`);
+/** Bên A luôn đi trước, do `firstPlayer` điều khiển (Q17). */
+export function setup(options: Options, seats: SeatId[], firstPlayer: SeatId): State {
+  const rest = seats.filter((s) => s !== firstPlayer);
+  if (seats.length !== 2 || rest.length !== 1) throw new Error(`Ghế không hợp lệ: ${seats} / ${firstPlayer}`);
   return {
     dan: [0, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5],
     quan: [true, true],
@@ -58,40 +74,76 @@ export function setup(options: Options, _seats: SeatId[], firstPlayer: SeatId): 
       { dan: 0, quan: 0 },
       { dan: 0, quan: 0 },
     ],
-    debt: [0, 0],
-    turn: firstPlayer,
+    controller: [firstPlayer, rest[0]!],
+    turn: 0,
     moveNo: 0,
+    latBanUsed: false,
+    recentSows: [],
+    buDanCount: [0, 0],
     options: { ...options },
     status: "playing",
     result: null,
   };
 }
 
-export function validMoves(state: State, seat: SeatId): Move[] {
-  if (state.status !== "playing" || seat !== state.turn || !isSeat(seat)) return [];
+/** Mọi nước hợp lệ của người chơi, gồm cả Lật bàn khi được phép (Q18). */
+export function validMoves(state: State, seatId: SeatId): Move[] {
+  if (state.status !== "playing" || toMove(state) !== seatId) return [];
   const moves: Move[] = [];
-  for (const square of ROWS[seat]) {
-    if (at(state, square) > 0) moves.push({ square, dir: 1 }, { square, dir: -1 });
+  for (const square of ROWS[state.turn]) {
+    if (at(state, square) > 0) moves.push({ kind: "sow", square, dir: 1 }, { kind: "sow", square, dir: -1 });
   }
+  if (canLatBan(state)) moves.push({ kind: "latBan" });
   return moves;
 }
 
 export function applyMove(
   state: State,
-  seat: SeatId,
+  seatId: SeatId,
   move: Move,
 ): { state: State; events: GameEvent[] } | { error: string } {
   if (state.status !== "playing") return { error: "INVALID_MOVE" };
-  if (!isSeat(seat) || seat !== state.turn) return { error: "NOT_YOUR_TURN" };
+  if (toMove(state) !== seatId) return { error: "NOT_YOUR_TURN" };
+  if (move.kind === "latBan") return latBan(state);
+  if (move.kind !== "sow") return { error: "INVALID_MOVE" };
   const { square, dir } = move;
   if (dir !== 1 && dir !== -1) return { error: "INVALID_MOVE" };
-  if (!Number.isInteger(square) || owner(square) !== seat) return { error: "INVALID_MOVE" };
+  if (!Number.isInteger(square) || owner(square) !== state.turn) return { error: "INVALID_MOVE" };
   if (at(state, square) <= 0) return { error: "INVALID_MOVE" };
 
   const s = clone(state);
   const events: GameEvent[] = [];
+  sow(s, square, dir, events);
 
-  // Bốc ô đã chọn
+  s.moveNo++;
+  const sown: SowMove = { kind: "sow", square, dir };
+  s.recentSows = [...s.recentSows, sown].slice(-REPEAT_WINDOW);
+
+  // Thứ tự kiểm tra kết thúc ván: hết quan → lặp nước → bù dân
+  if (isEmpty(s, 0) && isEmpty(s, 6)) {
+    finish(s, "het-quan", events);
+  } else if (isRepetition(s.recentSows)) {
+    finish(s, "lap-nuoc", events);
+  } else {
+    s.turn = other(s.turn);
+    if (rowEmpty(s, s.turn)) buDan(s, events);
+  }
+  return { state: s, events };
+}
+
+/** Lật bàn (luật mục 9, kỹ thuật mục 5.1). Quyền đi đã được kiểm tra trước. */
+function latBan(state: State): { state: State; events: GameEvent[] } | { error: string } {
+  if (!canLatBan(state)) return { error: "INVALID_MOVE" };
+  const s = clone(state);
+  s.controller = [s.controller[1], s.controller[0]];
+  s.latBanUsed = true;
+  s.recentSows = [];
+  return { state: s, events: [{ t: "latBan" }] };
+}
+
+/** Rải, bốc rải tiếp, ăn và ăn liên hoàn (luật mục 3–5). */
+function sow(s: State, square: number, dir: Dir, events: GameEvent[]): void {
+  const seat = s.turn;
   let hand = at(s, square);
   s.dan[square] = 0;
   events.push({ t: "pick", i: square, n: hand });
@@ -120,20 +172,20 @@ export function applyMove(
     // (b) ô quan còn quân
     if (isQuanSquare(n) && !isEmpty(s, n)) {
       events.push({ t: "turnEnd", reason: "gap-o-quan" });
-      break;
+      return;
     }
     // n trống
     let t = next(n, dir);
     // (d)
     if (isEmpty(s, t)) {
       events.push({ t: "turnEnd", reason: "hai-o-trong" });
-      break;
+      return;
     }
-    // (c) + ăn dây
+    // (c) + ăn liên hoàn
     for (;;) {
-      if (quanAt(s, t) && at(s, t) < 5 && s.options.camAnQuanNon) {
+      if (s.options.camAnQuanNon && quanAt(s, t) && at(s, t) < QUAN_GIA_MIN) {
         events.push({ t: "turnEnd", reason: "quan-non" });
-        break;
+        return;
       }
       capture(s, t, seat, events);
       const e = next(t, dir);
@@ -143,21 +195,9 @@ export function applyMove(
         continue;
       }
       events.push({ t: "turnEnd", reason: "het-an" });
-      break;
+      return;
     }
-    break;
   }
-
-  // Hết quan, tàn dân
-  if (isEmpty(s, 0) && isEmpty(s, 6)) {
-    finish(s, "het-quan", events);
-    return { state: s, events };
-  }
-
-  s.turn = (1 - s.turn) as Seat;
-  s.moveNo++;
-  if (rowEmpty(s, s.turn)) spread(s, events);
-  return { state: s, events };
 }
 
 function capture(s: State, i: number, by: Seat, events: GameEvent[]): void {
@@ -170,62 +210,85 @@ function capture(s: State, i: number, by: Seat, events: GameEvent[]): void {
   events.push({ t: "capture", i, dan, quan, by });
 }
 
-/** Rải quân khi hàng của người đến lượt trống hết (mục 6 luật). */
-function spread(s: State, events: GameEvent[]): void {
+/** 6 nước rải gần nhất có dạng X Y X Y X Y (luật mục 8). */
+function isRepetition(m: readonly SowMove[]): boolean {
+  if (m.length < REPEAT_WINDOW) return false;
+  return sameSow(m[0], m[2]) && sameSow(m[2], m[4]) && sameSow(m[1], m[3]) && sameSow(m[3], m[5]);
+}
+
+/** Bù dân khi hàng của bên đến lượt trống hết (luật mục 6, Q13). */
+function buDan(s: State, events: GameEvent[]): void {
   const seat = s.turn;
-  const opp = (1 - seat) as Seat;
-  const own = s.captured[seat].dan;
-  if (own + s.captured[opp].dan < SPREAD) {
-    finish(s, "khong-du-dan", events);
+  const v = s.options.giaTriQuan;
+  const p = s.captured[seat];
+  if (p.dan + p.quan * v < BU_DAN) {
+    finish(s, "khong-du-bu-dan", events);
     return;
   }
-  const fromOwn = Math.min(SPREAD, own);
-  const borrowed = SPREAD - fromOwn;
-  s.captured[seat].dan -= fromOwn;
-  s.captured[opp].dan -= borrowed;
-  s.debt[seat] += borrowed;
+  const doiQuan = p.dan < BU_DAN;
+  if (doiQuan) {
+    p.quan--;
+    p.dan += v;
+  }
+  p.dan -= BU_DAN;
   for (const i of ROWS[seat]) s.dan[i] = 1;
-  events.push({ t: "spread", seat, fromOwn, borrowed });
+  s.buDanCount[seat]++;
+  events.push({ t: "buDan", seat, doiQuan });
 }
 
 /**
- * Kết thúc ván (mục 7 luật). Quân thu trên bàn được cộng vào phần đã ăn, bàn trống hẳn.
- * - "het-quan": mỗi người thu dân trên hàng mình.
- * - "khong-du-dan": người không phải rải (đối thủ của người đến lượt) thu toàn bộ quân trên bàn (Q7).
+ * Kết thúc ván (luật mục 7). Quân trên bàn giữ nguyên; dân thu cuối ván chỉ ghi vào `ScoreDetail.rowDan`.
+ * - "het-quan", "lap-nuoc": mỗi bên thu dân trên hàng mình (quân trong ô quan không tính), so điểm.
+ * - "khong-du-bu-dan": bên đến lượt thua. "het-gio", "bo-cuoc": `loser` thua. Không thu quân.
  */
-function finish(s: State, reason: "het-quan" | "khong-du-dan", events: GameEvent[]): void {
-  const danBefore = [s.captured[0].dan, s.captured[1].dan];
-  const rowDan = [0, 0];
+function finish(s: State, reason: EndReason, events: GameEvent[], loser?: SeatId): void {
+  const v = s.options.giaTriQuan;
+  const collects = reason === "het-quan" || reason === "lap-nuoc";
+  const detail: ScoreDetail[] = [];
+  for (const side of [0, 1] as const) {
+    const p = s.captured[side];
+    const rowDan = collects ? ROWS[side].reduce((sum, i) => sum + at(s, i), 0) : 0;
+    detail[s.controller[side]] = {
+      side,
+      dan: p.dan,
+      quan: p.quan,
+      rowDan,
+      buDan: s.buDanCount[side],
+      total: p.dan + p.quan * v + rowDan,
+    };
+  }
+  const scores = detail.map((d) => d.total);
 
-  if (reason === "het-quan") {
-    for (const seat of [0, 1] as const) {
-      rowDan[seat] = ROWS[seat].reduce((sum, i) => sum + at(s, i), 0);
-    }
+  let winner: SeatId | null;
+  if (reason === "khong-du-bu-dan") {
+    winner = s.controller[other(s.turn)];
+  } else if (loser !== undefined) {
+    winner = s.controller[0] === loser ? s.controller[1] : s.controller[0];
   } else {
-    const collector = (1 - s.turn) as Seat;
-    rowDan[collector] = s.dan.reduce((sum, d) => sum + d, 0);
-    s.captured[collector].quan += Number(s.quan[0]) + Number(s.quan[1]);
+    const [a, b] = s.controller;
+    const sa = detail[a]!.total;
+    const sb = detail[b]!.total;
+    winner = sa === sb ? null : sa > sb ? a : b;
   }
 
-  s.dan.fill(0);
-  s.quan = [false, false];
-  const v = s.options.giaTriQuan;
-  const detail: ScoreDetail[] = ([0, 1] as const).map((seat) => {
-    const dan = danBefore[seat] ?? 0;
-    const row = rowDan[seat] ?? 0;
-    s.captured[seat].dan += row;
-    const quan = s.captured[seat].quan;
-    const borrowed = s.debt[seat];
-    const lent = s.debt[1 - seat] ?? 0;
-    return { dan, quan, rowDan: row, borrowed, lent, total: dan + quan * v + row - borrowed + lent };
-  });
-
-  const scores = detail.map((d) => d.total);
-  const [a = 0, b = 0] = scores;
-  const result: GameResult = { winner: a === b ? null : a > b ? 0 : 1, scores, reason, detail };
+  const result: GameResult = { winner, scores, reason, detail };
   s.status = "finished";
   s.result = result;
   events.push({ t: "gameOver", result });
+}
+
+/** Xử thua do hết giờ (bị đi thay 3 lượt) hoặc bỏ cuộc. Lớp phòng tự đếm và gọi hàm này. */
+export function forfeit(
+  state: State,
+  seatId: SeatId,
+  reason: "het-gio" | "bo-cuoc",
+): { state: State; events: GameEvent[] } | { error: string } {
+  if (state.status !== "playing") return { error: "INVALID_MOVE" };
+  if (!state.controller.includes(seatId)) return { error: "INVALID_MOVE" };
+  const s = clone(state);
+  const events: GameEvent[] = [];
+  finish(s, reason, events, seatId);
+  return { state: s, events };
 }
 
 export function result(state: State): GameResult | null {

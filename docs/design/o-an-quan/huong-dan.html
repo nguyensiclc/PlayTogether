@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hướng dẫn luật</title>
+<!-- Mockup: Hướng dẫn luật, 4 thẻ vuốt ngang, đang ở thẻ 2/4 · Mốc M5 · UX mục 6 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<script src="../shared/board.js"></script>
+<style>
+  .steps { display: flex; gap: 6px; margin: 4px 0 16px; }
+  .steps i { flex: 1; height: 4px; border-radius: 2px; background: var(--line); }
+  .steps i.on { background: var(--ink); }
+  .rcard { background: var(--surface); border-radius: 22px; box-shadow: var(--shadow); padding: 18px 14px 20px; }
+  .num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); font-weight: 800; font-size: 14px; }
+  .rcard h1 { font-size: 22px; margin: 10px 0 6px; }
+  .demo { margin: 34px 0 10px; position: relative; }
+  .demo .board { grid-template-rows: 56px 56px; }
+  .path { position: absolute; left: 0; right: 0; bottom: -30px; display: flex; justify-content: center; gap: 4px; font-size: 12px; color: var(--muted); }
+  .rules { margin-top: 34px; display: grid; gap: 10px; }
+  .rule { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+  .rule .k { flex: none; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; font-weight: 800; font-size: 13px; color: #fff; }
+  .k.a { background: var(--accent); color: var(--ink); } .k.c { background: var(--capture); } .k.s { background: var(--muted); }
+  .peek { display: flex; gap: 8px; margin-top: 12px; overflow: hidden; }
+  .peek span { flex: none; width: 70px; height: 6px; }
+  .nav { display: flex; gap: 8px; margin-top: auto; padding-top: 16px; }
+  .nav .btn.primary { flex: 1; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="topbar">
+    <a class="icon-btn" aria-label="Đóng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+    <div class="title">Cách chơi Ô ăn quan</div>
+    <span style="width:44px"></span>
+  </div>
+  <div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+
+  <article class="rcard">
+    <span class="num">2</span>
+    <h1>Rải quân rồi xem ô kế tiếp</h1>
+    <p class="muted small">Bốc hết sỏi trong một ô của bạn, rải mỗi ô một viên theo chiều đã chọn. Rải xong viên cuối, nhìn ô ngay sau đó:</p>
+
+    <div class="demo">
+      <div id="b"></div>
+    </div>
+
+    <div class="rules">
+      <div class="rule"><span class="k a">↻</span><div><b>Ô có sỏi</b> → bốc lên rải tiếp.</div></div>
+      <div class="rule"><span class="k c">+</span><div><b>Ô trống, ô sau có sỏi</b> → ăn hết ô sau. Lặp lại được: ăn liên hoàn.</div></div>
+      <div class="rule"><span class="k s">■</span><div><b>Gặp ô quan</b> hoặc <b>hai ô trống</b> → hết lượt.</div></div>
+    </div>
+  </article>
+
+  <div class="nav">
+    <a class="btn">Trước</a>
+    <a class="btn primary">Tiếp: Hết dân thì bù dân</a>
+  </div>
+</div>
+<script>
+  // Ví dụ trong luật mục 11.1: rải xong, ô 3 trống, ô 4 có 6 dân → ăn 6.
+  renderBoard(document.getElementById("b"), {
+    dan:  [1, 6, 6, 0, 6, 6, 1, 6, 6, 0, 6, 6],
+    quan: [true, true],
+    hand: 2,
+    capture: { cell: 4, gain: 6 },
+  });
+</script>
+</body>
+</html>

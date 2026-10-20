@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mất kết nối</title>
+<!-- Mockup: Hai trạng thái mất kết nối trên cùng một màn: (1) đối thủ mất kết nối, đang giữ ghế 60s; (2) mình mất kết nối → thanh đỏ, bàn khoá · Mốc M4 · UX mục 5 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<script src="../shared/board.js"></script>
+<style>
+  .screen { gap: 12px; }
+  .board-wrap { position: relative; margin-top: 6px; }
+  .locked { position: absolute; inset: 0; border-radius: 20px; background: rgba(244,234,216,.55); display: grid; place-items: center; z-index: 6; }
+  .locked span { background: var(--surface); padding: 8px 14px; border-radius: 999px; font-weight: 600; font-size: 13px; box-shadow: var(--shadow); }
+  .player.offline .avatar { filter: grayscale(1); opacity: .5; }
+  .player.offline .name { color: var(--muted); }
+  .reconn { font-size: 12px; color: var(--danger); font-weight: 700; }
+  .spin { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; flex: none; }
+  .divider { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 10px 0 2px; display: flex; align-items: center; gap: 8px; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--stone-edge); }
+  .left-card { text-align: center; }
+  .left-card .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="banner"><span class="spin"></span>Mất kết nối, đang thử lại… <span style="margin-left:auto;opacity:.8;font-weight:500">lần 3</span></div>
+  <div class="divider">Khi bạn mất kết nối</div>
+  <div class="board-wrap">
+    <div id="b"></div>
+    <div class="locked"><span>🔒 Bàn tạm khoá</span></div>
+  </div>
+  <p class="tiny muted" style="text-align:center">Ghế của bạn được giữ 60 giây. Tự kết nối lại khi có mạng.</p>
+
+  <div class="divider">Khi đối thủ mất kết nối</div>
+  <div class="player offline">
+    <span class="avatar av3">MM</span>
+    <div class="info"><div class="name">Mèo Mun</div><div class="reconn">Đang kết nối lại… còn 42 giây</div></div>
+    <div class="score"><b style="color:var(--muted)">10</b></div>
+  </div>
+
+  <div class="divider">Khi đối thủ rời hẳn</div>
+  <div class="card left-card">
+    <span class="avatar av3" style="margin:0 auto 8px;filter:grayscale(1);opacity:.6">MM</span>
+    <h2>Mèo Mun đã rời phòng</h2>
+    <p class="small muted" style="margin-top:4px">Mất kết nối quá 60 giây nên bạn được xử thắng.</p>
+    <div class="acts"><a class="btn primary sm">Chờ người khác</a><a class="btn sm">Về trang chủ</a></div>
+  </div>
+</div>
+<script>
+  renderBoard(document.getElementById("b"), { dan: [2, 3, 0, 6, 1, 4, 3, 2, 5, 0, 7, 1], quan: [true, true] });
+</script>
+</body>
+</html>

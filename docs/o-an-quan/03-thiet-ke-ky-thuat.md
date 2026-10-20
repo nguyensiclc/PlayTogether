@@ -46,10 +46,20 @@
     room.ts
   /client
     index.html
-    main.ts
-    /screens         ← home, lobby, board, result
-    /o-an-quan       ← render bàn + hiệu ứng
+    main.ts          ← định tuyến: / (trang chủ), /offline
+    style.css        ← token và bố cục theo docs/design (desktop ≥ 1024px bằng media query)
+    /screens
+      home.ts        ← trang chủ, danh sách trò chơi, lọc theo nhóm
+      offline.ts     ← M2: màn hình bắt đầu, bàn chơi chung một máy, Lật bàn, kết quả, phím tắt
+    /o-an-quan
+      layout.ts      ← xếp 12 ô lên bàn 7 cột theo bên ngồi dưới
+      view-model.ts  ← phát lại events trên state cũ (BoardView)
+      playback.ts    ← chạy events theo thời lượng UX mục 4, tua nhanh, bỏ qua
+      board-dom.ts   ← vẽ bàn bằng DOM/CSS, hiệu ứng ô, thanh ◀ ▶
+      move-log.ts    ← nhật ký ván: mô tả từng nước từ events
 ```
+
+Engine có hai đường import: `@playtogether/engine` (GameModule, RNG) và `@playtogether/engine/o-an-quan` (luật và kiểu dữ liệu Ô ăn quan).
 
 ## 3. Giao diện `GameModule`
 
@@ -88,17 +98,21 @@ type Dir = 1 | -1;
 
 interface Options {
   giaTriQuan: 10 | 5;
-  camAnQuanNon: boolean;
+  camAnQuanNon: boolean;               // UI: "Quan Già"
+  latBan: boolean;                     // UI: "Lật bàn"
   thoiGianLuot: 15 | 30 | 60 | null;   // giây
 }
 
 interface State {
   dan: number[];                 // độ dài 12, số dân ở từng ô (kể cả ô quan 0 và 6)
   quan: [boolean, boolean];      // quan[0] = ô 0 còn quan?, quan[1] = ô 6 còn quan?
-  captured: [Pile, Pile];        // theo Seat
-  debt: [number, number];        // số dân Seat i đã vay của đối phương
-  turn: Seat;
-  moveNo: number;
+  captured: [Pile, Pile];        // kho điểm, theo Seat (bên bàn), KHÔNG theo người chơi
+  controller: [SeatId, SeatId];  // controller[seat] = ghế phòng đang điều khiển bên đó. Lật bàn hoán đổi mảng này
+  turn: Seat;                    // bên đang đến lượt
+  moveNo: number;                // số nước rải đã đi
+  latBanUsed: boolean;
+  recentSows: SowMove[];         // tối đa 6 nước rải gần nhất, để phát hiện lặp nước. Lật bàn xoá mảng này
+  buDanCount: [number, number];  // số lần bù dân, theo Seat (để hiển thị)
   options: Options;
   status: "playing" | "finished";
   result: GameResult | null;
@@ -106,18 +120,30 @@ interface State {
 
 interface Pile { dan: number; quan: number; }
 
-interface Move { square: number; dir: Dir; }
+type SowMove = { kind: "sow"; square: number; dir: Dir };
+type Move = SowMove | { kind: "latBan" };
 
-// GameResult.detail của Ô ăn quan: ScoreDetail[] theo Seat
+type EndReason = "het-quan" | "khong-du-bu-dan" | "lap-nuoc" | "het-gio" | "bo-cuoc";
+
+// GameResult.detail của Ô ăn quan: ScoreDetail[] theo SeatId (người chơi)
 interface ScoreDetail {
-  dan: number;        // dân đã ăn
-  quan: number;       // quan đã ăn
-  rowDan: number;     // dân thu trên bàn cuối ván: hàng mình; nếu kết thúc theo 6.4 thì người còn lại thu cả bàn (quan còn trên bàn cộng vào `quan`)
-  borrowed: number;   // nợ đã vay (bị trừ)
-  lent: number;       // nợ đã cho vay (được cộng)
-  total: number;      // dan + quan × giaTriQuan + rowDan − borrowed + lent
+  side: Seat;         // bên người đó điều khiển lúc kết thúc
+  dan: number;        // dân trong kho (đã trừ bù dân)
+  quan: number;       // quan trong kho
+  rowDan: number;     // dân thu trên hàng mình cuối ván (chỉ khi het-quan / lap-nuoc)
+  buDan: number;      // số lần bù dân
+  total: number;      // dan + quan × giaTriQuan + rowDan
 }
 ```
+
+- `GameResult.reason` là một `EndReason`. Với `khong-du-bu-dan`, `het-gio` và `bo-cuoc`, người thua được xác định theo lý do kết thúc, **không** theo điểm.
+- Engine có thêm hàm `forfeit(state, seatId, reason: "het-gio" | "bo-cuoc")` để lớp phòng xử thua. Lớp phòng tự đếm số lượt bị đi thay và thời gian mất kết nối.
+- Khi validate một nước đi, quyền đi được xác định bằng `controller[turn] === seatId`, không dùng `turn === seatId`.
+- `setup(options, seats, firstPlayer)`: **bên A luôn đi trước**, tức `turn = 0`, `controller[0] = firstPlayer`, `controller[1]` là ghế còn lại (Q17).
+- `validMoves(state, seatId)` trả về **mọi** nước hợp lệ của người đó, gồm cả `{ kind: "latBan" }` khi được phép lật. Client dựa vào đó để biết lúc nào hiện hộp hỏi Lật bàn (Q18).
+- Khi ván kết thúc, engine **giữ nguyên quân trên bàn**. Dân thu cuối ván chỉ được ghi vào `ScoreDetail.rowDan`, không chuyển vào `captured`. Nhờ vậy bất biến tổng điểm vẫn đúng sau nước cuối, kể cả khi lặp nước (quân trong ô quan không được tính).
+- `forfeit` trả về cùng dạng với `applyMove`: `{ state, events: [gameOver] } | { error }`. Lỗi `INVALID_MOVE` khi ván đã kết thúc hoặc ghế không có trong ván. Điểm là kho hiện tại, không thu quân trên bàn.
+- Engine export thêm `ROWS` (các ô dân của từng bên), `isQuanSquare`, `owner`, `next`, `isEmpty` để client dùng chung.
 
 Các hàm tiện ích:
 - `isQuanSquare(i) = i === 0 || i === 6`
@@ -125,12 +151,24 @@ Các hàm tiện ích:
 - `next(i, dir) = (i + dir + 12) % 12`
 - `isEmpty(i) = dan[i] === 0 && !(isQuanSquare(i) && quanAt(i))`
 
-**Bất biến** (kiểm tra trong test sau mỗi nước đi): tổng dân trên bàn + dân đã ăn của cả hai bên = 50. Số quan trên bàn + quan đã ăn = 2.
+**Bất biến** (kiểm tra trong test sau mỗi nước đi): **tổng điểm** = (dân trên bàn + quan trên bàn × v) + (kho dân + kho quan × v của cả hai bên) = 70 (hoặc 60), với v = `giaTriQuan`. Không còn bất biến "tổng quan = 2", vì khi bù dân có thể đổi quan thành dân.
 
 ## 5. Thuật toán `applyMove`
 
+### 5.1 Lật bàn
+
 ```
-validate: status = playing, seat = turn, owner(square) = seat, dan[square] > 0, dir ∈ {1,-1}
+validate: status = playing, options.latBan, !latBanUsed, moveNo = 1, controller[turn] = seatId
+controller = [controller[1], controller[0]]; latBanUsed = true; recentSows = []
+turn giữ nguyên  → người mở đầu giờ điều khiển bên đang đến lượt và phải đi
+emit latBan
+```
+
+### 5.2 Nước rải
+
+```
+validate: status = playing, controller[turn] = seatId, owner(square) = turn, dan[square] > 0, dir ∈ {1,-1}
+seat = turn
 
 hand = dan[square]; dan[square] = 0; emit pick(square, hand)
 pos = square
@@ -154,12 +192,26 @@ loop:
       emit turnEnd("het-an"); break
   break
 
-if cả hai ô quan isEmpty: kết thúc ván (thu dân hai hàng, tính điểm), emit gameOver
+moveNo++; recentSows.push(move), chỉ giữ 6 phần tử cuối
+
+if cả hai ô quan isEmpty:
+    kết thúc "het-quan": mỗi bên thu dân trên hàng mình; so điểm; emit gameOver
+elif recentSows có 6 phần tử dạng X Y X Y X Y:
+    kết thúc "lap-nuoc": mỗi bên thu dân trên hàng mình; quân trong ô quan không tính; so điểm; emit gameOver
 else:
-  turn = 1 - turn; moveNo++
-  if hàng của turn trống hết: thực hiện rải quân (vay nếu thiếu), emit spread(seat, fromOwn, borrowed)
-     nếu cả hai bên cộng lại không đủ 5 dân: kết thúc ván
+  turn = 1 - turn
+  if 5 ô của turn đều trống:                                   # Bù dân
+      v = giaTriQuan; p = captured[turn]
+      if p.dan + p.quan × v < 5:
+          kết thúc "khong-du-bu-dan": bên turn thua; emit gameOver
+      else:
+          doiQuan = p.dan < 5
+          if doiQuan: p.quan--; p.dan += v
+          p.dan -= 5; mỗi ô của turn = 1; buDanCount[turn]++
+          emit buDan(turn, doiQuan)
 ```
+
+Thứ tự kiểm tra kết thúc ván: **hết quan → lặp nước → bù dân**.
 
 > Vòng lặp `while hand > 0` có thể đi qua chính ô vừa bốc. Điều này đúng luật: ô đó chỉ bị bỏ qua tại thời điểm bốc, không bị bỏ qua khi rải vòng tới.
 
@@ -171,7 +223,8 @@ type GameEvent =
   | { t: "drop"; i: number }
   | { t: "capture"; i: number; dan: number; quan: number; by: Seat }
   | { t: "turnEnd"; reason: "gap-o-quan" | "hai-o-trong" | "het-an" | "quan-non" }
-  | { t: "spread"; seat: Seat; fromOwn: number; borrowed: number }
+  | { t: "buDan"; seat: Seat; doiQuan: boolean }   // trừ 5 điểm, mỗi ô 1 dân
+  | { t: "latBan" }                                // controller đã hoán đổi
   | { t: "gameOver"; result: GameResult };
 ```
 
@@ -235,7 +288,7 @@ Mọi message là JSON có dạng `{ type, ...payload }`. Kết nối tại `wss
 ## 8. Đồng hồ lượt
 
 - Server đặt `turnDeadline = now + thoiGianLuot + animationBudget(events)`, với `animationBudget ≈ 180ms × số drop + 400ms × số capture` (tối đa 8 giây).
-- Hết giờ: server chọn ngẫu nhiên trong `validMoves` rồi áp dụng như nước đi bình thường. Đếm số lượt bị đi thay liên tiếp của người đó, đủ 3 lần thì xử thua.
+- Hết giờ: server chọn ngẫu nhiên trong các nước `kind = "sow"` của `validMoves` (không bao giờ chọn `latBan`) rồi áp dụng như nước đi bình thường. Đếm số lượt bị đi thay liên tiếp của người đó, đủ 3 lần thì xử thua.
 - Client chỉ hiển thị đếm ngược dựa trên `turnDeadline`. Client không tự quyết định hết giờ.
 
 ## 9. Mất kết nối và kết nối lại

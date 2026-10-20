@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bàn chơi desktop</title>
+<!-- Mockup desktop 1280 × 800: Bàn chơi, lượt của mình, đã chọn ô 3 → ◀ ▶; cột phải: nhật ký ván, biểu cảm, người xem, phím tắt · Mốc M2/M3 · UX mục 2.4, 3, 4 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/desktop.css">
+<script src="../shared/board.js"></script>
+<style>
+  body { overflow: hidden; }
+  .dk-nav .room { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .dk-nav .room small { font-weight: 600; color: var(--muted); }
+  .layout { display: grid; grid-template-columns: 1fr 340px; height: calc(100vh - 68px); min-height: 732px; }
+  .stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px 48px; }
+  .stage .player { width: 100%; max-width: 760px; }
+  .player .score b { font-size: 30px; }
+  .board-wrap { position: relative; width: 100%; max-width: 760px; margin: 22px 0; }
+  .row-label { font-size: 11px; }
+  .row-label.top { top: -22px; left: 6px; }
+  .row-label.bottom { bottom: -22px; left: 6px; color: var(--ink); }
+  .row-label.right { left: auto; right: 6px; text-transform: none; letter-spacing: 0; display: flex; gap: 6px; align-items: center; }
+  .status-row { display: flex; align-items: center; gap: 14px; }
+
+  .side { border-left: 1px solid var(--line); background: rgba(255,250,240,.55); display: flex; flex-direction: column; min-height: 0; }
+  .tabs { display: flex; gap: 4px; padding: 14px 16px 0; }
+  .tabs span { padding: 8px 14px; border-radius: 10px 10px 0 0; font-weight: 600; font-size: 14px; color: var(--muted); }
+  .tabs span.on { color: var(--ink); background: var(--surface); }
+  .log { flex: 1; overflow: auto; background: var(--surface); margin: 0 16px; border-radius: 0 12px 12px 12px; padding: 6px 14px; }
+  .log li { list-style: none; display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .log li:last-child { border: 0; }
+  .log .n { color: var(--muted); width: 22px; flex: none; font-weight: 600; }
+  .log .who { font-weight: 700; }
+  .log .gain { color: var(--capture); font-weight: 800; margin-left: auto; white-space: nowrap; }
+  .log .ev { color: var(--primary); font-weight: 700; margin-left: auto; white-space: nowrap; }
+  .log ul { margin: 0; padding: 0; }
+  .block { padding: 14px 16px 0; }
+  .block h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }
+  .emote-bar span { width: 44px; height: 44px; font-size: 20px; cursor: pointer; }
+  .viewers { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; font-size: 13px; color: var(--muted); padding-bottom: 16px; align-items: center; }
+</style>
+</head>
+<body class="desk">
+<nav class="dk-nav">
+  <div class="logo"><span class="logo-mark"><i></i></span></div>
+  <div class="room">Ô ăn quan <small>· Phòng ABCD · Lượt 12</small></div>
+  <div class="spacer"></div>
+  <span class="chip">Quan = 10</span><span class="chip">Quan Già: tắt</span><span class="chip">Lật bàn: bật</span><span class="chip">30s / lượt</span>
+  <a class="icon-btn" aria-label="Âm thanh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4V5zM15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg></a>
+  <a class="btn sm">Về phòng chờ</a>
+</nav>
+
+<div class="layout">
+  <main class="stage">
+    <div class="player">
+      <span class="avatar av3">MM</span>
+      <div class="info"><div class="name">Mèo Mun</div><div class="kho"><span class="ddot"></span>10 dân · <span class="qdot"></span>0 quan</div></div>
+      <div class="score"><b>10</b><span class="tiny muted">điểm</span></div>
+    </div>
+
+    <div class="board-wrap">
+      <span class="row-label top">Hàng của Mèo Mun</span>
+      <div id="b"></div>
+      <span class="row-label bottom">Hàng của bạn</span>
+      <span class="row-label bottom right"><kbd>1</kbd>–<kbd>5</kbd> chọn ô · <kbd>←</kbd><kbd>→</kbd> chọn chiều</span>
+    </div>
+
+    <div class="status-row">
+      <div class="status-pill"><span class="pulse"></span>Lượt của bạn · chọn chiều rải</div>
+      <span class="small muted"><kbd>Esc</kbd> chọn lại</span>
+    </div>
+
+    <div class="player active">
+      <span class="avatar av1">CT</span>
+      <div class="info">
+        <div class="name">Cò Trắng 42 <span class="small muted">(bạn)</span></div>
+        <div class="kho"><span class="ddot"></span>6 dân · <span class="qdot"></span>0 quan</div>
+        <div class="timer"><i style="width:68%"></i></div>
+      </div>
+      <div class="score"><b>6</b><span class="tiny muted">20 giây</span></div>
+    </div>
+  </main>
+
+  <aside class="side">
+    <div class="tabs"><span class="on">Nhật ký ván</span><span>Luật chơi</span></div>
+    <div class="log">
+      <ul>
+        <li><span class="n">11</span><div><span class="who">Mèo Mun</span> rải ô 9 → ăn ô 2 của bạn</div><span class="gain">+4</span></li>
+        <li><span class="n">10</span><div><span class="who">Bạn</span> rải ô 5 → gặp ô quan, hết lượt</div></li>
+        <li><span class="n">9</span><div><span class="who">Mèo Mun</span> rải ô 7 → ăn liên hoàn 2 ô</div><span class="gain">+6</span></li>
+        <li><span class="n">8</span><div><span class="who">Bạn</span> rải ô 1 → ăn ô 9</div><span class="gain">+6</span></li>
+        <li><span class="n">7</span><div><span class="who">Mèo Mun</span> rải ô 11 → hai ô trống, hết lượt</div></li>
+        <li><span class="n">6</span><div><span class="who">Bạn</span> rải ô 4 → hết lượt</div></li>
+        <li><span class="n">2</span><div><span class="who">Mèo Mun</span> chọn giữ bên, không lật bàn</div></li>
+      </ul>
+    </div>
+    <div class="block">
+      <h3>Biểu cảm</h3>
+      <div class="emote-bar"><span>😂</span><span>😮</span><span>😡</span><span>👏</span><span>🤝</span><span>😭</span></div>
+    </div>
+    <div class="block">
+      <h3>Người xem</h3>
+      <div class="viewers"><span class="avatar sm av2">SN</span>Sóc Nâu <span class="spacer"></span><a class="btn sm ghost" style="min-height:32px">Sao chép link</a></div>
+    </div>
+    <div class="block">
+      <h3>Phím tắt</h3>
+      <div class="keys"><span><kbd>1</kbd>–<kbd>5</kbd></span><span>Chọn ô (trái → phải)</span><span><kbd>←</kbd> <kbd>→</kbd></span><span>Rải sang trái / phải</span><span><kbd>Space</kbd></span><span>Tua nhanh hiệu ứng</span></div>
+    </div>
+  </aside>
+</div>
+<script>
+  renderBoard(document.getElementById("b"), {
+    dan:  [2, 3, 0, 6, 1, 4, 3, 2, 5, 0, 7, 1],
+    quan: [true, true],
+    valid: [1, 4, 5], off: [2], selected: 3, dim: [7, 8, 9, 10, 11], pick: true,
+  });
+  document.getElementById("b").classList.add("lg");
+</script>
+</body>
+</html>

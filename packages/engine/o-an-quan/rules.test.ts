@@ -1,12 +1,12 @@
-// Test T1–T16 (mục 4 tài liệu kế hoạch). Các thế cờ được tính tay theo 01-luat-choi.md.
+// Test T1–T20 (mục 4 tài liệu kế hoạch). Các thế cờ được tính tay theo 01-luat-choi.md.
 import { describe, expect, it } from "vitest";
 import { createRng, pickRandom } from "../game-module.ts";
-import { applyMove, defaultOptions, result, setup, validMoves } from "./rules.ts";
-import type { GameEvent, Move, Options, ScoreDetail, State } from "./types.ts";
+import { applyMove, defaultOptions, forfeit, result, setup, validMoves } from "./rules.ts";
+import type { Dir, GameEvent, Move, Options, ScoreDetail, SowMove, State } from "./types.ts";
 
 type Overrides = Partial<Omit<State, "options">> & { options?: Partial<Options> };
 
-/** Dựng state tuỳ ý cho test. Mặc định: lượt A, cả hai ô quan còn quan, chưa ai ăn gì. */
+/** Dựng state tuỳ ý cho test. Mặc định: lượt bên A, ghế 0 điều khiển A, cả hai ô quan còn quan. */
 function makeState(over: Overrides): State {
   const { options, ...rest } = over;
   return {
@@ -16,9 +16,12 @@ function makeState(over: Overrides): State {
       { dan: 0, quan: 0 },
       { dan: 0, quan: 0 },
     ],
-    debt: [0, 0],
+    controller: [0, 1],
     turn: 0,
     moveNo: 0,
+    latBanUsed: false,
+    recentSows: [],
+    buDanCount: [0, 0],
     status: "playing",
     result: null,
     ...rest,
@@ -26,38 +29,36 @@ function makeState(over: Overrides): State {
   };
 }
 
-function play(state: State, seat: number, move: Move): { state: State; events: GameEvent[] } {
-  const r = applyMove(state, seat, move);
+const sow = (square: number, dir: Dir): SowMove => ({ kind: "sow", square, dir });
+const LAT_BAN: Move = { kind: "latBan" };
+
+/** Đi một nước bằng ghế đang điều khiển bên đến lượt (hoặc ghế chỉ định). */
+function play(state: State, move: Move, seatId = state.controller[state.turn]) {
+  const r = applyMove(state, seatId, move);
   if ("error" in r) throw new Error(`nước đi bị từ chối: ${r.error}`);
   return r;
 }
 
-function captures(events: GameEvent[]) {
-  return events.filter((e) => e.t === "capture");
-}
-
-function turnEnd(events: GameEvent[]) {
-  return events.find((e) => e.t === "turnEnd");
-}
-
-function totalDan(s: State): number {
-  return s.dan.reduce((a, b) => a + b, 0) + s.captured[0].dan + s.captured[1].dan;
-}
-
-function totalQuan(s: State): number {
-  return Number(s.quan[0]) + Number(s.quan[1]) + s.captured[0].quan + s.captured[1].quan;
-}
+const captures = (events: GameEvent[]) => events.filter((e) => e.t === "capture");
+const turnEnd = (events: GameEvent[]) => events.find((e) => e.t === "turnEnd");
 
 function clone(s: State): State {
   return JSON.parse(JSON.stringify(s)) as State;
+}
+
+/** Tổng điểm bàn + kho (bất biến = 70 hoặc 60) */
+function totalPoints(s: State): number {
+  const v = s.options.giaTriQuan;
+  const board = s.dan.reduce((a, b) => a + b, 0) + (Number(s.quan[0]) + Number(s.quan[1])) * v;
+  return board + s.captured.reduce((a, p) => a + p.dan + p.quan * v, 0);
 }
 
 function details(s: State): ScoreDetail[] {
   return s.result?.detail as ScoreDetail[];
 }
 
-describe("setup", () => {
-  it("bàn khởi đầu: 5 dân mỗi ô dân, 1 quan mỗi ô quan, người đi trước theo tham số", () => {
+describe("setup và validMoves", () => {
+  it("bàn khởi đầu: bên A luôn đi trước, controller[0] = người đi trước (Q17)", () => {
     const s = setup(defaultOptions, [0, 1], 1);
     expect(s.dan).toEqual([0, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5]);
     expect(s.quan).toEqual([true, true]);
@@ -65,23 +66,25 @@ describe("setup", () => {
       { dan: 0, quan: 0 },
       { dan: 0, quan: 0 },
     ]);
-    expect(s.debt).toEqual([0, 0]);
-    expect(s.turn).toBe(1);
+    expect(s.controller).toEqual([1, 0]);
+    expect(s.turn).toBe(0);
     expect(s.moveNo).toBe(0);
+    expect(s.latBanUsed).toBe(false);
+    expect(s.recentSows).toEqual([]);
+    expect(s.buDanCount).toEqual([0, 0]);
     expect(s.status).toBe("playing");
     expect(s.result).toBeNull();
-    expect(totalDan(s)).toBe(50);
-    expect(totalQuan(s)).toBe(2);
+    expect(totalPoints(s)).toBe(70);
+    expect(setup(defaultOptions, [0, 1], 0).controller).toEqual([0, 1]);
   });
 
-  it("validMoves: mỗi ô dân có quân trên hàng mình, hai chiều; không có nước cho người không đến lượt", () => {
+  it("tuỳ chọn mặc định: quan 10, Quan Già tắt, Lật bàn tắt (Q16)", () => {
+    expect(defaultOptions).toMatchObject({ giaTriQuan: 10, camAnQuanNon: false, latBan: false });
+  });
+
+  it("validMoves: ô có quân trên hàng của bên đến lượt, hai chiều; người không đến lượt không có nước", () => {
     const s = makeState({ dan: [0, 0, 3, 0, 1, 0, 0, 5, 5, 5, 5, 5] });
-    expect(validMoves(s, 0)).toEqual([
-      { square: 2, dir: 1 },
-      { square: 2, dir: -1 },
-      { square: 4, dir: 1 },
-      { square: 4, dir: -1 },
-    ]);
+    expect(validMoves(s, 0)).toEqual([sow(2, 1), sow(2, -1), sow(4, 1), sow(4, -1)]);
     expect(validMoves(s, 1)).toEqual([]);
   });
 });
@@ -89,7 +92,7 @@ describe("setup", () => {
 describe("T1 — ví dụ chuẩn", () => {
   it("bàn khởi đầu, A chọn ô 3 chiều +1: ăn 6 dân ở ô 4, lượt sang B", () => {
     const s = setup(defaultOptions, [0, 1], 0);
-    const { state, events } = play(s, 0, { square: 3, dir: 1 });
+    const { state, events } = play(s, sow(3, 1));
 
     expect(events).toEqual([
       { t: "pick", i: 3, n: 5 },
@@ -108,66 +111,64 @@ describe("T1 — ví dụ chuẩn", () => {
       { t: "turnEnd", reason: "het-an" },
     ]);
     expect(state.dan).toEqual([1, 6, 6, 0, 0, 6, 1, 6, 6, 0, 6, 6]);
-    expect(state.quan).toEqual([true, true]);
     expect(state.captured[0]).toEqual({ dan: 6, quan: 0 });
     expect(state.turn).toBe(1);
     expect(state.moveNo).toBe(1);
+    expect(state.recentSows).toEqual([sow(3, 1)]);
   });
 });
 
 describe("T2 — viên cuối rơi ngay trước ô quan", () => {
   it("ô quan còn quan: kết thúc lượt, không ăn gì", () => {
     const s = makeState({ dan: [0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1] });
-    const { state, events } = play(s, 0, { square: 4, dir: 1 });
+    const { state, events } = play(s, sow(4, 1));
     expect(state.dan).toEqual([0, 1, 1, 1, 0, 2, 0, 1, 1, 1, 1, 1]);
     expect(captures(events)).toEqual([]);
     expect(turnEnd(events)).toEqual({ t: "turnEnd", reason: "gap-o-quan" });
-    expect(state.captured[0]).toEqual({ dan: 0, quan: 0 });
     expect(state.turn).toBe(1);
   });
 
   it("ô quan đã mất quan nhưng còn dân: vẫn kết thúc lượt, không bốc ô quan", () => {
     const s = makeState({ dan: [0, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1], quan: [true, false] });
-    const { state, events } = play(s, 0, { square: 4, dir: 1 });
+    const { state, events } = play(s, sow(4, 1));
     expect(state.dan[6]).toBe(2);
     expect(captures(events)).toEqual([]);
     expect(turnEnd(events)).toEqual({ t: "turnEnd", reason: "gap-o-quan" });
   });
 });
 
-describe("T3/T4 — quan non", () => {
-  // A đi ô 3 chiều +1 (1 dân) → rơi vào ô 4. Ô 5 trống, ô 6 có quan + 3 dân.
-  const board = [0, 1, 1, 1, 0, 0, 3, 1, 1, 1, 1, 1];
-
-  it("T3: camAnQuanNon tắt → ăn 1 quan + 3 dân", () => {
-    const s = makeState({ dan: board });
-    const { state, events } = play(s, 0, { square: 3, dir: 1 });
+describe("T3/T4 — Cơ bản và Quan Già", () => {
+  it("T3: Quan Già tắt → ăn 1 quan + 3 dân (13 điểm)", () => {
+    // A đi ô 3 chiều +1 (1 dân) → rơi vào ô 4. Ô 5 trống, ô 6 có quan + 3 dân.
+    const s = makeState({ dan: [0, 1, 1, 1, 0, 0, 3, 1, 1, 1, 1, 1] });
+    const { state, events } = play(s, sow(3, 1));
     expect(captures(events)).toEqual([{ t: "capture", i: 6, dan: 3, quan: 1, by: 0 }]);
     expect(turnEnd(events)).toEqual({ t: "turnEnd", reason: "het-an" });
     expect(state.captured[0]).toEqual({ dan: 3, quan: 1 });
     expect(state.quan).toEqual([true, false]);
-    expect(state.dan[6]).toBe(0);
   });
 
-  it("T4: camAnQuanNon bật → không ăn, kết thúc lượt", () => {
-    const s = makeState({ dan: board, options: { camAnQuanNon: true } });
-    const { state, events } = play(s, 0, { square: 3, dir: 1 });
+  it("T4: Quan Già, ô quan có quan + 4 dân → không ăn, dừng ngay, không bỏ qua để ăn ô phía sau", () => {
+    // Nếu được bỏ qua ô quan thì ô 7 trống, ô 8 có 2 dân sẽ bị ăn. Quan Già không cho phép.
+    const s = makeState({ dan: [0, 1, 1, 1, 0, 0, 4, 0, 2, 1, 1, 1], options: { camAnQuanNon: true } });
+    const { state, events } = play(s, sow(3, 1));
     expect(captures(events)).toEqual([]);
     expect(turnEnd(events)).toEqual({ t: "turnEnd", reason: "quan-non" });
     expect(state.captured[0]).toEqual({ dan: 0, quan: 0 });
     expect(state.quan).toEqual([true, true]);
-    expect(state.dan[6]).toBe(3);
+    expect(state.dan[6]).toBe(4);
+    expect(state.dan[8]).toBe(2);
   });
 
-  it("camAnQuanNon bật nhưng ô quan có ≥ 5 dân → vẫn ăn được", () => {
+  it("T4b: Quan Già, ô quan có quan + 5 dân → ăn được 15 điểm", () => {
     const s = makeState({ dan: [0, 1, 1, 1, 0, 0, 5, 1, 1, 1, 1, 1], options: { camAnQuanNon: true } });
-    const { state } = play(s, 0, { square: 3, dir: 1 });
+    const { state } = play(s, sow(3, 1));
     expect(state.captured[0]).toEqual({ dan: 5, quan: 1 });
   });
 
-  it("camAnQuanNon bật: các ô đã ăn trước quan non trong cùng lượt vẫn được giữ", () => {
+  it("T4c: Quan Già, ăn ô dân rồi ăn liên hoàn tới ô quan non → giữ ô đã ăn, dừng trước ô quan", () => {
     // B đi ô 7 chiều -1 (1 dân) → rơi vào ô quan 6. Ô 5 trống, ăn ô 4 (2 dân), ô 3 trống, ăn ô 2 (3 dân),
-    // ô 1 trống, ô 0 là quan non (quan + 2 dân) → dừng. A có sẵn 5 dân để rải lại hàng mình.
+    // ô 1 trống, ô quan 0 có quan + 2 dân → dừng. Kho A có sẵn 5 dân để bù dân.
     const s = makeState({
       dan: [2, 0, 3, 0, 2, 0, 0, 1, 1, 1, 1, 1],
       turn: 1,
@@ -177,15 +178,27 @@ describe("T3/T4 — quan non", () => {
       ],
       options: { camAnQuanNon: true },
     });
-    const { state, events } = play(s, 1, { square: 7, dir: -1 });
+    const { state, events } = play(s, sow(7, -1));
     expect(captures(events).map((e) => e.i)).toEqual([4, 2]);
     expect(turnEnd(events)).toEqual({ t: "turnEnd", reason: "quan-non" });
     expect(state.captured[1]).toEqual({ dan: 5, quan: 0 });
     expect(state.quan[0]).toBe(true);
+    expect(state.dan[0]).toBe(2);
+  });
+
+  it("T4d: Quan Già, ô quan đã mất quan, có 2 dân → ăn bình thường 2 điểm", () => {
+    const s = makeState({
+      dan: [0, 1, 1, 1, 0, 0, 2, 1, 1, 1, 1, 1],
+      quan: [true, false],
+      options: { camAnQuanNon: true },
+    });
+    const { state, events } = play(s, sow(3, 1));
+    expect(captures(events)).toEqual([{ t: "capture", i: 6, dan: 2, quan: 0, by: 0 }]);
+    expect(state.captured[0]).toEqual({ dan: 2, quan: 0 });
   });
 });
 
-describe("T5 — ăn dây", () => {
+describe("T5 — ăn liên hoàn", () => {
   it("trống–có–trống–có–trống–có: ăn cả 3 ô", () => {
     // A đi ô 5 chiều +1 (1 dân) → rơi vào ô quan 6. Sau đó: 7 trống, 8 có 2, 9 trống, 10 có 3, 11 trống,
     // ô quan 0 có quan + 4 dân; tiếp theo ô 1 có dân → dừng.
@@ -196,7 +209,7 @@ describe("T5 — ăn dây", () => {
         { dan: 10, quan: 0 },
       ],
     });
-    const { state, events } = play(s, 0, { square: 5, dir: 1 });
+    const { state, events } = play(s, sow(5, 1));
     expect(captures(events)).toEqual([
       { t: "capture", i: 8, dan: 2, quan: 0, by: 0 },
       { t: "capture", i: 10, dan: 3, quan: 0, by: 0 },
@@ -204,38 +217,34 @@ describe("T5 — ăn dây", () => {
     ]);
     expect(turnEnd(events)).toEqual({ t: "turnEnd", reason: "het-an" });
     expect(state.captured[0]).toEqual({ dan: 9, quan: 1 });
-    expect(state.quan).toEqual([false, true]);
   });
 });
 
 describe("T6 — hai ô trống", () => {
   it("sau viên cuối là hai ô trống: kết thúc lượt, không ăn", () => {
     const s = makeState({ dan: [0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1] });
-    const { state, events } = play(s, 0, { square: 1, dir: 1 });
+    const { state, events } = play(s, sow(1, 1));
     expect(state.dan).toEqual([0, 0, 2, 0, 0, 1, 0, 1, 1, 1, 1, 1]);
     expect(captures(events)).toEqual([]);
     expect(turnEnd(events)).toEqual({ t: "turnEnd", reason: "hai-o-trong" });
-    expect(state.turn).toBe(1);
   });
 });
 
-describe("T7 — ăn dây qua ô quan đã trống hẳn", () => {
+describe("T7 — ăn liên hoàn qua ô quan đã trống hẳn", () => {
   it("ô quan trống hẳn được xem là ô trống, ăn tiếp ô phía sau", () => {
-    // A đi ô 2 chiều +1 (1 dân) → rơi vào ô 3. Ô 4 trống, ăn ô 5 (2 dân),
-    // ô quan 6 trống hẳn, ăn ô 7 (3 dân), ô 8 có dân → dừng.
+    // A đi ô 2 chiều +1 → rơi vào ô 3. Ô 4 trống, ăn ô 5 (2), ô quan 6 trống hẳn, ăn ô 7 (3), ô 8 có dân → dừng.
     const s = makeState({ dan: [0, 1, 1, 0, 0, 2, 0, 3, 1, 1, 1, 1], quan: [true, false] });
-    const { state, events } = play(s, 0, { square: 2, dir: 1 });
-    expect(captures(events)).toEqual([
-      { t: "capture", i: 5, dan: 2, quan: 0, by: 0 },
-      { t: "capture", i: 7, dan: 3, quan: 0, by: 0 },
+    const { state, events } = play(s, sow(2, 1));
+    expect(captures(events).map((e) => [e.i, e.dan])).toEqual([
+      [5, 2],
+      [7, 3],
     ]);
     expect(state.captured[0]).toEqual({ dan: 5, quan: 0 });
   });
 
   it("ô n là ô quan trống hẳn: được ăn ô sau nó (trường hợp c)", () => {
-    // A đi ô 4 chiều +1 (1 dân) → rơi vào ô 5. Ô quan 6 trống hẳn, ăn ô 7 (2 dân), ô 8 có dân → dừng.
     const s = makeState({ dan: [0, 1, 1, 1, 1, 0, 0, 2, 1, 1, 1, 1], quan: [true, false] });
-    const { state, events } = play(s, 0, { square: 4, dir: 1 });
+    const { state, events } = play(s, sow(4, 1));
     expect(captures(events)).toEqual([{ t: "capture", i: 7, dan: 2, quan: 0, by: 0 }]);
     expect(state.captured[0]).toEqual({ dan: 2, quan: 0 });
   });
@@ -243,22 +252,22 @@ describe("T7 — ăn dây qua ô quan đã trống hẳn", () => {
 
 describe("T8 — rải đủ một vòng", () => {
   it("ô có 12 dân: ô vừa bốc nhận lại 1 dân khi rải vòng tới", () => {
-    const s = makeState({ dan: [0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] });
-    const { state, events } = play(s, 0, { square: 1, dir: 1 });
+    const s = makeState({ dan: [0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], captured: [{ dan: 0, quan: 0 }, { dan: 38, quan: 0 }] });
+    const { state, events } = play(s, sow(1, 1));
     const drops = events.filter((e) => e.t === "drop").map((e) => e.i);
     expect(drops.slice(0, 12)).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1]);
-    // Viên cuối rơi vào ô 1 → ô 2 có 1 dân → bốc rải tiếp vào 3 → ô 4 có 1 → bốc rải vào 5 → gặp ô quan 6.
+    // Viên cuối rơi vào ô 1 → ô 2 có 1 dân → bốc rải vào 3 → ô 4 có 1 → bốc rải vào 5 → gặp ô quan 6.
     expect(state.dan).toEqual([1, 1, 0, 2, 0, 2, 1, 1, 1, 1, 1, 1]);
     expect(turnEnd(events)).toEqual({ t: "turnEnd", reason: "gap-o-quan" });
   });
 });
 
-describe("T9–T11 — hết dân trên hàng, rải quân", () => {
+describe("T9–T11 — Bù dân", () => {
   // A đi ô 1 chiều -1 (1 dân) → rơi vào ô quan 0. Ô 11 và 10 trống → hết lượt. Hàng B trống hết.
   const board = [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0];
-  const move: Move = { square: 1, dir: -1 };
+  const move = sow(1, -1);
 
-  it("T9: B đã ăn ≥ 5 dân → trừ 5 dân của B, mỗi ô 1 dân", () => {
+  it("T9: kho B có ≥ 5 dân → trừ 5 dân, mỗi ô 1 dân, buDan(doiQuan = false)", () => {
     const s = makeState({
       dan: board,
       captured: [
@@ -266,73 +275,80 @@ describe("T9–T11 — hết dân trên hàng, rải quân", () => {
         { dan: 7, quan: 0 },
       ],
     });
-    const { state, events } = play(s, 0, move);
-    expect(events.at(-1)).toEqual({ t: "spread", seat: 1, fromOwn: 5, borrowed: 0 });
+    const { state, events } = play(s, move);
+    expect(events.at(-1)).toEqual({ t: "buDan", seat: 1, doiQuan: false });
     expect(state.dan.slice(7, 12)).toEqual([1, 1, 1, 1, 1]);
-    expect(state.captured[1].dan).toBe(2);
-    expect(state.captured[0].dan).toBe(3);
-    expect(state.debt).toEqual([0, 0]);
+    expect(state.captured).toEqual([
+      { dan: 3, quan: 0 },
+      { dan: 2, quan: 0 },
+    ]);
+    expect(state.buDanCount).toEqual([0, 1]);
     expect(state.turn).toBe(1);
     expect(state.status).toBe("playing");
     expect(validMoves(state, 1)).toHaveLength(10);
   });
 
-  it("T10: B chỉ có 2 dân → dùng 2 dân, vay 3 dân của A, debt = 3", () => {
+  it("T10: kho B có 2 dân + 1 quan (v = 10) → đổi 1 quan thành 10 dân rồi trừ 5: còn 7 dân, 0 quan", () => {
     const s = makeState({
       dan: board,
       captured: [
-        { dan: 10, quan: 1 },
-        { dan: 2, quan: 0 },
+        { dan: 10, quan: 0 },
+        { dan: 2, quan: 1 },
       ],
     });
-    const { state, events } = play(s, 0, move);
-    expect(events.at(-1)).toEqual({ t: "spread", seat: 1, fromOwn: 2, borrowed: 3 });
+    const { state, events } = play(s, move);
+    expect(events.at(-1)).toEqual({ t: "buDan", seat: 1, doiQuan: true });
+    expect(state.captured[1]).toEqual({ dan: 7, quan: 0 });
+    expect(state.captured[0]).toEqual({ dan: 10, quan: 0 });
     expect(state.dan.slice(7, 12)).toEqual([1, 1, 1, 1, 1]);
-    expect(state.captured[1]).toEqual({ dan: 0, quan: 0 });
-    expect(state.captured[0]).toEqual({ dan: 7, quan: 1 });
-    expect(state.debt).toEqual([0, 3]);
   });
 
-  it("T11: hai bên cộng lại không đủ 5 dân, ô quan còn quân → ván kết thúc, người còn lại thu cả bàn", () => {
-    // A đi ô 5 chiều +1 (1 dân) → rơi vào ô quan 6. Ô 7 và 8 trống → hết lượt. Hàng B trống, A 1 + B 2 = 3 < 5.
+  it("T10 (v = 5): kho 2 dân + 1 quan → đổi quan thành 5 dân, trừ 5: còn 2 dân", () => {
     const s = makeState({
-      dan: [10, 6, 6, 6, 6, 1, 12, 0, 0, 0, 0, 0],
+      dan: board,
+      captured: [
+        { dan: 10, quan: 0 },
+        { dan: 2, quan: 1 },
+      ],
+      options: { giaTriQuan: 5 },
+    });
+    const { state } = play(s, move);
+    expect(state.captured[1]).toEqual({ dan: 2, quan: 0 });
+  });
+
+  it("T11: cần bù dân nhưng kho < 5 điểm → ván kết thúc khong-du-bu-dan, bên đó thua dù điểm cao hơn", () => {
+    const s = makeState({
+      dan: board,
+      controller: [1, 0],
       captured: [
         { dan: 1, quan: 0 },
-        { dan: 2, quan: 0 },
+        { dan: 4, quan: 0 },
       ],
     });
-    expect(totalDan(s)).toBe(50);
-    const { state, events } = play(s, 0, { square: 5, dir: 1 });
-
-    expect(events.some((e) => e.t === "spread")).toBe(false);
+    const { state, events } = play(s, move);
+    expect(events.some((e) => e.t === "buDan")).toBe(false);
     expect(events.at(-1)?.t).toBe("gameOver");
     expect(state.status).toBe("finished");
+    // Bên B do ghế 0 điều khiển, 4 điểm > 1 điểm nhưng vẫn thua. Không thu quân trên bàn.
     expect(state.result).toEqual({
-      winner: 0,
-      scores: [68, 2],
-      reason: "khong-du-dan",
+      winner: 1,
+      scores: [4, 1],
+      reason: "khong-du-bu-dan",
       detail: [
-        { dan: 1, quan: 2, rowDan: 47, borrowed: 0, lent: 0, total: 68 },
-        { dan: 2, quan: 0, rowDan: 0, borrowed: 0, lent: 0, total: 2 },
+        { side: 1, dan: 4, quan: 0, rowDan: 0, buDan: 0, total: 4 },
+        { side: 0, dan: 1, quan: 0, rowDan: 0, buDan: 0, total: 1 },
       ],
     });
     expect(result(state)).toEqual(state.result);
-    // Quân thu cuối ván được cộng vào phần đã ăn, bàn trống hẳn.
-    expect(state.dan.every((d) => d === 0)).toBe(true);
-    expect(state.quan).toEqual([false, false]);
-    expect(state.captured[0]).toEqual({ dan: 48, quan: 2 });
-    expect(totalDan(state)).toBe(50);
-    expect(totalQuan(state)).toBe(2);
     expect(validMoves(state, 0)).toEqual([]);
     expect(validMoves(state, 1)).toEqual([]);
+    expect(totalPoints(state)).toBe(totalPoints(s));
   });
 });
 
-describe("T12/T13/T15 — hết quan, tính điểm", () => {
+describe("T12/T15 — hết quan", () => {
   // A đi ô 3 chiều +1 (1 dân) → rơi vào ô 4. Ô 5 trống, ăn ô quan 6 (quan + 2 dân). Ô 7 có dân → dừng.
-  // Ô quan 0 đã trống hẳn → hai ô quan đều trống → hết ván.
-  // Tổng: bàn 15 dân + đã ăn 20 + 15 = 50 dân; quan: A đã ăn 1 + ô 6 còn 1 = 2.
+  // Ô quan 0 đã trống hẳn → hết quan. Tổng: bàn 15 dân + 1 quan, kho A 20 dân + 1 quan, kho B 15 dân.
   const base = (over: Overrides = {}) =>
     makeState({
       dan: [0, 5, 0, 1, 0, 0, 2, 4, 2, 1, 0, 0],
@@ -344,10 +360,10 @@ describe("T12/T13/T15 — hết quan, tính điểm", () => {
       ...over,
     });
 
-  it("T12: ăn ô quan cuối → ván kết thúc, mỗi bên thu dân trên hàng mình", () => {
+  it("T12: ăn ô quan cuối → ván kết thúc, mỗi bên thu dân trên hàng mình, so điểm", () => {
     const s = base();
-    expect(totalDan(s)).toBe(50);
-    const { state, events } = play(s, 0, { square: 3, dir: 1 });
+    expect(totalPoints(s)).toBe(70);
+    const { state, events } = play(s, sow(3, 1));
     expect(captures(events)).toEqual([{ t: "capture", i: 6, dan: 2, quan: 1, by: 0 }]);
     expect(events.at(-1)?.t).toBe("gameOver");
     expect(state.status).toBe("finished");
@@ -357,141 +373,324 @@ describe("T12/T13/T15 — hết quan, tính điểm", () => {
       scores: [48, 22],
       reason: "het-quan",
       detail: [
-        { dan: 22, quan: 2, rowDan: 6, borrowed: 0, lent: 0, total: 48 },
-        { dan: 15, quan: 0, rowDan: 7, borrowed: 0, lent: 0, total: 22 },
+        { side: 0, dan: 22, quan: 2, rowDan: 6, buDan: 0, total: 48 },
+        { side: 1, dan: 15, quan: 0, rowDan: 7, buDan: 0, total: 22 },
       ],
     });
-    expect(state.captured).toEqual([
-      { dan: 28, quan: 2 },
-      { dan: 22, quan: 0 },
-    ]);
-    expect(state.dan.every((d) => d === 0)).toBe(true);
-    expect(state.result!.scores.reduce((a, b) => a + b, 0)).toBe(70);
+    expect(totalPoints(state)).toBe(70);
   });
 
-  it("T13: tính điểm có nợ — A đã vay 3 dân của B", () => {
-    const { state } = play(base({ debt: [3, 0] }), 0, { square: 3, dir: 1 });
-    expect(state.result?.scores).toEqual([45, 25]);
-    expect(details(state)[0]).toMatchObject({ borrowed: 3, lent: 0, total: 45 });
-    expect(details(state)[1]).toMatchObject({ borrowed: 0, lent: 3, total: 25 });
-  });
-
-  it("T13: nợ hai chiều được bù trừ", () => {
-    const { state } = play(base({ debt: [3, 5] }), 0, { square: 3, dir: 1 });
-    // A: 48 − 3 + 5 = 50. B: 22 − 5 + 3 = 20.
-    expect(state.result?.scores).toEqual([50, 20]);
-  });
-
-  it("hoà khi bằng điểm", () => {
-    // Như T12 nhưng chia lại phần đã ăn (tổng vẫn 50 dân).
+  it("hoà khi 35–35", () => {
     const s = base({
       captured: [
         { dan: 7, quan: 1 },
         { dan: 28, quan: 0 },
       ],
     });
-    const { state } = play(s, 0, { square: 3, dir: 1 });
-    // A: 9 + 20 + 6 = 35. B: 28 + 7 = 35.
+    const { state } = play(s, sow(3, 1));
     expect(state.result?.scores).toEqual([35, 35]);
     expect(state.result?.winner).toBeNull();
   });
 
-  it("T15: giaTriQuan = 5 → tổng điểm hai bên = 60", () => {
-    const { state } = play(base({ options: { giaTriQuan: 5 } }), 0, { square: 3, dir: 1 });
+  it("số lần bù dân được ghi vào ScoreDetail", () => {
+    const { state } = play(base({ buDanCount: [2, 1] }), sow(3, 1));
+    expect(details(state).map((d) => d.buDan)).toEqual([2, 1]);
+  });
+
+  it("T15: giaTriQuan = 5 → tổng điểm hai bên cuối ván = 60", () => {
+    const s = base({ options: { giaTriQuan: 5 } });
+    expect(totalPoints(s)).toBe(60);
+    const { state } = play(s, sow(3, 1));
     expect(state.result?.scores).toEqual([38, 22]);
     expect(state.result!.scores.reduce((a, b) => a + b, 0)).toBe(60);
   });
 });
 
+describe("T13 — lặp nước", () => {
+  // X = A đi ô 4 chiều +1 (1 dân) → rơi vào ô 5, gặp ô quan 6. Y = B đi ô 10 chiều +1 (1 dân) → rơi vào 11, gặp ô quan 0.
+  // Bốn nước X Y X Y đã đi trước đó (ghi sẵn trong recentSows).
+  const X = sow(4, 1);
+  const Y = sow(10, 1);
+  const base = () =>
+    makeState({
+      dan: [9, 2, 2, 2, 1, 1, 10, 2, 2, 2, 1, 1],
+      captured: [
+        { dan: 10, quan: 0 },
+        { dan: 5, quan: 0 },
+      ],
+      moveNo: 4,
+      recentSows: [X, Y, X, Y],
+    });
+
+  it("6 nước gần nhất dạng X Y X Y X Y → ván kết thúc lap-nuoc, quân trong ô quan không tính", () => {
+    const s = base();
+    expect(totalPoints(s)).toBe(70);
+    const after5 = play(s, X).state;
+    expect(after5.status).toBe("playing");
+    const { state, events } = play(after5, Y);
+    expect(events.at(-1)?.t).toBe("gameOver");
+    // A: kho 10 + hàng (2 + 2 + 2 + 0 + 2) = 18. B: kho 5 + hàng (2 + 2 + 2 + 0 + 2) = 13.
+    // Ô quan 0 (9 dân + quan) và ô quan 6 (10 dân + quan) không được tính.
+    expect(state.result).toEqual({
+      winner: 0,
+      scores: [18, 13],
+      reason: "lap-nuoc",
+      detail: [
+        { side: 0, dan: 10, quan: 0, rowDan: 8, buDan: 0, total: 18 },
+        { side: 1, dan: 5, quan: 0, rowDan: 8, buDan: 0, total: 13 },
+      ],
+    });
+    expect(totalPoints(state)).toBe(70);
+  });
+
+  it("nước thứ 6 khác → ván tiếp tục, recentSows chỉ giữ 6 nước gần nhất", () => {
+    const after5 = play(base(), X).state;
+    const { state } = play(after5, sow(9, 1));
+    expect(state.status).toBe("playing");
+    expect(state.recentSows).toEqual([X, Y, X, Y, X, sow(9, 1)]);
+  });
+});
+
 describe("T14 — nước đi không hợp lệ", () => {
   const cases: [string, number, Move][] = [
-    ["sai lượt", 1, { square: 8, dir: 1 }],
-    ["ô của đối thủ", 0, { square: 8, dir: 1 }],
-    ["ô quan 0", 0, { square: 0, dir: 1 }],
-    ["ô quan 6", 0, { square: 6, dir: -1 }],
-    ["ô ngoài bàn", 0, { square: 12, dir: 1 }],
-    ["ô âm", 0, { square: -1, dir: 1 }],
-    ["ô không phải số nguyên", 0, { square: 1.5, dir: 1 }],
-    ["chiều 0", 0, { square: 1, dir: 0 as never }],
-    ["chiều 2", 0, { square: 1, dir: 2 as never }],
-    ["ghế không tồn tại", 2, { square: 1, dir: 1 }],
+    ["sai lượt", 1, sow(8, 1)],
+    ["ô của đối thủ", 0, sow(8, 1)],
+    ["ô quan 0", 0, sow(0, 1)],
+    ["ô quan 6", 0, sow(6, -1)],
+    ["ô ngoài bàn", 0, sow(12, 1)],
+    ["ô âm", 0, sow(-1, 1)],
+    ["ô không phải số nguyên", 0, sow(1.5, 1)],
+    ["chiều 0", 0, sow(1, 0 as never)],
+    ["chiều 2", 0, sow(1, 2 as never)],
+    ["kiểu nước lạ", 0, { kind: "khac" } as never],
+    ["ghế không tồn tại", 2, sow(1, 1)],
   ];
 
   it.each(cases)("%s → trả về lỗi, state không đổi", (_name, seat, move) => {
     const s = setup(defaultOptions, [0, 1], 0);
     const snapshot = clone(s);
-    const r = applyMove(s, seat, move);
-    expect(r).toHaveProperty("error");
+    expect(applyMove(s, seat, move)).toHaveProperty("error");
     expect(s).toEqual(snapshot);
+  });
+
+  it("sai lượt → NOT_YOUR_TURN; ô không hợp lệ → INVALID_MOVE", () => {
+    const s = setup(defaultOptions, [0, 1], 0);
+    expect(applyMove(s, 1, sow(8, 1))).toEqual({ error: "NOT_YOUR_TURN" });
+    expect(applyMove(s, 0, sow(8, 1))).toEqual({ error: "INVALID_MOVE" });
   });
 
   it("ô trống → lỗi", () => {
     const t = makeState({ dan: [0, 0, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5] });
     const before = clone(t);
-    expect(applyMove(t, 0, { square: 1, dir: 1 })).toHaveProperty("error");
+    expect(applyMove(t, 0, sow(1, 1))).toHaveProperty("error");
     expect(t).toEqual(before);
   });
 
   it("ván đã kết thúc → lỗi", () => {
-    const t = makeState({ status: "finished" });
-    expect(applyMove(t, 0, { square: 1, dir: 1 })).toHaveProperty("error");
+    expect(applyMove(makeState({ status: "finished" }), 0, sow(1, 1))).toHaveProperty("error");
   });
 
   it("nước hợp lệ không sửa state đầu vào", () => {
     const s = setup(defaultOptions, [0, 1], 0);
     const snapshot = clone(s);
-    applyMove(s, 0, { square: 3, dir: 1 });
+    applyMove(s, 0, sow(3, 1));
     expect(s).toEqual(snapshot);
   });
 });
 
+describe("T17/T18 — Lật bàn", () => {
+  const opened = () => play(setup({ ...defaultOptions, latBan: true }, [0, 1], 0), sow(3, 1)).state;
+
+  it("T17: sau nước mở đầu, người đi sau lật → đổi controller, lượt giữ nguyên, người mở đầu phải đi tiếp", () => {
+    const s = opened();
+    expect(s.turn).toBe(1);
+    expect(validMoves(s, 1)).toContainEqual(LAT_BAN);
+    expect(validMoves(s, 0)).toEqual([]);
+
+    const { state, events } = play(s, LAT_BAN, 1);
+    expect(events).toEqual([{ t: "latBan" }]);
+    expect(state.controller).toEqual([1, 0]);
+    expect(state.turn).toBe(1);
+    expect(state.moveNo).toBe(1);
+    expect(state.latBanUsed).toBe(true);
+    expect(state.recentSows).toEqual([]);
+    // Bàn và kho giữ nguyên
+    expect(state.dan).toEqual(s.dan);
+    expect(state.captured).toEqual(s.captured);
+
+    // Người vừa lật không được đi ngay
+    expect(applyMove(state, 1, sow(7, 1))).toEqual({ error: "NOT_YOUR_TURN" });
+    // Người mở đầu giờ điều khiển bên B và phải đi
+    expect(validMoves(state, 0).length).toBeGreaterThan(0);
+    expect(validMoves(state, 0)).not.toContainEqual(LAT_BAN);
+    const next = play(state, sow(7, 1), 0).state;
+    expect(next.turn).toBe(0);
+    expect(next.controller[0]).toBe(1);
+  });
+
+  it("đi quân thay vì lật → mất quyền lật bàn", () => {
+    const s = play(opened(), sow(7, 1), 1).state;
+    expect(validMoves(s, s.controller[s.turn])).not.toContainEqual(LAT_BAN);
+  });
+
+  const invalid: [string, () => State, number][] = [
+    ["tuỳ chọn tắt", () => play(setup(defaultOptions, [0, 1], 0), sow(3, 1)).state, 1],
+    ["trước nước đầu", () => setup({ ...defaultOptions, latBan: true }, [0, 1], 0), 0],
+    ["sau nước thứ 2", () => play(opened(), sow(7, 1), 1).state, 0],
+    ["lật lần hai", () => play(opened(), LAT_BAN, 1).state, 0],
+    ["người mở đầu bấm lật", () => opened(), 0],
+  ];
+
+  it.each(invalid)("T18: %s → lỗi, state không đổi", (_name, make, seat) => {
+    const s = make();
+    const snapshot = clone(s);
+    expect(applyMove(s, seat, LAT_BAN)).toHaveProperty("error");
+    expect(s).toEqual(snapshot);
+    expect(validMoves(s, seat)).not.toContainEqual(LAT_BAN);
+  });
+
+  it("T18: người mở đầu bấm lật → NOT_YOUR_TURN", () => {
+    expect(applyMove(opened(), 0, LAT_BAN)).toEqual({ error: "NOT_YOUR_TURN" });
+  });
+});
+
+describe("T19 — ví dụ 11.2 trong luật", () => {
+  // A đi ô 3 chiều +1 → rơi vào ô 4. Ô 5 trống, ô quan 6 có 1 quan + 2 dân, ô 7 trống, ô 8 có 4 dân, ô 9 có dân.
+  const board = [0, 1, 1, 1, 0, 0, 2, 0, 4, 1, 1, 1];
+
+  it("Cơ bản: ăn ô quan 12 điểm + ăn liên hoàn 4 → 16 điểm", () => {
+    const { state } = play(makeState({ dan: board }), sow(3, 1));
+    expect(state.captured[0]).toEqual({ dan: 6, quan: 1 });
+  });
+
+  it("Quan Già: ô quan chỉ có 2 dân → 0 điểm", () => {
+    const { state } = play(makeState({ dan: board, options: { camAnQuanNon: true } }), sow(3, 1));
+    expect(state.captured[0]).toEqual({ dan: 0, quan: 0 });
+  });
+});
+
+describe("T20 — kết thúc ván khi đã lật bàn", () => {
+  it("scores và ScoreDetail theo người chơi, lấy kho của bên người đó đang điều khiển", () => {
+    // Như T12, nhưng ghế 1 đang điều khiển bên A (đã lật bàn).
+    const s = makeState({
+      dan: [0, 5, 0, 1, 0, 0, 2, 4, 2, 1, 0, 0],
+      quan: [false, true],
+      captured: [
+        { dan: 20, quan: 1 },
+        { dan: 15, quan: 0 },
+      ],
+      controller: [1, 0],
+      latBanUsed: true,
+      moveNo: 10,
+    });
+    expect(applyMove(s, 0, sow(3, 1))).toEqual({ error: "NOT_YOUR_TURN" });
+    const { state } = play(s, sow(3, 1), 1);
+    expect(state.result).toEqual({
+      winner: 1,
+      scores: [22, 48],
+      reason: "het-quan",
+      detail: [
+        { side: 1, dan: 15, quan: 0, rowDan: 7, buDan: 0, total: 22 },
+        { side: 0, dan: 22, quan: 2, rowDan: 6, buDan: 0, total: 48 },
+      ],
+    });
+  });
+});
+
+describe("forfeit — hết giờ / bỏ cuộc", () => {
+  it("người bị xử thua thua ngay, điểm là kho hiện tại, không thu quân trên bàn", () => {
+    const s = makeState({
+      controller: [1, 0],
+      captured: [
+        { dan: 12, quan: 1 },
+        { dan: 3, quan: 0 },
+      ],
+      dan: [0, 5, 5, 0, 0, 0, 0, 5, 5, 5, 0, 0],
+    });
+    const r = forfeit(s, 1, "het-gio");
+    if ("error" in r) throw new Error(r.error);
+    expect(r.events).toEqual([{ t: "gameOver", result: r.state.result }]);
+    expect(r.state.status).toBe("finished");
+    expect(r.state.result).toEqual({
+      winner: 0,
+      scores: [3, 22],
+      reason: "het-gio",
+      detail: [
+        { side: 1, dan: 3, quan: 0, rowDan: 0, buDan: 0, total: 3 },
+        { side: 0, dan: 12, quan: 1, rowDan: 0, buDan: 0, total: 22 },
+      ],
+    });
+    expect(s.status).toBe("playing");
+  });
+
+  it("bỏ cuộc khi không phải lượt mình vẫn được", () => {
+    const r = forfeit(setup(defaultOptions, [0, 1], 0), 1, "bo-cuoc");
+    if ("error" in r) throw new Error(r.error);
+    expect(r.state.result).toMatchObject({ winner: 0, reason: "bo-cuoc" });
+  });
+
+  it("ván đã kết thúc hoặc ghế không có trong ván → lỗi", () => {
+    expect(forfeit(makeState({ status: "finished" }), 0, "bo-cuoc")).toHaveProperty("error");
+    expect(forfeit(makeState({}), 5, "bo-cuoc")).toHaveProperty("error");
+  });
+});
+
 describe("T16 — fuzz", () => {
-  it("10.000 ván ngẫu nhiên: không lỗi, bất biến luôn đúng, mọi ván kết thúc, tổng điểm = 70 / 60", () => {
+  it("10.000 ván ngẫu nhiên (Quan Già, Lật bàn bật ngẫu nhiên): không lỗi, bất biến tổng điểm, mọi ván kết thúc", () => {
     const rng = createRng(20261020);
     const MAX_MOVES = 5000;
-    let longest = 0;
     const reasons: Record<string, number> = {};
+    let flips = 0;
 
     for (let game = 0; game < 10_000; game++) {
       const options: Options = {
         ...defaultOptions,
         giaTriQuan: game % 2 === 0 ? 10 : 5,
         camAnQuanNon: rng() < 0.5,
+        latBan: rng() < 0.5,
       };
+      const total = 50 + 2 * options.giaTriQuan;
       let state = setup(options, [0, 1], rng() < 0.5 ? 0 : 1);
       let moves = 0;
 
       while (state.status === "playing") {
-        const seat = state.turn;
-        const legal = validMoves(state, seat);
-        expect(legal.length, `ván ${game}: đến lượt mà không có nước đi`).toBeGreaterThan(0);
-        expect(validMoves(state, 1 - seat)).toEqual([]);
+        const seatId = state.controller[state.turn];
+        const legal = validMoves(state, seatId);
+        if (legal.length === 0) throw new Error(`ván ${game}: đến lượt mà không có nước đi`);
+        if (validMoves(state, 1 - seatId).length !== 0) throw new Error(`ván ${game}: người không đến lượt có nước đi`);
 
-        const move = pickRandom(legal, rng)!;
-        const r = applyMove(state, seat, move);
+        // Khi được lật bàn thì lật một nửa số lần, để fuzz phủ được nhánh này
+        const canFlip = legal.some((m) => m.kind === "latBan");
+        const move = canFlip && rng() < 0.5 ? LAT_BAN : pickRandom(legal.filter((m) => m.kind === "sow"), rng)!;
+        if (move.kind === "latBan") flips++;
+        const r = applyMove(state, seatId, move);
         if ("error" in r) throw new Error(`ván ${game}: nước hợp lệ bị từ chối: ${r.error}`);
         state = r.state;
         moves++;
 
-        if (totalDan(state) !== 50 || totalQuan(state) !== 2 || state.dan.some((d) => d < 0)) {
+        if (totalPoints(state) !== total || state.dan.some((d) => d < 0) || state.captured.some((p) => p.dan < 0 || p.quan < 0)) {
           throw new Error(`ván ${game}, nước ${moves}: sai bất biến ${JSON.stringify(state)}`);
         }
         if (moves > MAX_MOVES) throw new Error(`ván ${game}: quá ${MAX_MOVES} nước, nghi bị treo`);
       }
 
-      longest = Math.max(longest, moves);
       const res = state.result!;
       reasons[res.reason] = (reasons[res.reason] ?? 0) + 1;
-      const sum = res.scores[0]! + res.scores[1]!;
-      if (sum !== 50 + 2 * options.giaTriQuan) {
-        throw new Error(`ván ${game}: tổng điểm ${sum} ${JSON.stringify(res)}`);
+      const [a, b] = res.scores as [number, number];
+      if (res.reason === "het-quan" && a + b !== total) {
+        throw new Error(`ván ${game}: hết quan nhưng tổng điểm ${a + b} ${JSON.stringify(res)}`);
       }
-      const expectedWinner = res.scores[0] === res.scores[1] ? null : res.scores[0]! > res.scores[1]! ? 0 : 1;
-      expect(res.winner).toBe(expectedWinner);
+      if (res.reason === "khong-du-bu-dan") {
+        // Bên đến lượt không bù được dân thì người điều khiển bên đó thua
+        if (res.winner !== state.controller[1 - state.turn]) throw new Error(`ván ${game}: sai người thắng`);
+      } else {
+        const expected = a === b ? null : a > b ? 0 : 1;
+        if (res.winner !== expected) throw new Error(`ván ${game}: sai người thắng ${JSON.stringify(res)}`);
+      }
     }
 
-    expect(longest).toBeLessThanOrEqual(MAX_MOVES);
-    // Cả hai cách kết thúc ván đều phải xuất hiện, để fuzz thực sự kiểm tra được cả hai nhánh tính điểm.
-    expect(Object.keys(reasons).sort(), JSON.stringify(reasons)).toEqual(["het-quan", "khong-du-dan"]);
+    expect(reasons["het-quan"], JSON.stringify(reasons)).toBeGreaterThan(0);
+    expect(reasons["khong-du-bu-dan"], JSON.stringify(reasons)).toBeGreaterThan(0);
+    expect(flips).toBeGreaterThan(0);
   }, 120_000);
 });

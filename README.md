@@ -19,6 +19,7 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 | [Ô ăn quan — Thiết kế UX](docs/o-an-quan/02-thiet-ke-ux.md) | Màn hình, luồng, tương tác, hiệu ứng |
 | [Ô ăn quan — Thiết kế kỹ thuật](docs/o-an-quan/03-thiet-ke-ky-thuat.md) | Kiến trúc, mô hình dữ liệu, engine, giao thức |
 | [Ô ăn quan — Kế hoạch prototype](docs/o-an-quan/04-ke-hoach-prototype.md) | Phạm vi, các mốc, test case, câu hỏi mở |
+| [Thiết kế màn hình](docs/design/README.md) | Mockup các màn hình, quy ước, hệ màu, trạng thái thiết kế |
 
 ## Trạng thái
 

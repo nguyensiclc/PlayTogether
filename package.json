@@ -6,6 +6,8 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "npm run dev -w @playtogether/client",
+    "build": "npm run build -w @playtogether/client",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "npm run typecheck --workspaces --if-present"

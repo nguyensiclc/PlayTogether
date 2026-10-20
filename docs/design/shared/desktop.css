@@ -1,0 +1,44 @@
+/* PlayTogether — bố cục desktop (≥ 1024px) cho mockup. Dùng chung với tokens.css. */
+
+body.desk { min-width: 1024px; }
+
+.dk-nav {
+  height: 68px; display: flex; align-items: center; gap: 24px;
+  padding: 0 40px; border-bottom: 1px solid var(--line); background: rgba(255, 250, 240, .6);
+}
+.dk-nav .links { display: flex; gap: 4px; }
+.dk-nav .links a { padding: 8px 14px; border-radius: 10px; font-weight: 600; font-size: 14px; color: var(--muted); text-decoration: none; }
+.dk-nav .links a.on { color: var(--ink); background: var(--surface); box-shadow: var(--shadow); }
+.dk-nav .field { min-height: 42px; width: 230px; }
+.dk-nav .field input { font-size: 14px; }
+
+.dk-wrap { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+
+/* Bàn lớn cho desktop */
+.board.lg { grid-template-rows: 124px 124px; gap: 8px; padding: 10px; border-width: 5px; border-radius: 30px; }
+.board.lg .cell { border-radius: 16px; box-shadow: inset 0 5px 12px var(--cell-shade); }
+.board.lg .cell.quan.left { border-radius: 999px 16px 16px 999px / 50% 16px 16px 50%; }
+.board.lg .cell.quan.right { border-radius: 16px 999px 999px 16px / 16px 50% 50% 16px; }
+.board.lg .cell.valid { box-shadow: inset 0 5px 12px var(--cell-shade), 0 0 0 3px var(--valid); }
+.board.lg .cell.selected { box-shadow: inset 0 5px 12px var(--cell-shade), 0 0 0 4px var(--accent), 0 0 22px rgba(242,179,61,.8); }
+.board.lg .stone { width: 14px; height: 14px; }
+.board.lg .stone.big { width: 32px; height: 32px; }
+.board.lg .cell.quan .stone.big { left: calc(50% - 16px) !important; }
+.board.lg .count { font-size: 14px; right: 8px; bottom: 5px; }
+.board.lg .cell.quan .count { bottom: 12px; }
+.board.lg .gain { font-size: 15px; top: -28px; }
+
+/* Phím tắt */
+kbd {
+  display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 6px;
+  border-radius: 6px; border: 1px solid var(--stone-edge); border-bottom-width: 2px;
+  background: var(--surface); font: 600 12px var(--font); color: var(--ink);
+}
+
+/* Modal giữa màn hình (thay cho bottom sheet trên điện thoại) */
+.modal {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 21;
+  width: 460px; background: var(--surface); border-radius: 24px; padding: 28px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.35);
+}
+.scrim.fixed { position: fixed; }

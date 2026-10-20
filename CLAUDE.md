@@ -10,7 +10,8 @@ Game đầu tiên: **Ô ăn quan**. Sau đó sẽ có Tiến lên, Cờ tướng
 - Luật chơi: `docs/o-an-quan/01-luat-choi.md`. Engine phải khớp **chính xác** tài liệu này, kể cả cách đánh số ô `0..11`.
 - UX: `docs/o-an-quan/02-thiet-ke-ux.md`
 - Kỹ thuật (kiến trúc, kiểu dữ liệu, thuật toán, giao thức WS): `docs/o-an-quan/03-thiet-ke-ky-thuat.md`
-- Kế hoạch, các mốc M1–M5, test case T1–T16, câu hỏi mở: `docs/o-an-quan/04-ke-hoach-prototype.md`
+- Kế hoạch, các mốc M1–M5 (gồm M1.1), test case T1–T20, câu hỏi mở: `docs/o-an-quan/04-ke-hoach-prototype.md`
+- Thiết kế màn hình (mockup, hệ màu): `docs/design/`. Màn hình đã có thiết kế thì code UI phải theo thiết kế đó.
 
 Nếu code cần làm khác tài liệu thì **cập nhật tài liệu trong cùng thay đổi** và nêu rõ lý do. Câu hỏi mở Q1–Q6 chưa chốt thì dùng phương án "Đề xuất hiện tại" trong bảng.
 
@@ -45,12 +46,14 @@ Monorepo npm workspaces (`packages/*`). Chạy ở thư mục gốc:
 
 ```
 npm install          # cài phụ thuộc
+npm run dev          # Vite dev server cho client (mở /offline); --host nên điện thoại cùng Wi-Fi vào được
+npm run build        # build client ra packages/client/dist
 npm test             # Vitest, chạy toàn bộ test (gồm fuzz T16)
 npm run test:watch   # Vitest chế độ theo dõi
 npm run typecheck    # tsc cho mọi workspace có script typecheck
 npx vitest run -t T5 # chạy riêng các test có tên chứa "T5"
 ```
 
-`dev` và `build` chưa có, sẽ thêm khi làm server/client (M2–M3).
+Server (M3) chưa có, nên `dev` hiện mới chạy client.
 
 Import trong TS dùng đuôi `.ts` (`allowImportingTsExtensions`), để sau này Node 24 chạy trực tiếp được.

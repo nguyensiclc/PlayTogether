@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kết quả desktop</title>
+<!-- Mockup desktop 1280 × 800: Kết quả ván, modal giữa màn hình trên nền bàn chơi · Mốc M2/M5 · UX mục 2.5 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/desktop.css">
+<style>
+  body { overflow: hidden; height: 100vh; min-height: 800px; position: relative; }
+  .bg { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+  .modal { width: 640px; padding: 0; overflow: hidden; display: grid; grid-template-columns: 250px 1fr; }
+  .hero { background: linear-gradient(160deg, #fbe9c4, #f3d9cf); padding: 30px 22px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+  .hero .trophy { font-size: 56px; line-height: 1; }
+  .hero h1 { font-size: 30px; }
+  .score { display: flex; align-items: baseline; gap: 10px; margin-top: 10px; }
+  .score b { font-size: 44px; line-height: 1; }
+  .score b.win { color: var(--capture); }
+  .score span { color: var(--muted); font-weight: 700; }
+  .detail { padding: 26px 26px 22px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 9px 4px; border-top: 1px solid var(--line); }
+  thead td { border-top: 0; }
+  th { text-align: left; font-weight: 500; color: var(--muted); }
+  td { text-align: right; font-weight: 600; width: 90px; }
+  tr.total th, tr.total td { font-weight: 800; color: var(--ink); font-size: 16px; }
+  .ready { display: flex; align-items: center; gap: 6px; margin: 16px 0 10px; font-size: 13px; color: #23704a; font-weight: 600; }
+  .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+</style>
+</head>
+<body class="desk">
+<iframe class="bg" src="ban-choi-desktop.html" title="Bàn chơi (nền)" tabindex="-1"></iframe>
+<div class="scrim"></div>
+<section class="modal">
+  <div class="hero">
+    <span class="trophy">🏆</span>
+    <h1>Bạn thắng!</h1>
+    <span class="chip">Hết quan · thu dân về</span>
+    <div class="score"><b class="win">39</b><span>–</span><b>31</b></div>
+    <span class="small muted">Bạn · Mèo Mun</span>
+  </div>
+  <div class="detail">
+    <table>
+      <thead><tr><th></th><td class="tiny muted">Bạn</td><td class="tiny muted">Mèo Mun</td></tr></thead>
+      <tr><th>Dân đã ăn</th><td>21</td><td>18</td></tr>
+      <tr><th>Quan đã ăn</th><td>1 (10)</td><td>1 (10)</td></tr>
+      <tr><th>Bù dân</th><td>0</td><td>1 lần</td></tr>
+      <tr><th>Dân thu cuối ván</th><td>8</td><td>3</td></tr>
+      <tr class="total"><th>Tổng</th><td>39</td><td>31</td></tr>
+    </table>
+    <div class="ready"><span class="avatar sm av3" style="width:20px;height:20px;font-size:9px">MM</span>Mèo Mun muốn chơi ván nữa</div>
+    <a class="btn primary block">Ván nữa · Mèo Mun đi trước <kbd style="margin-left:6px">Enter</kbd></a>
+    <div class="acts">
+      <a class="btn sm">Về phòng chờ</a>
+      <a class="btn sm">Chia sẻ kết quả</a>
+    </div>
+  </div>
+</section>
+</body>
+</html>

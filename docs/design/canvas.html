@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlayTogether Canvas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #e9e1d2; --dot: #d3c7b2; --ink: #2b2118; --muted: #6f5f4f; --surface: #fffaf0; --line: #d9cab0;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--ink); font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    background-color: var(--canvas);
+    background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+  header { padding: 32px 40px 8px; max-width: 1200px; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: -.01em; }
+  header p { margin: 6px 0 0; color: var(--muted); max-width: 720px; line-height: 1.5; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .sw { display: flex; align-items: center; gap: 6px; background: var(--surface); border-radius: 999px; padding: 4px 10px 4px 4px; font-size: 12px; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .sw i { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(0,0,0,.1); }
+
+  section { padding: 28px 40px 8px; }
+  section > h2 { margin: 0 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  section > p { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+  .row { display: flex; gap: 36px; overflow-x: auto; padding: 8px 4px 28px; align-items: flex-start; }
+  figure { margin: 0; flex: none; width: 376px; }
+  .frame {
+    width: 376px; height: 756px; border-radius: 34px; overflow: hidden; background: #f4ead8;
+    border: 8px solid #1d1611; box-shadow: 0 24px 50px rgba(43,33,24,.22);
+  }
+  .frame iframe { width: 360px; height: 740px; border: 0; display: block; }
+  figcaption { margin-top: 14px; }
+  figcaption a { color: var(--ink); font-weight: 700; font-size: 15px; text-decoration: none; }
+  figcaption a:hover { text-decoration: underline; }
+  figcaption .meta { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  figcaption .tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); }
+  figcaption p { margin: 6px 0 0; font-size: 13px; color: var(--muted); line-height: 1.45; }
+  .flow { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin: 0 0 6px; flex-wrap: wrap; }
+  .flow b { color: var(--ink); background: var(--surface); padding: 2px 8px; border-radius: 6px; }
+  .dframe { width: 640px; height: 428px; border-radius: 14px; overflow: hidden; background: #f4ead8; box-shadow: 0 24px 50px rgba(43,33,24,.22); border: 1px solid #1d1611; }
+  .dframe .chrome { height: 28px; background: #1d1611; display: flex; align-items: center; gap: 6px; padding: 0 12px; }
+  .dframe .chrome i { width: 10px; height: 10px; border-radius: 50%; background: #5a4a3c; }
+  .dframe .chrome span { margin-left: 12px; flex: 1; height: 16px; border-radius: 6px; background: #3a2e24; color: #b9ad94; font-size: 10px; line-height: 16px; padding-left: 8px; }
+  .dframe .vp { width: 640px; height: 400px; overflow: hidden; }
+  .dframe iframe { width: 1280px; height: 800px; border: 0; transform: scale(.5); transform-origin: 0 0; display: block; }
+  figure.d { width: 640px; }
+  @media (max-width: 600px) { header, section { padding-left: 16px; padding-right: 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>PlayTogether · Canvas thiết kế</h1>
+  <p>Màn hình điện thoại ở khung 360 × 740, màn hình desktop ở khung 1280 × 800 (thu nhỏ 50%). Mỗi khung là một file HTML tĩnh trong <code>docs/design/</code>: bấm tên để mở riêng (mở được trên điện thoại). Hệ màu và component dùng chung nằm ở <code>shared/tokens.css</code>.</p>
+  <div class="swatches">
+    <span class="sw"><i style="background:#f4ead8"></i>bg</span>
+    <span class="sw"><i style="background:#fffaf0"></i>surface</span>
+    <span class="sw"><i style="background:#2b2118"></i>ink</span>
+    <span class="sw"><i style="background:#b5462f"></i>primary</span>
+    <span class="sw"><i style="background:#8a5a2e"></i>board</span>
+    <span class="sw"><i style="background:#b07a45"></i>cell</span>
+    <span class="sw"><i style="background:#f2b33d"></i>accent</span>
+    <span class="sw"><i style="background:#3fa36b"></i>capture</span>
+    <span class="sw"><i style="background:#c2412d"></i>danger</span>
+    <span class="sw"><i style="background:#2f6b5a"></i>nhóm Cờ</span>
+    <span class="sw"><i style="background:#3a4f8f"></i>nhóm Bài</span>
+  </div>
+</header>
+
+<section>
+  <h2>Nền tảng</h2>
+  <p class="flow"><b>Trang chủ</b>→ Tạo phòng →<b>Phòng chờ</b>→ gửi link → bạn bè bấm link →<b>Nhập nickname</b>→<b>Phòng chờ</b></p>
+  <div class="row">
+    <figure>
+      <div class="frame"><iframe src="nen-tang/trang-chu.html" title="Trang chủ" loading="lazy"></iframe></div>
+      <figcaption><a href="nen-tang/trang-chu.html">Trang chủ · danh sách trò chơi</a>
+        <div class="meta"><span class="tag">M3</span><span class="tag">UX 2.1</span></div>
+        <p>Nhập mã phòng ở đầu trang, phòng gần đây để vào lại, Ô ăn quan nổi bật kèm nút Tạo phòng. Lưới trò chơi lọc theo nhóm; game chưa làm có nhãn "Sắp có". Cuộn để xem hết.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="frame"><iframe src="nen-tang/nhap-nickname.html" title="Nhập nickname" loading="lazy"></iframe></div>
+      <figcaption><a href="nen-tang/nhap-nickname.html">Vào bằng link mời</a>
+        <div class="meta"><span class="tag">M3</span><span class="tag">UX 2.2</span></div>
+        <p>Chỉ hiện khi máy chưa có nickname. Nói rõ ai mời, chơi gì, còn ghế không. Tên điền sẵn, một nút là vào.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="frame"><iframe src="nen-tang/phong-cho.html" title="Phòng chờ" loading="lazy"></iframe></div>
+      <figcaption><a href="nen-tang/phong-cho.html">Phòng chờ · chủ phòng</a>
+        <div class="meta"><span class="tag">M3</span><span class="tag">UX 2.3</span></div>
+        <p>Khối mời bạn nổi bật nhất (link, Chia sẻ, QR). Ghế, người xem, 4 tuỳ chọn luật. Nút Bắt đầu cố định ở đáy, bị khoá đến khi đủ 2 người.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="frame"><iframe src="nen-tang/mat-ket-noi.html" title="Mất kết nối" loading="lazy"></iframe></div>
+      <figcaption><a href="nen-tang/mat-ket-noi.html">Mất kết nối · rời phòng</a>
+        <div class="meta"><span class="tag">M4</span><span class="tag">UX 5</span></div>
+        <p>Ba trạng thái gộp trong một khung: mình mất mạng (thanh đỏ, bàn khoá), đối thủ mất mạng (avatar xám, đếm 60s), đối thủ rời hẳn.</p></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>Ô ăn quan</h2>
+  <p class="flow"><b>Bàn chơi</b>⇄<b>Đối thủ đi</b>…→<b>Kết quả</b>→ Ván nữa · (tuỳ chọn)<b>Lật bàn</b>sau nước đầu · nút ? →<b>Hướng dẫn</b></p>
+  <div class="row">
+    <figure>
+      <div class="frame"><iframe src="o-an-quan/ban-choi.html" title="Bàn chơi" loading="lazy"></iframe></div>
+      <figcaption><a href="o-an-quan/ban-choi.html">Bàn chơi · lượt của bạn</a>
+        <div class="meta"><span class="tag">M2/M3</span><span class="tag">UX 2.4, 3</span></div>
+        <p>Đã chạm ô 3: thanh ◀ ▶ nổi ngay trên ô. Ô hợp lệ viền vàng, ô trống mờ, hàng đối thủ tối hơn. Thẻ của mình viền vàng + thanh thời gian.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="frame"><iframe src="o-an-quan/ban-choi-doi-thu.html" title="Đối thủ đang đi" loading="lazy"></iframe></div>
+      <figcaption><a href="o-an-quan/ban-choi-doi-thu.html">Đối thủ đi · hiệu ứng ăn quân</a>
+        <div class="meta"><span class="tag">M2/M5</span><span class="tag">UX 4, 6</span></div>
+        <p>Ô bị ăn nháy xanh + nhãn "+5", điểm đối thủ tăng. Dòng mô tả nước đi, nút Tua nhanh / Bỏ qua. Emoji bay ra từ avatar.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="frame"><iframe src="o-an-quan/lat-ban.html" title="Lật bàn" loading="lazy"></iframe></div>
+      <figcaption><a href="o-an-quan/lat-ban.html">Hộp hỏi Lật bàn</a>
+        <div class="meta"><span class="tag">M2</span><span class="tag">Luật 9</span></div>
+        <p>Bottom sheet cho người đi sau: so sánh "giữ bên" và "lật bàn" bằng điểm, đồng hồ vẫn chạy. Giữ bên là nút phụ, Lật bàn là nút chính.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="frame"><iframe src="o-an-quan/ket-qua.html" title="Kết quả" loading="lazy"></iframe></div>
+      <figcaption><a href="o-an-quan/ket-qua.html">Kết quả ván</a>
+        <div class="meta"><span class="tag">M2/M5</span><span class="tag">UX 2.5</span></div>
+        <p>Thắng/thua + lý do kết thúc, bảng điểm (dân, quan, bù dân, dân thu cuối ván). Hiện ai đã sẵn sàng ván mới và ai sẽ đi trước.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="frame"><iframe src="o-an-quan/huong-dan.html" title="Hướng dẫn luật" loading="lazy"></iframe></div>
+      <figcaption><a href="o-an-quan/huong-dan.html">Hướng dẫn luật · thẻ 2/4</a>
+        <div class="meta"><span class="tag">M5</span><span class="tag">UX 6</span></div>
+        <p>4 thẻ: (1) Bàn &amp; mục tiêu, (2) Rải và ăn, (3) Bù dân, (4) Hết ván. Mỗi thẻ có một bàn minh hoạ dùng chung style với bàn thật.</p></figcaption>
+    </figure>
+  </div>
+</section>
+<section>
+  <h2>Desktop · 1280 × 800</h2>
+  <p>Từ 1024px trở lên dùng bố cục riêng: tận dụng chiều ngang thay vì kéo dãn bản điện thoại. Bấm tên để mở cỡ thật.</p>
+  <div class="row">
+    <figure class="d">
+      <div class="dframe"><div class="chrome"><i></i><i></i><i></i><span>playtogether.vn</span></div><div class="vp"><iframe src="nen-tang/trang-chu-desktop.html" title="Trang chủ" loading="lazy" tabindex="-1"></iframe></div></div>
+      <figcaption><a href="nen-tang/trang-chu-desktop.html">Trang chủ</a>
+        <div class="meta"><span class="tag">M3</span><span class="tag">UX 2.1</span></div>
+        <p>Thanh trên có ô mã phòng và nickname. Hero chia đôi: lời mời + nút tạo phòng | thẻ Ô ăn quan lớn. Phòng gần đây thành 3 cột, lưới trò chơi 4 cột, mỗi thẻ có nút Tạo phòng khi rê chuột.</p></figcaption>
+    </figure>
+    <figure class="d">
+      <div class="dframe"><div class="chrome"><i></i><i></i><i></i><span>playtogether.vn/r/ABCD</span></div><div class="vp"><iframe src="nen-tang/phong-cho-desktop.html" title="Phòng chờ" loading="lazy" tabindex="-1"></iframe></div></div>
+      <figcaption><a href="nen-tang/phong-cho-desktop.html">Phòng chờ</a>
+        <div class="meta"><span class="tag">M3</span><span class="tag">UX 2.3</span></div>
+        <p>Hai cột: trái là hai ghế đối mặt (VS) và tuỳ chọn luật dạng lưới 2×2; phải là khối mời bạn có sẵn mã QR (desktop không có Web Share) và nút Bắt đầu.</p></figcaption>
+    </figure>
+    <figure class="d">
+      <div class="dframe"><div class="chrome"><i></i><i></i><i></i><span>playtogether.vn/r/ABCD</span></div><div class="vp"><iframe src="o-an-quan/ban-choi-desktop.html" title="Bàn chơi" loading="lazy" tabindex="-1"></iframe></div></div>
+      <figcaption><a href="o-an-quan/ban-choi-desktop.html">Bàn chơi</a>
+        <div class="meta"><span class="tag">M2/M3</span><span class="tag">UX 2.4, 3, 4</span></div>
+        <p>Bàn to ở giữa (ô 124px), thẻ người chơi trên/dưới. Cột phải 340px: nhật ký ván, biểu cảm, người xem, phím tắt. Thanh trên hiện luật đang bật của phòng.</p></figcaption>
+    </figure>
+    <figure class="d">
+      <div class="dframe"><div class="chrome"><i></i><i></i><i></i><span>playtogether.vn/r/ABCD</span></div><div class="vp"><iframe src="o-an-quan/lat-ban-desktop.html" title="Hộp hỏi Lật bàn" loading="lazy" tabindex="-1"></iframe></div></div>
+      <figcaption><a href="o-an-quan/lat-ban-desktop.html">Hộp hỏi Lật bàn</a>
+        <div class="meta"><span class="tag">M2</span><span class="tag">Luật 9</span></div>
+        <p>Modal giữa màn hình thay cho bottom sheet. Có phím tắt Esc (giữ bên) và L (lật bàn).</p></figcaption>
+    </figure>
+    <figure class="d">
+      <div class="dframe"><div class="chrome"><i></i><i></i><i></i><span>playtogether.vn/r/ABCD</span></div><div class="vp"><iframe src="o-an-quan/ket-qua-desktop.html" title="Kết quả ván" loading="lazy" tabindex="-1"></iframe></div></div>
+      <figcaption><a href="o-an-quan/ket-qua-desktop.html">Kết quả ván</a>
+        <div class="meta"><span class="tag">M2/M5</span><span class="tag">UX 2.5</span></div>
+        <p>Modal ngang hai phần: trái là thắng/thua + tỉ số, phải là bảng điểm chi tiết và các nút. Enter = Ván nữa.</p></figcaption>
+    </figure>
+  </div>
+</section>
+</body>
+</html>
