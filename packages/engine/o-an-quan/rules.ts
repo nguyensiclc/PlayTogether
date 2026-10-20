@@ -65,8 +65,10 @@ function clone(s: State): State {
 
 /** Bên A luôn đi trước, do `firstPlayer` điều khiển (Q17). */
 export function setup(options: Options, seats: SeatId[], firstPlayer: SeatId): State {
-  const rest = seats.filter((s) => s !== firstPlayer);
-  if (seats.length !== 2 || rest.length !== 1) throw new Error(`Ghế không hợp lệ: ${seats} / ${firstPlayer}`);
+  const [second, ...extra] = seats.filter((s) => s !== firstPlayer);
+  if (seats.length !== 2 || second === undefined || extra.length > 0) {
+    throw new Error(`Ghế không hợp lệ: ${seats} / ${firstPlayer}`);
+  }
   return {
     dan: [0, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5],
     quan: [true, true],
@@ -74,7 +76,7 @@ export function setup(options: Options, seats: SeatId[], firstPlayer: SeatId): S
       { dan: 0, quan: 0 },
       { dan: 0, quan: 0 },
     ],
-    controller: [firstPlayer, rest[0]!],
+    controller: [firstPlayer, second],
     turn: 0,
     moveNo: 0,
     latBanUsed: false,
@@ -141,62 +143,76 @@ function latBan(state: State): { state: State; events: GameEvent[] } | { error: 
   return { state: s, events: [{ t: "latBan" }] };
 }
 
-/** Rải, bốc rải tiếp, ăn và ăn liên hoàn (luật mục 3–5). */
+/** Rải, bốc rải tiếp, rồi xét ô kế tiếp (luật mục 3). */
 function sow(s: State, square: number, dir: Dir, events: GameEvent[]): void {
-  const seat = s.turn;
-  let hand = at(s, square);
-  s.dan[square] = 0;
-  events.push({ t: "pick", i: square, n: hand });
   let pos = square;
+  let hand = pickUp(s, square, events);
   let drops = 0;
-
   for (;;) {
-    // Rải (có thể đi qua chính ô vừa bốc)
-    while (hand > 0) {
-      pos = next(pos, dir);
-      s.dan[pos] = at(s, pos) + 1;
-      hand--;
-      events.push({ t: "drop", i: pos });
-      if (++drops > MAX_DROPS_PER_TURN) throw new Error("Vượt giới hạn rải trong một lượt");
-    }
-
+    drops += hand;
+    if (drops > MAX_DROPS_PER_TURN) throw new Error("Vượt giới hạn rải trong một lượt");
+    pos = scatter(s, pos, hand, dir, events);
     const n = next(pos, dir);
     // (a) ô dân có quân: bốc rải tiếp
     if (!isQuanSquare(n) && at(s, n) > 0) {
-      hand = at(s, n);
-      s.dan[n] = 0;
       pos = n;
-      events.push({ t: "pick", i: n, n: hand });
+      hand = pickUp(s, n, events);
       continue;
     }
-    // (b) ô quan còn quân
-    if (isQuanSquare(n) && !isEmpty(s, n)) {
-      events.push({ t: "turnEnd", reason: "gap-o-quan" });
+    resolveAfterSowing(s, n, dir, events);
+    return;
+  }
+}
+
+/** Bốc hết dân trong ô, trả về số dân trên tay. */
+function pickUp(s: State, i: number, events: GameEvent[]): number {
+  const hand = at(s, i);
+  s.dan[i] = 0;
+  events.push({ t: "pick", i, n: hand });
+  return hand;
+}
+
+/** Rải `hand` viên từ ô sau `from`, trả về ô nhận viên cuối. Có thể đi qua chính ô vừa bốc. */
+function scatter(s: State, from: number, hand: number, dir: Dir, events: GameEvent[]): number {
+  let pos = from;
+  for (let k = 0; k < hand; k++) {
+    pos = next(pos, dir);
+    s.dan[pos] = at(s, pos) + 1;
+    events.push({ t: "drop", i: pos });
+  }
+  return pos;
+}
+
+/** Ô `n` sau viên cuối không phải ô dân có quân: (b) gặp ô quan, (d) hai ô trống, hoặc (c) ăn. */
+function resolveAfterSowing(s: State, n: number, dir: Dir, events: GameEvent[]): void {
+  if (isQuanSquare(n) && !isEmpty(s, n)) {
+    events.push({ t: "turnEnd", reason: "gap-o-quan" });
+    return;
+  }
+  const target = next(n, dir);
+  if (isEmpty(s, target)) {
+    events.push({ t: "turnEnd", reason: "hai-o-trong" });
+    return;
+  }
+  captureChain(s, target, dir, events);
+}
+
+/** Ăn ô `first`, rồi còn "ô trống – ô có quân" phía trước thì ăn tiếp (luật mục 4; Quan Già mục 5). */
+function captureChain(s: State, first: number, dir: Dir, events: GameEvent[]): void {
+  let t = first;
+  for (;;) {
+    if (s.options.camAnQuanNon && quanAt(s, t) && at(s, t) < QUAN_GIA_MIN) {
+      events.push({ t: "turnEnd", reason: "quan-non" });
       return;
     }
-    // n trống
-    let t = next(n, dir);
-    // (d)
-    if (isEmpty(s, t)) {
-      events.push({ t: "turnEnd", reason: "hai-o-trong" });
-      return;
-    }
-    // (c) + ăn liên hoàn
-    for (;;) {
-      if (s.options.camAnQuanNon && quanAt(s, t) && at(s, t) < QUAN_GIA_MIN) {
-        events.push({ t: "turnEnd", reason: "quan-non" });
-        return;
-      }
-      capture(s, t, seat, events);
-      const e = next(t, dir);
-      const t2 = next(e, dir);
-      if (isEmpty(s, e) && !isEmpty(s, t2)) {
-        t = t2;
-        continue;
-      }
+    capture(s, t, s.turn, events);
+    const gap = next(t, dir);
+    const after = next(gap, dir);
+    if (!isEmpty(s, gap) || isEmpty(s, after)) {
       events.push({ t: "turnEnd", reason: "het-an" });
       return;
     }
+    t = after;
   }
 }
 
@@ -242,39 +258,48 @@ function buDan(s: State, events: GameEvent[]): void {
  * - "khong-du-bu-dan": bên đến lượt thua. "het-gio", "bo-cuoc": `loser` thua. Không thu quân.
  */
 function finish(s: State, reason: EndReason, events: GameEvent[], loser?: SeatId): void {
-  const v = s.options.giaTriQuan;
-  const collects = reason === "het-quan" || reason === "lap-nuoc";
+  const bySide = [scoreSide(s, 0, reason), scoreSide(s, 1, reason)] as const;
+  // scores và detail đánh theo người chơi (SeatId), không theo bên bàn (T20)
   const detail: ScoreDetail[] = [];
-  for (const side of [0, 1] as const) {
-    const p = s.captured[side];
-    const rowDan = collects ? ROWS[side].reduce((sum, i) => sum + at(s, i), 0) : 0;
-    detail[s.controller[side]] = {
-      side,
-      dan: p.dan,
-      quan: p.quan,
-      rowDan,
-      buDan: s.buDanCount[side],
-      total: p.dan + p.quan * v + rowDan,
-    };
-  }
+  detail[s.controller[0]] = bySide[0];
+  detail[s.controller[1]] = bySide[1];
   const scores = detail.map((d) => d.total);
-
-  let winner: SeatId | null;
-  if (reason === "khong-du-bu-dan") {
-    winner = s.controller[other(s.turn)];
-  } else if (loser !== undefined) {
-    winner = s.controller[0] === loser ? s.controller[1] : s.controller[0];
-  } else {
-    const [a, b] = s.controller;
-    const sa = detail[a]!.total;
-    const sb = detail[b]!.total;
-    winner = sa === sb ? null : sa > sb ? a : b;
-  }
+  const winner = decideWinner(s, reason, bySide, loser);
 
   const result: GameResult = { winner, scores, reason, detail };
   s.status = "finished";
   s.result = result;
   events.push({ t: "gameOver", result });
+}
+
+/** Điểm một bên lúc hết ván. Chỉ "het-quan", "lap-nuoc" mới thu dân trên hàng mình. */
+function scoreSide(s: State, side: Seat, reason: EndReason): ScoreDetail {
+  const p = s.captured[side];
+  const collects = reason === "het-quan" || reason === "lap-nuoc";
+  const rowDan = collects ? ROWS[side].reduce((sum, i) => sum + at(s, i), 0) : 0;
+  return {
+    side,
+    dan: p.dan,
+    quan: p.quan,
+    rowDan,
+    buDan: s.buDanCount[side],
+    total: p.dan + p.quan * s.options.giaTriQuan + rowDan,
+  };
+}
+
+/** Người thắng: theo lý do kết thúc nếu là xử thua, còn lại so điểm (luật mục 7). */
+function decideWinner(
+  s: State,
+  reason: EndReason,
+  bySide: readonly [ScoreDetail, ScoreDetail],
+  loser: SeatId | undefined,
+): SeatId | null {
+  const [a, b] = s.controller;
+  if (reason === "khong-du-bu-dan") return s.controller[other(s.turn)];
+  if (loser !== undefined) return a === loser ? b : a;
+  const [sa, sb] = [bySide[0].total, bySide[1].total];
+  if (sa === sb) return null;
+  return sa > sb ? a : b;
 }
 
 /** Xử thua do hết giờ (bị đi thay 3 lượt) hoặc bỏ cuộc. Lớp phòng tự đếm và gọi hàm này. */

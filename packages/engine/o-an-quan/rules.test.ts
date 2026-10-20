@@ -252,7 +252,13 @@ describe("T7 — ăn liên hoàn qua ô quan đã trống hẳn", () => {
 
 describe("T8 — rải đủ một vòng", () => {
   it("ô có 12 dân: ô vừa bốc nhận lại 1 dân khi rải vòng tới", () => {
-    const s = makeState({ dan: [0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], captured: [{ dan: 0, quan: 0 }, { dan: 38, quan: 0 }] });
+    const s = makeState({
+      dan: [0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      captured: [
+        { dan: 0, quan: 0 },
+        { dan: 38, quan: 0 },
+      ],
+    });
     const { state, events } = play(s, sow(1, 1));
     const drops = events.filter((e) => e.t === "drop").map((e) => e.i);
     expect(drops.slice(0, 12)).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1]);
@@ -635,10 +641,60 @@ describe("forfeit — hết giờ / bỏ cuộc", () => {
   });
 });
 
+const FUZZ_MAX_MOVES = 5000;
+
+/** Chọn nước ngẫu nhiên. Khi được lật bàn thì lật một nửa số lần, để fuzz phủ được nhánh này. */
+function randomMove(legal: Move[], rng: () => number): Move {
+  if (legal.some((m) => m.kind === "latBan") && rng() < 0.5) return LAT_BAN;
+  return pickRandom(
+    legal.filter((m) => m.kind === "sow"),
+    rng,
+  )!;
+}
+
+/** Bất biến sau mỗi nước: tổng điểm bàn + kho không đổi, không ô hay kho nào âm. */
+function checkInvariants(state: State, total: number, where: string): void {
+  const negative = state.dan.some((d) => d < 0) || state.captured.some((p) => p.dan < 0 || p.quan < 0);
+  if (totalPoints(state) !== total || negative) throw new Error(`${where}: sai bất biến ${JSON.stringify(state)}`);
+}
+
+/** Kết quả cuối ván: hết quan thì tổng điểm đủ; người thắng đúng theo lý do kết thúc. */
+function checkResult(state: State, total: number, where: string): void {
+  const res = state.result!;
+  const [a, b] = res.scores as [number, number];
+  if (res.reason === "het-quan" && a + b !== total) throw new Error(`${where}: hết quan nhưng tổng điểm ${a + b}`);
+  // Bên đến lượt không bù được dân thì người điều khiển bên đó thua; còn lại so điểm
+  const expected = res.reason === "khong-du-bu-dan" ? state.controller[1 - state.turn] : a === b ? null : a > b ? 0 : 1;
+  if (res.winner !== expected) throw new Error(`${where}: sai người thắng ${JSON.stringify(res)}`);
+}
+
+/** Chơi một ván ngẫu nhiên tới hết, kiểm tra bất biến sau mỗi nước. */
+function playRandomGame(options: Options, rng: () => number, game: number): { state: State; flips: number } {
+  const total = 50 + 2 * options.giaTriQuan;
+  let state = setup(options, [0, 1], rng() < 0.5 ? 0 : 1);
+  let flips = 0;
+  for (let moves = 1; state.status === "playing"; moves++) {
+    const where = `ván ${game}, nước ${moves}`;
+    const seatId = state.controller[state.turn];
+    const legal = validMoves(state, seatId);
+    if (legal.length === 0) throw new Error(`${where}: đến lượt mà không có nước đi`);
+    if (validMoves(state, 1 - seatId).length !== 0) throw new Error(`${where}: người không đến lượt có nước đi`);
+    if (moves > FUZZ_MAX_MOVES) throw new Error(`${where}: quá ${FUZZ_MAX_MOVES} nước, nghi bị treo`);
+
+    const move = randomMove(legal, rng);
+    if (move.kind === "latBan") flips++;
+    const r = applyMove(state, seatId, move);
+    if ("error" in r) throw new Error(`${where}: nước hợp lệ bị từ chối: ${r.error}`);
+    state = r.state;
+    checkInvariants(state, total, where);
+  }
+  checkResult(state, total, `ván ${game}`);
+  return { state, flips };
+}
+
 describe("T16 — fuzz", () => {
   it("10.000 ván ngẫu nhiên (Quan Già, Lật bàn bật ngẫu nhiên): không lỗi, bất biến tổng điểm, mọi ván kết thúc", () => {
     const rng = createRng(20261020);
-    const MAX_MOVES = 5000;
     const reasons: Record<string, number> = {};
     let flips = 0;
 
@@ -649,44 +705,10 @@ describe("T16 — fuzz", () => {
         camAnQuanNon: rng() < 0.5,
         latBan: rng() < 0.5,
       };
-      const total = 50 + 2 * options.giaTriQuan;
-      let state = setup(options, [0, 1], rng() < 0.5 ? 0 : 1);
-      let moves = 0;
-
-      while (state.status === "playing") {
-        const seatId = state.controller[state.turn];
-        const legal = validMoves(state, seatId);
-        if (legal.length === 0) throw new Error(`ván ${game}: đến lượt mà không có nước đi`);
-        if (validMoves(state, 1 - seatId).length !== 0) throw new Error(`ván ${game}: người không đến lượt có nước đi`);
-
-        // Khi được lật bàn thì lật một nửa số lần, để fuzz phủ được nhánh này
-        const canFlip = legal.some((m) => m.kind === "latBan");
-        const move = canFlip && rng() < 0.5 ? LAT_BAN : pickRandom(legal.filter((m) => m.kind === "sow"), rng)!;
-        if (move.kind === "latBan") flips++;
-        const r = applyMove(state, seatId, move);
-        if ("error" in r) throw new Error(`ván ${game}: nước hợp lệ bị từ chối: ${r.error}`);
-        state = r.state;
-        moves++;
-
-        if (totalPoints(state) !== total || state.dan.some((d) => d < 0) || state.captured.some((p) => p.dan < 0 || p.quan < 0)) {
-          throw new Error(`ván ${game}, nước ${moves}: sai bất biến ${JSON.stringify(state)}`);
-        }
-        if (moves > MAX_MOVES) throw new Error(`ván ${game}: quá ${MAX_MOVES} nước, nghi bị treo`);
-      }
-
-      const res = state.result!;
-      reasons[res.reason] = (reasons[res.reason] ?? 0) + 1;
-      const [a, b] = res.scores as [number, number];
-      if (res.reason === "het-quan" && a + b !== total) {
-        throw new Error(`ván ${game}: hết quan nhưng tổng điểm ${a + b} ${JSON.stringify(res)}`);
-      }
-      if (res.reason === "khong-du-bu-dan") {
-        // Bên đến lượt không bù được dân thì người điều khiển bên đó thua
-        if (res.winner !== state.controller[1 - state.turn]) throw new Error(`ván ${game}: sai người thắng`);
-      } else {
-        const expected = a === b ? null : a > b ? 0 : 1;
-        if (res.winner !== expected) throw new Error(`ván ${game}: sai người thắng ${JSON.stringify(res)}`);
-      }
+      const played = playRandomGame(options, rng, game);
+      flips += played.flips;
+      const reason = played.state.result!.reason;
+      reasons[reason] = (reasons[reason] ?? 0) + 1;
     }
 
     expect(reasons["het-quan"], JSON.stringify(reasons)).toBeGreaterThan(0);

@@ -52,6 +52,18 @@ Lấy từ `packages/client/style.css` (bản M2), cộng thêm vài token mới
 | `--line` (mới) | `#e2d4bb` | Đường kẻ, nút bị khoá |
 | `--danger` (mới) | `#c2412d` | Mất kết nối, sắp hết giờ |
 | `--cat-co` / `--cat-bai` (mới) | `#2f6b5a` / `#3a4f8f` | Màu nhóm Cờ / Bài trên trang chủ (nhóm Dân gian dùng `--primary`) |
+| `--cat-dangian-soft` / `--cat-co-soft` / `--cat-bai-soft` | `#f3d9cf` / `#d3e6dd` / `#d7deef` | Nền biểu tượng trò chơi theo nhóm |
+| `--on-dark` | `#fff` | Chữ trên nền tối (nút chính, viên trạng thái) |
+| `--count-ink` | `#fff8e8` | Con số trong ô bàn |
+| `--board-top` | `#96653b` | Đầu gradient của bàn |
+| `--art-from` / `--art-to` / `--art-to-desk` | `#a76c39` / `#7a4b23` / `#74461f` | Gradient hình bàn trên thẻ nổi bật (điện thoại / desktop) |
+| `--quan-shine` | `#6b5644` | Vệt sáng trên viên quan |
+| `--capture-cell` / `--capture-shade` | `#4c9a6b` / `#2f6b4a` | Ô vừa bị ăn |
+| `--live-bg` / `--live-ink` | `#e3f3e9` / `#23704a` | Nhãn "Chơi được ngay" |
+| `--gold-soft` | `#fbe9c4` | Nền cúp ở màn kết quả |
+| `--accent-soft` | `#fff6df` | Ô "Lật bàn" trong hộp hỏi |
+
+Bóng đổ và lớp phủ trong suốt (`rgba`) được viết trực tiếp, không cần token (quy ước code mục 6).
 
 ## Danh sách màn hình
 

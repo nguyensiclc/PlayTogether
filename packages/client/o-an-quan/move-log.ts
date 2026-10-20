@@ -1,6 +1,7 @@
 // Nhật ký ván: mô tả ngắn từng nước đi từ `events` (thiết kế ban-choi-desktop, ban-choi-doi-thu).
+
+import type { EndReason, GameEvent, Move, TurnEndReason } from "@playtogether/engine/o-an-quan";
 import { isQuanSquare } from "@playtogether/engine/o-an-quan";
-import type { EndReason, GameEvent, Move } from "@playtogether/engine/o-an-quan";
 
 export interface LogEntry {
   /** Số lượt (nước rải thứ mấy của ván) */
@@ -22,6 +23,14 @@ export const END_TITLE: Record<EndReason, string> = {
 };
 
 const squareName = (i: number): string => (isQuanSquare(i) ? `ô quan ${i}` : `ô ${i}`);
+
+/** Lượt không ăn được gì thì tả theo lý do hết lượt (luật mục 3 trường hợp b, d; mục 5) */
+const NO_CAPTURE_TEXT: Record<TurnEndReason, string> = {
+  "gap-o-quan": "gặp ô quan, hết lượt",
+  "hai-o-trong": "hai ô trống, hết lượt",
+  "quan-non": "gặp Quan Già, hết lượt",
+  "het-an": "hết lượt",
+};
 
 /**
  * Mô tả một nước đi.
@@ -46,22 +55,10 @@ export function describeMove(
 
   const caps = events.filter((e) => e.t === "capture");
   const end = events.find((e) => e.t === "turnEnd");
-  let outcome: string;
-  if (caps.length === 1) {
-    outcome = `ăn ${squareName(caps[0]!.i)}`;
-  } else if (caps.length > 1) {
-    outcome = `ăn liên hoàn ${caps.length} ô`;
-  } else if (end?.reason === "gap-o-quan") {
-    outcome = "gặp ô quan, hết lượt";
-  } else if (end?.reason === "hai-o-trong") {
-    outcome = "hai ô trống, hết lượt";
-  } else if (end?.reason === "quan-non") {
-    outcome = "gặp Quan Già, hết lượt";
-  } else {
-    outcome = "hết lượt";
-  }
-  if (caps.length && end?.reason === "quan-non") outcome += ", dừng trước Quan Già";
-
+  const outcome = outcomeText(
+    caps.map((e) => e.i),
+    end?.reason,
+  );
   const gain = caps.reduce((sum, e) => sum + e.dan + e.quan * giaTriQuan, 0);
   out.push({ n, who, text: `rải ô ${move.square} → ${outcome}`, ...(gain > 0 ? { gain } : {}) });
 
@@ -73,6 +70,14 @@ export function describeMove(
     }
   }
   return out;
+}
+
+/** Câu tả lượt rải kết thúc thế nào, theo các ô bị ăn và lý do hết lượt. */
+function outcomeText(captured: readonly number[], end: TurnEndReason | undefined): string {
+  const [first] = captured;
+  if (first === undefined) return end ? NO_CAPTURE_TEXT[end] : "hết lượt";
+  const ate = captured.length === 1 ? `ăn ${squareName(first)}` : `ăn liên hoàn ${captured.length} ô`;
+  return end === "quan-non" ? `${ate}, dừng trước Quan Già` : ate;
 }
 
 /** Dòng nhật ký khi người đi sau chọn giữ bên (không lật bàn). */

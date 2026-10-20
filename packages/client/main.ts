@@ -1,7 +1,10 @@
+// Điểm vào của client: chọn màn hình theo đường dẫn.
+
+import { $ } from "./dom.ts";
 import { mountHome } from "./screens/home.ts";
 import { mountOffline } from "./screens/offline.ts";
 
-const root = document.getElementById("app")!;
+const root = $(document, "#app");
 
 // Phòng chờ, nhập nickname thuộc M3. Ô ăn quan tạm chơi ở /offline cho tới M3 (Q19).
 const path = location.pathname.replace(/\/+$/, "") || "/";

@@ -24,6 +24,22 @@
   --cat-dangian: #b5462f;
   --cat-co: #2f6b5a;
   --cat-bai: #3a4f8f;
+  --cat-dangian-soft: #f3d9cf;
+  --cat-co-soft: #d3e6dd;
+  --cat-bai-soft: #d7deef;
+  --on-dark: #fff;
+  --count-ink: #fff8e8;
+  --board-top: #96653b;
+  --art-from: #a76c39;
+  --art-to: #7a4b23;
+  --art-to-desk: #74461f;
+  --quan-shine: #6b5644;
+  --capture-cell: #4c9a6b;
+  --capture-shade: #2f6b4a;
+  --live-bg: #e3f3e9;
+  --live-ink: #23704a;
+  --gold-soft: #fbe9c4;
+  --accent-soft: #fff6df;
 
   --radius: 14px;
   --shadow: 0 1px 0 rgba(43, 33, 24, 0.06), 0 6px 18px rgba(43, 33, 24, 0.08);
@@ -37,6 +53,7 @@
 }
 
 [hidden] {
+  /* biome-ignore lint/complexity/noImportantStyles: thuộc tính hidden phải thắng mọi display của class (quy ước code mục 6) */
   display: none !important;
 }
 
@@ -93,11 +110,13 @@ a {
 /* Chỉ hiện trên điện thoại / chỉ hiện trên desktop */
 @media (min-width: 1024px) {
   .mobile-only {
+    /* biome-ignore lint/complexity/noImportantStyles: tiện ích ẩn/hiện theo màn hình (quy ước code mục 6) */
     display: none !important;
   }
 }
 @media (max-width: 1023.98px) {
   .desk-only {
+    /* biome-ignore lint/complexity/noImportantStyles: tiện ích ẩn/hiện theo màn hình (quy ước code mục 6) */
     display: none !important;
   }
 }
@@ -181,6 +200,21 @@ a {
     -8px 0 0 var(--stone);
 }
 
+/* ---------- Phím tắt ---------- */
+kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--stone-edge);
+  border-bottom-width: 2px;
+  background: var(--surface);
+  font: 600 12px var(--font);
+  color: var(--ink);
+}
+
 /* ---------- Nút ---------- */
 .btn {
   display: inline-flex;
@@ -208,7 +242,7 @@ a {
 .btn.dark {
   background: var(--ink);
   border-color: var(--ink);
-  color: #fff;
+  color: var(--on-dark);
 }
 .btn.ghost {
   background: transparent;
@@ -226,29 +260,15 @@ a {
 .btn[aria-pressed="true"] {
   background: var(--ink);
   border-color: var(--ink);
-  color: #fff;
+  color: var(--on-dark);
 }
 .btn kbd {
   margin-left: 4px;
 }
 .btn.primary kbd {
   background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  color: var(--on-dark);
   border-color: rgba(255, 255, 255, 0.4);
-}
-
-kbd {
-  display: inline-grid;
-  place-items: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 6px;
-  border-radius: 6px;
-  border: 1px solid var(--stone-edge);
-  border-bottom-width: 2px;
-  background: var(--surface);
-  font: 600 12px var(--font);
-  color: var(--ink);
 }
 
 /* ---------- Thẻ, chip, nhãn, avatar ---------- */
@@ -293,8 +313,8 @@ kbd {
   color: var(--muted);
 }
 .badge.live {
-  background: #e3f3e9;
-  color: #23704a;
+  background: var(--live-bg);
+  color: var(--live-ink);
 }
 .avatar {
   width: 40px;
@@ -304,14 +324,14 @@ kbd {
   display: grid;
   place-items: center;
   font-weight: 700;
-  color: #fff;
+  color: var(--on-dark);
   font-size: 15px;
 }
 .av1 {
-  background: #b5462f;
+  background: var(--primary);
 }
 .av3 {
-  background: #3a4f8f;
+  background: var(--cat-bai);
 }
 
 /* ---------- Segmented control ---------- */
@@ -408,7 +428,7 @@ kbd {
 }
 .featured .art {
   height: 128px;
-  background: linear-gradient(135deg, #a76c39, #7a4b23);
+  background: linear-gradient(135deg, var(--art-from), var(--art-to));
   display: grid;
   place-items: center;
   position: relative;
@@ -465,7 +485,7 @@ kbd {
 }
 .filters .chip[aria-pressed="true"] {
   background: var(--ink);
-  color: #fff;
+  color: var(--on-dark);
   border-color: var(--ink);
 }
 .games {
@@ -534,13 +554,13 @@ a.game:hover {
   opacity: 0.85;
 }
 .c-dg {
-  background: #f3d9cf;
+  background: var(--cat-dangian-soft);
 }
 .c-co {
-  background: #d3e6dd;
+  background: var(--cat-co-soft);
 }
 .c-bai {
-  background: #d7deef;
+  background: var(--cat-bai-soft);
 }
 .home footer {
   margin-top: 26px;
@@ -604,7 +624,7 @@ a.game:hover {
   }
   .featured .art {
     height: 230px;
-    background: linear-gradient(135deg, #a76c39, #74461f);
+    background: linear-gradient(135deg, var(--art-from), var(--art-to-desk));
   }
   .featured .art svg {
     width: 440px;
@@ -837,7 +857,7 @@ a.game:hover {
   grid-template-rows: 84px 84px;
   gap: 4px;
   padding: 6px;
-  background: linear-gradient(180deg, #96653b, var(--board));
+  background: linear-gradient(180deg, var(--board-top), var(--board));
   border: 3px solid var(--board-edge);
   border-radius: 20px;
   box-shadow:
@@ -868,7 +888,7 @@ a.game:hover {
   bottom: 2px;
   font-size: 11px;
   font-weight: 700;
-  color: #fff8e8;
+  color: var(--count-ink);
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
   font-variant-numeric: tabular-nums;
 }
@@ -883,7 +903,7 @@ a.game:hover {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff, var(--stone) 55%, var(--stone-edge));
+  background: radial-gradient(circle at 35% 30%, var(--on-dark), var(--stone) 55%, var(--stone-edge));
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
 }
 .stone.big {
@@ -891,7 +911,7 @@ a.game:hover {
   height: 20px;
   left: calc(50% - 10px);
   top: 26%;
-  background: radial-gradient(circle at 35% 30%, #6b5644, var(--quan) 60%);
+  background: radial-gradient(circle at 35% 30%, var(--quan-shine), var(--quan) 60%);
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.45);
 }
 .cell.dim {
@@ -912,9 +932,9 @@ a.game:hover {
   opacity: 0.5;
 }
 .cell.capture {
-  background: #4c9a6b;
+  background: var(--capture-cell);
   box-shadow:
-    inset 0 3px 7px #2f6b4a,
+    inset 0 3px 7px var(--capture-shade),
     0 0 0 3px var(--capture),
     0 0 16px rgba(63, 163, 107, 0.7);
 }
@@ -927,7 +947,7 @@ a.game:hover {
   padding: 2px 8px;
   border-radius: 999px;
   background: var(--capture);
-  color: #fff;
+  color: var(--on-dark);
   font-size: 13px;
   font-weight: 800;
   white-space: nowrap;
@@ -1003,7 +1023,7 @@ a.game:hover {
   padding: 8px 14px;
   border-radius: 999px;
   background: rgba(43, 33, 24, 0.9);
-  color: #fff;
+  color: var(--on-dark);
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -1028,7 +1048,7 @@ a.game:hover {
   padding: 8px 14px;
   border-radius: 999px;
   background: var(--ink);
-  color: #fff;
+  color: var(--on-dark);
   font-weight: 600;
   font-size: 14px;
 }
@@ -1304,7 +1324,7 @@ a.game:hover {
 }
 .latban .side.after {
   border: 2px solid var(--accent);
-  background: #fff6df;
+  background: var(--accent-soft);
 }
 .latban .side b {
   display: block;
@@ -1316,7 +1336,7 @@ a.game:hover {
   height: 36px;
   border-radius: 50%;
   background: var(--ink);
-  color: #fff;
+  color: var(--on-dark);
   display: grid;
   place-items: center;
 }
@@ -1349,7 +1369,7 @@ a.game:hover {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #fbe9c4;
+  background: var(--gold-soft);
   margin: -54px auto 10px;
   display: grid;
   place-items: center;
@@ -1409,6 +1429,7 @@ a.game:hover {
   font-size: 12px;
   color: var(--muted);
 }
+
 .result th {
   text-align: left;
   font-weight: 500;
@@ -1600,7 +1621,7 @@ a.game:hover {
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
   }
   .result .side-hero {
-    background: linear-gradient(160deg, #fbe9c4, #f3d9cf);
+    background: linear-gradient(160deg, var(--gold-soft), var(--cat-dangian-soft));
     padding: 30px 22px;
     text-align: center;
     display: flex;

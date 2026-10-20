@@ -47,16 +47,23 @@
   /client
     index.html
     main.ts          ← định tuyến: / (trang chủ), /offline
+    dom.ts           ← $() có kiểm tra, create(), escapeHtml(), restartAnimation()
+    icons.ts         ← SVG dùng chung
     style.css        ← token và bố cục theo docs/design (desktop ≥ 1024px bằng media query)
     /screens
-      home.ts        ← trang chủ, danh sách trò chơi, lọc theo nhóm
-      offline.ts     ← M2: màn hình bắt đầu, bàn chơi chung một máy, Lật bàn, kết quả, phím tắt
+      home.ts            ← trang chủ, danh sách trò chơi, lọc theo nhóm
+      offline-setup.ts   ← màn hình bắt đầu /offline
+      offline-page.ts    ← khung HTML trang ván chơi
+      offline.ts         ← điều phối ván chơi chung một máy: thao tác, hiệu ứng, xoay bàn, phím tắt
     /o-an-quan
-      layout.ts      ← xếp 12 ô lên bàn 7 cột theo bên ngồi dưới
-      view-model.ts  ← phát lại events trên state cũ (BoardView)
-      playback.ts    ← chạy events theo thời lượng UX mục 4, tua nhanh, bỏ qua
-      board-dom.ts   ← vẽ bàn bằng DOM/CSS, hiệu ứng ô, thanh ◀ ▶
-      move-log.ts    ← nhật ký ván: mô tả từng nước từ events
+      layout.ts          ← xếp 12 ô lên bàn 7 cột theo bên ngồi dưới
+      view-model.ts      ← phát lại events trên state cũ (BoardView)
+      playback.ts        ← chạy events theo thời lượng UX mục 4, tua nhanh, bỏ qua
+      board-dom.ts       ← vẽ bàn bằng DOM/CSS, hiệu ứng ô, thanh ◀ ▶
+      player-card.ts     ← thẻ người chơi
+      lat-ban-sheet.ts   ← nội dung hộp hỏi Lật bàn
+      result-view.ts     ← nội dung màn kết quả
+      move-log.ts        ← nhật ký ván: mô tả từng nước từ events
 ```
 
 Engine có hai đường import: `@playtogether/engine` (GameModule, RNG) và `@playtogether/engine/o-an-quan` (luật và kiểu dữ liệu Ô ăn quan).

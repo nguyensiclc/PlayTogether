@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
 import { createRng, pickRandom } from "@playtogether/engine";
-import { applyMove, defaultOptions, next, setup, validMoves } from "@playtogether/engine/o-an-quan";
 import type { Options } from "@playtogether/engine/o-an-quan";
+import { applyMove, defaultOptions, next, setup, validMoves } from "@playtogether/engine/o-an-quan";
+import { describe, expect, it } from "vitest";
 import { dirForArrow, layoutFor } from "./layout.ts";
 import { applyEvent, viewFromState } from "./view-model.ts";
 
@@ -23,6 +23,20 @@ describe("layoutFor", () => {
   }
 });
 
+/** Chơi một ván ngẫu nhiên; sau mỗi nước, phát lại events trên state cũ phải ra đúng state mới. */
+function replayRandomGame(options: Options, rng: () => number, seen: Set<string>): void {
+  let state = setup(options, [0, 1], rng() < 0.5 ? 0 : 1);
+  while (state.status === "playing") {
+    const seatId = state.controller[state.turn];
+    const r = applyMove(state, seatId, pickRandom(validMoves(state, seatId), rng)!);
+    if ("error" in r) throw new Error(r.error);
+    for (const e of r.events) seen.add(e.t);
+    const replayed = r.events.reduce((v, e) => applyEvent(v, e, options.giaTriQuan), viewFromState(state));
+    expect(replayed).toEqual(viewFromState(r.state));
+    state = r.state;
+  }
+}
+
 describe("phát lại events", () => {
   it("phát lại events trên state cũ cho ra đúng state mới (1.000 ván ngẫu nhiên, có bù dân và lật bàn)", () => {
     const rng = createRng(42);
@@ -34,17 +48,7 @@ describe("phát lại events", () => {
         camAnQuanNon: rng() < 0.5,
         latBan: rng() < 0.5,
       };
-      let state = setup(options, [0, 1], rng() < 0.5 ? 0 : 1);
-      while (state.status === "playing") {
-        const seatId = state.controller[state.turn];
-        const move = pickRandom(validMoves(state, seatId), rng)!;
-        const r = applyMove(state, seatId, move);
-        if ("error" in r) throw new Error(r.error);
-        r.events.forEach((e) => seen.add(e.t));
-        const replayed = r.events.reduce((v, e) => applyEvent(v, e, options.giaTriQuan), viewFromState(state));
-        expect(replayed).toEqual(viewFromState(r.state));
-        state = r.state;
-      }
+      replayRandomGame(options, rng, seen);
     }
     expect([...seen].sort()).toEqual(["buDan", "capture", "drop", "gameOver", "latBan", "pick", "turnEnd"]);
   });

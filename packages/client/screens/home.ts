@@ -75,7 +75,10 @@ const FEATURED_ART = `<svg viewBox="0 0 250 92" aria-hidden="true">
   <rect x="8" y="10" width="234" height="72" rx="36" fill="#8a5a2e"/>
   <path d="M44 14 A32 32 0 0 0 44 78 Z" fill="#b07a45"/><path d="M206 14 A32 32 0 0 1 206 78 Z" fill="#b07a45"/>
   <g fill="#b07a45">${[50, 81, 112, 143, 174]
-    .map((x) => `<rect x="${x}" y="14" width="27" height="31" rx="6"/><rect x="${x}" y="48" width="27" height="30" rx="6"/>`)
+    .map(
+      (x) =>
+        `<rect x="${x}" y="14" width="27" height="31" rx="6"/><rect x="${x}" y="48" width="27" height="30" rx="6"/>`,
+    )
     .join("")}</g>
   <circle cx="30" cy="46" r="8" fill="#33251b"/><circle cx="220" cy="46" r="8" fill="#33251b"/>
   <g fill="#eee6d4"><circle cx="58" cy="24" r="3"/><circle cx="66" cy="30" r="3"/><circle cx="60" cy="36" r="3"/><circle cx="70" cy="22" r="3"/><circle cx="68" cy="38" r="3"/><circle cx="90" cy="25" r="3"/><circle cx="99" cy="31" r="3"/><circle cx="92" cy="37" r="3"/><circle cx="100" cy="22" r="3"/><circle cx="96" cy="38" r="3"/><circle cx="120" cy="26" r="3"/><circle cx="130" cy="30" r="3"/><circle cx="124" cy="37" r="3"/><circle cx="131" cy="21" r="3"/><circle cx="120" cy="20" r="3"/><circle cx="152" cy="24" r="3"/><circle cx="160" cy="31" r="3"/><circle cx="151" cy="36" r="3"/><circle cx="163" cy="22" r="3"/><circle cx="162" cy="38" r="3"/><circle cx="182" cy="25" r="3"/><circle cx="192" cy="29" r="3"/><circle cx="185" cy="37" r="3"/><circle cx="193" cy="21" r="3"/><circle cx="192" cy="38" r="3"/><circle cx="58" cy="57" r="3"/><circle cx="68" cy="62" r="3"/><circle cx="60" cy="70" r="3"/><circle cx="70" cy="54" r="3"/><circle cx="69" cy="71" r="3"/><circle cx="90" cy="58" r="3"/><circle cx="99" cy="63" r="3"/><circle cx="91" cy="70" r="3"/><circle cx="100" cy="54" r="3"/><circle cx="99" cy="71" r="3"/><circle cx="121" cy="57" r="3"/><circle cx="131" cy="62" r="3"/><circle cx="122" cy="70" r="3"/><circle cx="130" cy="54" r="3"/><circle cx="131" cy="71" r="3"/><circle cx="152" cy="57" r="3"/><circle cx="162" cy="62" r="3"/><circle cx="153" cy="70" r="3"/><circle cx="161" cy="54" r="3"/><circle cx="162" cy="71" r="3"/><circle cx="183" cy="57" r="3"/><circle cx="193" cy="62" r="3"/><circle cx="184" cy="70" r="3"/><circle cx="192" cy="54" r="3"/><circle cx="193" cy="71" r="3"/></g>
@@ -118,7 +121,10 @@ export function mountHome(root: HTMLElement): void {
           <div class="filters" role="group" aria-label="Lọc theo nhóm">
             <button type="button" class="chip" data-cat="" aria-pressed="true">Tất cả</button>
             ${(Object.keys(CATEGORY_NAME) as Category[])
-              .map((c) => `<button type="button" class="chip" data-cat="${c}" aria-pressed="false">${CATEGORY_NAME[c]}</button>`)
+              .map(
+                (c) =>
+                  `<button type="button" class="chip" data-cat="${c}" aria-pressed="false">${CATEGORY_NAME[c]}</button>`,
+              )
               .join("")}
           </div>
         </div>
@@ -131,17 +137,16 @@ export function mountHome(root: HTMLElement): void {
       </main>
     </div>`;
 
-  // Lọc trò chơi theo nhóm
-  const chips = root.querySelectorAll<HTMLButtonElement>(".filters .chip");
-  for (const chip of chips) {
-    chip.addEventListener("click", () => {
-      const cat = chip.dataset.cat ?? "";
-      chips.forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
-      root.querySelectorAll<HTMLElement>(".games .game").forEach((g) => {
-        g.hidden = cat !== "" && g.dataset.cat !== cat;
-      });
-    });
+  for (const chip of root.querySelectorAll<HTMLButtonElement>(".filters .chip")) {
+    chip.addEventListener("click", () => filterGames(root, chip));
   }
+}
+
+/** Lọc lưới trò chơi theo nhóm của chip vừa bấm ("" = tất cả). */
+function filterGames(root: HTMLElement, chip: HTMLButtonElement): void {
+  const cat = chip.dataset.cat ?? "";
+  for (const c of root.querySelectorAll(".filters .chip")) c.setAttribute("aria-pressed", String(c === chip));
+  for (const g of root.querySelectorAll<HTMLElement>(".games .game")) g.hidden = cat !== "" && g.dataset.cat !== cat;
 }
 
 function gameCard(g: GameInfo): string {

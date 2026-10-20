@@ -1,8 +1,9 @@
 // Mô hình hiển thị: client phát lại events trên state cũ để chạy hiệu ứng,
 // xong thì ghi đè bằng state cuối (mục 5 tài liệu kỹ thuật).
-import { ROWS } from "@playtogether/engine/o-an-quan";
-import type { GameEvent, Pile, State } from "@playtogether/engine/o-an-quan";
+
 import type { SeatId } from "@playtogether/engine";
+import type { GameEvent, Pile, State } from "@playtogether/engine/o-an-quan";
+import { ROWS } from "@playtogether/engine/o-an-quan";
 
 export interface BoardView {
   dan: number[];

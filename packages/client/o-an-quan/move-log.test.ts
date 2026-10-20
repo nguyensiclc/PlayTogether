@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { applyMove, defaultOptions, setup } from "@playtogether/engine/o-an-quan";
 import type { GameEvent, Move, State } from "@playtogether/engine/o-an-quan";
+import { applyMove, defaultOptions, setup } from "@playtogether/engine/o-an-quan";
+import { describe, expect, it } from "vitest";
 import { describeMove, keepSideEntry } from "./move-log.ts";
 
 const names = ["Người chơi A", "Người chơi B"];
@@ -62,7 +62,14 @@ describe("describeMove", () => {
       { n: 7, who: "Người chơi A", text: "rải ô 5 → hai ô trống, hết lượt" },
       { n: 7, who: "Người chơi B", text: "hết dân, bù dân (đổi 1 quan)", ev: "−5" },
     ]);
-    const over = describeMove(9, "A", sow, [{ t: "gameOver", result: { winner: 0, scores: [40, 30], reason: "het-quan" } }], 10, () => "");
+    const over = describeMove(
+      9,
+      "A",
+      sow,
+      [{ t: "gameOver", result: { winner: 0, scores: [40, 30], reason: "het-quan" } }],
+      10,
+      () => "",
+    );
     expect(over.at(-1)).toEqual({ n: 9, who: "", text: "Hết ván · Hết quan" });
   });
 
@@ -70,6 +77,10 @@ describe("describeMove", () => {
     expect(describeMove(2, "Người chơi B", { kind: "latBan" }, [{ t: "latBan" }], 10, () => "")).toEqual([
       { n: 2, who: "Người chơi B", text: "lật bàn, đổi bên với đối thủ" },
     ]);
-    expect(keepSideEntry(2, "Người chơi B")).toEqual({ n: 2, who: "Người chơi B", text: "chọn giữ bên, không lật bàn" });
+    expect(keepSideEntry(2, "Người chơi B")).toEqual({
+      n: 2,
+      who: "Người chơi B",
+      text: "chọn giữ bên, không lật bàn",
+    });
   });
 });

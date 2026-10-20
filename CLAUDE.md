@@ -12,6 +12,7 @@ Game đầu tiên: **Ô ăn quan**. Sau đó sẽ có Tiến lên, Cờ tướng
 - Kỹ thuật (kiến trúc, kiểu dữ liệu, thuật toán, giao thức WS): `docs/o-an-quan/03-thiet-ke-ky-thuat.md`
 - Kế hoạch, các mốc M1–M5 (gồm M1.1), test case T1–T20, câu hỏi mở: `docs/o-an-quan/04-ke-hoach-prototype.md`
 - Thiết kế màn hình (mockup, hệ màu): `docs/design/`. Màn hình đã có thiết kế thì code UI phải theo thiết kế đó.
+- Quy ước code, clean code: `docs/quy-uoc-code.md`. Code mới và code sửa phải theo quy ước này. Trước khi commit chạy `npm run check`.
 
 Nếu code cần làm khác tài liệu thì **cập nhật tài liệu trong cùng thay đổi** và nêu rõ lý do. Câu hỏi mở Q1–Q6 chưa chốt thì dùng phương án "Đề xuất hiện tại" trong bảng.
 
@@ -46,11 +47,14 @@ Monorepo npm workspaces (`packages/*`). Chạy ở thư mục gốc:
 
 ```
 npm install          # cài phụ thuộc
-npm run dev          # Vite dev server cho client (mở /offline); --host nên điện thoại cùng Wi-Fi vào được
+npm run dev          # Vite dev server cho client (trang chủ /, ván chơi /offline); --host để điện thoại cùng Wi-Fi vào được
 npm run build        # build client ra packages/client/dist
 npm test             # Vitest, chạy toàn bộ test (gồm fuzz T16)
 npm run test:watch   # Vitest chế độ theo dõi
 npm run typecheck    # tsc cho mọi workspace có script typecheck
+npm run lint         # Biome: kiểm tra định dạng + lint (không sửa)
+npm run format       # Biome: tự sửa định dạng, sắp xếp import, lỗi lint an toàn
+npm run check        # lint → typecheck → test; phải xanh trước khi commit
 npx vitest run -t T5 # chạy riêng các test có tên chứa "T5"
 ```
 
