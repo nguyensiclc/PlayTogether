@@ -29,6 +29,8 @@ export interface GameModule<S, M, O, E> {
   forfeit(state: S, seat: SeatId, reason: ForfeitReason): { state: S; events: E[] } | { error: string };
   /** Đọc tuỳ chọn từ dữ liệu ngoài: chỉ nhận giá trị hợp lệ, còn lại giữ theo `base`. Lớp phòng không tự kiểm tra luật. */
   parseOptions(raw: unknown, base: O): O;
+  /** Đọc nước đi từ dữ liệu ngoài: chỉ kiểm tra hình dạng (đúng luật hay không do `applyMove` quyết định). null nếu sai hình dạng */
+  parseMove(raw: unknown): M | null;
 }
 
 export type ForfeitReason = "het-gio" | "bo-cuoc";

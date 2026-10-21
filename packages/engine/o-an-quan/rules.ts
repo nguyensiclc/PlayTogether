@@ -340,6 +340,16 @@ function setOption<K extends keyof Options>(out: Options, key: K, value: unknown
   if ((OPTION_VALUES[key] as readonly unknown[]).includes(value)) out[key] = value as Options[K];
 }
 
+/** Đọc nước đi từ dữ liệu ngoài: chỉ kiểm tra hình dạng; đúng luật hay không do `applyMove` quyết định */
+export function parseMove(raw: unknown): Move | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const input = raw as Record<string, unknown>;
+  if (input.kind === "latBan") return { kind: "latBan" };
+  const { square, dir } = input;
+  const isSow = input.kind === "sow" && typeof square === "number" && Number.isInteger(square);
+  return isSow && (dir === 1 || dir === -1) ? { kind: "sow", square, dir } : null;
+}
+
 export function result(state: State): GameResult | null {
   return state.result;
 }
@@ -357,4 +367,5 @@ export const oAnQuan: GameModule<State, Move, Options, GameEvent> = {
   result,
   forfeit,
   parseOptions,
+  parseMove,
 };

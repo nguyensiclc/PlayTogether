@@ -1,7 +1,7 @@
 // Test T1–T20 (mục 4 tài liệu kế hoạch). Các thế cờ được tính tay theo 01-luat-choi.md.
 import { describe, expect, it } from "vitest";
 import { createRng, pickRandom } from "../game-module.ts";
-import { applyMove, defaultOptions, forfeit, parseOptions, result, setup, validMoves } from "./rules.ts";
+import { applyMove, defaultOptions, forfeit, parseMove, parseOptions, result, setup, validMoves } from "./rules.ts";
 import type { Dir, GameEvent, Move, Options, ScoreDetail, SowMove, State } from "./types.ts";
 
 type Overrides = Partial<Omit<State, "options">> & { options?: Partial<Options> };
@@ -732,5 +732,31 @@ describe("parseOptions — kiểm tra tuỳ chọn chủ phòng gửi lên", () 
     expect(parseOptions(raw, defaultOptions)).toEqual(defaultOptions);
     expect(parseOptions("rác", defaultOptions)).toEqual(defaultOptions);
     expect(parseOptions(null, defaultOptions)).toEqual(defaultOptions);
+  });
+});
+
+describe("parseMove — kiểm tra hình dạng nước đi từ ngoài", () => {
+  it("nhận nước rải và nước Lật bàn đúng hình dạng", () => {
+    expect(parseMove({ kind: "sow", square: 3, dir: 1 })).toEqual({ kind: "sow", square: 3, dir: 1 });
+    expect(parseMove({ kind: "sow", square: 9, dir: -1, thua: true })).toEqual({ kind: "sow", square: 9, dir: -1 });
+    expect(parseMove({ kind: "latBan" })).toEqual({ kind: "latBan" });
+  });
+
+  it("từ chối thiếu trường, sai kiểu, chiều lạ, kiểu lạ, và nước của game khác", () => {
+    for (const bad of [
+      null,
+      "3",
+      [],
+      {},
+      { kind: "sow" },
+      { kind: "sow", square: 3 },
+      { kind: "sow", square: "3", dir: 1 },
+      { kind: "sow", square: 3, dir: 2 },
+      { kind: "sow", square: 1.5, dir: 1 },
+      { kind: "khac" },
+      { x: 3, y: 4 },
+    ]) {
+      expect(parseMove(bad), JSON.stringify(bad)).toBeNull();
+    }
   });
 });
