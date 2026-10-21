@@ -14,6 +14,7 @@ Game đầu tiên: **Ô ăn quan**. Sau đó sẽ có Tiến lên, Cờ tướng
 - Thiết kế màn hình (mockup, hệ màu): `docs/design/`. Màn hình đã có thiết kế thì code UI phải theo thiết kế đó.
 - Cờ caro: `docs/caro/` (luật, UX, kỹ thuật, kế hoạch). Câu hỏi mở của Caro đánh số `C1…` ở `docs/caro/04-ke-hoach-prototype.md` mục 6. Mockup đã chốt trong `docs/design/caro/` (Claude tự thiết kế), bản yêu cầu gốc ở `docs/design/caro/README.md`. Code UI Caro ở `packages/client/caro/` và `packages/client/screens/caro-game.ts`.
 - Kiến trúc module (cái gì dùng chung, cái gì riêng từng game, cách thêm game): `docs/kien-truc-module.md`. **Đọc trước khi thêm game hoặc thêm tính năng dùng cho nhiều game.**
+- Prompt bắt đầu session mới (nắm tình hình, các biến thể: thêm game, sửa lỗi, tiếp tục việc dở, rà soát trước khi gộp): `docs/prompt-bat-dau-session.md`.
 - Quy ước code, clean code: `docs/quy-uoc-code.md`. Code mới và code sửa phải theo quy ước này. Trước khi commit chạy `npm run check`.
 
 Nếu code cần làm khác tài liệu thì **cập nhật tài liệu trong cùng thay đổi** và nêu rõ lý do. Câu hỏi mở Q1–Q6 chưa chốt thì dùng phương án "Đề xuất hiện tại" trong bảng.
