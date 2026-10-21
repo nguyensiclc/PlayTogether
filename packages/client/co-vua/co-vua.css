@@ -20,16 +20,21 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--card-line);
+  box-shadow: var(--shadow);
   box-sizing: border-box;
 }
 
+/* Đến lượt: viền và nền vàng như thẻ người chơi ở các game khác */
 .chess-player.active {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(181, 70, 47, 0.2);
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--accent-soft), var(--surface));
+  box-shadow:
+    0 0 0 2px var(--accent),
+    var(--shadow);
 }
 
 .chess-player-info {
@@ -66,7 +71,7 @@
   align-items: center;
   gap: 2px;
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--muted);
 }
 
 .chess-captured-list {
@@ -80,16 +85,20 @@
   margin-left: 4px;
 }
 
-/* Khung bàn cờ */
+/* Khung bàn cờ. Khung gỗ vẽ bằng box-shadow (không phải padding) để getBoundingClientRect của khung vẫn đúng là mặt bàn khi tính ô chạm */
 .chess-board-wrap {
-  width: 100%;
+  width: calc(100% - 12px);
   aspect-ratio: 1 / 1;
   max-width: 384px;
   max-height: 384px;
+  margin: 6px;
   position: relative;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 0 0 6px var(--frame-lo),
+    0 0 0 7px rgba(0, 0, 0, 0.25),
+    0 12px 24px rgba(60, 35, 10, 0.3);
   cursor: pointer;
 }
 
@@ -130,7 +139,7 @@
 .promo-modal {
   display: flex;
   flex-direction: column;
-  background: var(--bg-card);
+  background: var(--surface);
   border: 2px solid var(--primary);
   border-radius: 8px;
   padding: 8px;
@@ -142,7 +151,7 @@
   font-size: 13px;
   font-weight: 700;
   text-align: center;
-  color: var(--text);
+  color: var(--ink);
 }
 
 .promo-pieces {
@@ -154,7 +163,7 @@
   width: 52px;
   height: 52px;
   border-radius: 6px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--card-line);
   background: #fffaf0;
   cursor: pointer;
   display: flex;
@@ -187,23 +196,28 @@
   margin-top: 4px;
 }
 
+/* Hai nút đỏ gạch to, dễ chạm (≥ 44px), như bộ thiết kế */
 .chess-sub-btn {
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  color: var(--text);
+  flex: 1;
+  min-height: 44px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 1px solid var(--primary-lo);
+  background: linear-gradient(180deg, var(--primary-hi), var(--primary));
+  color: var(--primary-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 2px 0 var(--primary-lo);
   cursor: pointer;
+  touch-action: manipulation;
 }
 
-.chess-sub-btn:hover {
-  background: var(--bg-card-hover);
-}
-
-.chess-sub-btn.danger {
-  color: var(--danger);
+.chess-sub-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 var(--primary-lo);
 }
 
 /* Hộp thoại xác nhận (Đề nghị hoà / Đầu hàng) */
@@ -219,8 +233,8 @@
 }
 
 .chess-dialog {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--card-line);
   border-radius: 12px;
   padding: 20px;
   max-width: 320px;
@@ -237,7 +251,7 @@
 .chess-dialog p {
   margin: 0 0 16px 0;
   font-size: 14px;
-  color: var(--text-dim);
+  color: var(--muted);
 }
 
 .chess-dialog-actions {

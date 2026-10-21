@@ -44,8 +44,18 @@
   --share: #0068ff;
   --av2: #2f6b5a;
 
-  --radius: 14px;
-  --shadow: 0 1px 0 rgba(43, 33, 24, 0.06), 0 6px 18px rgba(43, 33, 24, 0.08);
+  /* Thiết kế Canva (bộ mobile + desktop): giấy kem, thẻ bo lớn viền nâu mảnh, khối nâu tối cho nhật ký/phím tắt, nút đỏ gạch nổi */
+  --wood-dark: #3a2616;
+  --wood-dark-2: #4d3420;
+  --cream: #f8f0de;
+  --card-line: rgba(107, 66, 31, 0.16);
+  --primary-hi: #c8583b;
+  --primary-lo: #9a3a25;
+  --frame-hi: #a8723f;
+  --frame-lo: #7a4b23;
+
+  --radius: 18px;
+  --shadow: 0 1px 0 rgba(43, 33, 24, 0.06), 0 8px 22px rgba(90, 55, 20, 0.12);
   --font: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
 }
@@ -63,7 +73,11 @@
 html,
 body {
   margin: 0;
-  background: var(--bg);
+  /* Giấy kem ấm: một quầng sáng góc trên trái, một quầng nâu nhạt góc dưới phải */
+  background:
+    radial-gradient(1100px 560px at 8% -8%, rgba(255, 255, 255, 0.6), transparent 62%),
+    radial-gradient(900px 520px at 100% 108%, rgba(176, 122, 69, 0.14), transparent 62%), var(--bg);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--font);
   font-size: 15px;
@@ -259,9 +273,21 @@ kbd {
 }
 
 .btn.primary {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: linear-gradient(180deg, var(--primary-hi), var(--primary));
+  border-color: var(--primary-lo);
   color: var(--primary-ink);
+  /* Nút nổi: viền sáng phía trên, bậc đậm phía dưới, bóng đỏ nhạt */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 2px 0 var(--primary-lo),
+    0 8px 14px rgba(181, 70, 47, 0.22);
+}
+
+.btn.primary:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 1px 0 var(--primary-lo);
 }
 
 .btn.dark {
@@ -317,16 +343,22 @@ kbd {
 
 .card {
   background: var(--surface);
+  border: 1px solid var(--card-line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 14px;
+}
+
+/* Khoảng cách giữa các phần của trang chủ: một biến chung, to hơn ở desktop */
+.home {
+  --section-gap: 22px;
 }
 
 .section-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin: 22px 0 10px;
+  margin: var(--section-gap, 22px) 0 10px;
 }
 
 .chip {
@@ -517,6 +549,9 @@ kbd {
   position: absolute;
   top: 10px;
   left: 10px;
+  height: 26px;
+  padding: 0 12px;
+  font-size: 12px;
 }
 
 .featured .body {
@@ -543,7 +578,7 @@ kbd {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 22px 0 12px;
+  margin: var(--section-gap, 22px) 0 12px;
 }
 
 .lib-head h2 .count {
@@ -576,7 +611,7 @@ kbd {
 
 .games {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -627,11 +662,27 @@ a.game:hover {
   background: rgba(255, 250, 240, 0.92);
 }
 
+/* Hai tầng: tên + meta ở trên, nhóm nút ở dưới; `flex: 1` để nút luôn dính đáy thẻ dù thẻ cùng hàng cao hơn */
 .game .row {
+  flex: 1;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
+  min-width: 0;
+  text-align: left;
+}
+
+.game .info {
+  min-width: 0;
+}
+
+.game .acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: auto;
 }
 
 .game .nm {
@@ -641,8 +692,22 @@ a.game:hover {
 }
 
 .game .mt {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0;
+  margin-top: 2px;
   font-size: 12px;
   color: var(--muted);
+}
+
+/* Mỗi cụm nằm trọn một dòng; dấu chấm giữa hai cụm đi theo cụm sau */
+.game .mt span {
+  white-space: nowrap;
+}
+
+.game .mt span + span::before {
+  content: "·";
+  margin: 0 5px;
 }
 
 .game.soon .ico {
@@ -696,6 +761,10 @@ a.game:hover {
     padding: 0 40px;
     border-bottom: 1px solid var(--line);
     background: rgba(255, 250, 240, 0.6);
+  }
+
+  .home {
+    --section-gap: 36px;
   }
 
   .home .wrap {
@@ -769,7 +838,7 @@ a.game:hover {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    margin: 36px 0 14px;
+    margin: var(--section-gap) 0 14px;
   }
 
   .lib-head h2 {
@@ -787,7 +856,7 @@ a.game:hover {
   }
 
   .games {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
   }
 
@@ -820,7 +889,7 @@ a.game:hover {
   }
 
   .home footer {
-    margin: 44px 0 0;
+    margin: var(--section-gap) 0 0;
     padding: 22px 0 30px;
     border-top: 1px solid var(--line);
     justify-content: space-between;
@@ -883,6 +952,20 @@ a.game:hover {
   flex: 1;
 }
 
+/* Gáy lò xo sổ tay ở mép trái màn chơi trên điện thoại (bộ thiết kế mobile); chỉ trang trí nên không nhận chạm */
+@media (max-width: 1023px) {
+  .game-page::before {
+    content: "";
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 10px;
+    background:
+      radial-gradient(circle at 5px 50%, rgba(107, 66, 31, 0.7) 0 2.6px, transparent 3.2px) 0 0 / 10px 30px repeat-y;
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
 .g-top .logo-mark {
   margin-right: 4px;
 }
@@ -894,6 +977,7 @@ a.game:hover {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
+  border: 1px solid var(--card-line);
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: var(--shadow);
@@ -922,6 +1006,8 @@ a.game:hover {
 }
 
 .player.active {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--accent-soft), var(--surface));
   box-shadow:
     0 0 0 2px var(--accent),
     var(--shadow);
@@ -945,18 +1031,22 @@ a.game:hover {
   gap: 8px;
   padding: 8px 14px;
   border-radius: 999px;
-  background: var(--ink);
-  color: var(--on-dark);
-  font-weight: 600;
+  /* Đến lượt mình: nền vàng nổi bật như bộ thiết kế (thanh "Lượt của bạn"); đợi đối phương thì xám ở .wait */
+  background: linear-gradient(180deg, #f7c256, var(--accent));
+  color: var(--ink);
+  font-weight: 700;
   font-size: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 4px 10px rgba(242, 179, 61, 0.3);
 }
 
 .status-pill .pulse {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 4px rgba(242, 179, 61, 0.3);
+  background: var(--wood-dark);
+  box-shadow: 0 0 0 4px rgba(58, 38, 22, 0.18);
 }
 
 .status-pill.wait {
@@ -993,19 +1083,23 @@ a.game:hover {
   padding: 14px 16px 0;
 }
 
+/* Dải tiêu đề nâu tối (Nhật ký ván, Phím tắt) trên thân kem, như bộ thiết kế desktop */
 .g-side .tabs span {
-  padding: 8px 14px;
-  border-radius: 10px 10px 0 0;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--ink);
-  background: var(--surface);
+  padding: 10px 16px;
+  border-radius: 12px 12px 0 0;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--wood-dark);
 }
 
 .g-side .log {
   flex: 1;
   overflow: auto;
   background: var(--surface);
+  border: 1px solid var(--card-line);
   margin: 0 16px;
   border-radius: 0 12px 12px 12px;
   padding: 6px 14px;
@@ -1063,11 +1157,14 @@ a.game:hover {
 }
 
 .g-side .block h3 {
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 12px 12px 0 0;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--muted);
-  margin-bottom: 8px;
+  color: var(--cream);
+  background: var(--wood-dark);
 }
 
 .g-side .keys {
@@ -1076,7 +1173,12 @@ a.game:hover {
   gap: 6px 10px;
   font-size: 13px;
   color: var(--muted);
-  padding-bottom: 16px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--card-line);
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
   align-items: center;
 }
 
@@ -1627,6 +1729,8 @@ button.game:hover {
 
 .recent-list {
   display: grid;
+  /* minmax(0, …): tên người chơi dài không đẩy thẻ rộng quá màn hình */
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -1657,6 +1761,30 @@ button.game:hover {
 
 .recent .nm {
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-meta {
+  display: flex;
+  min-width: 0;
+}
+
+.recent-meta .with {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-meta .when {
+  flex: none;
+  white-space: nowrap;
+}
+
+.recent-meta .with + .when::before {
+  content: "\00a0·\00a0";
 }
 
 @media (min-width: 1024px) {
@@ -1674,7 +1802,7 @@ button.game:hover {
   }
 
   .recent-list {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 14px;
   }
 }

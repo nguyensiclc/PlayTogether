@@ -7,6 +7,43 @@ export const ICON_SMALL =
 /** SVG 56 × 56 cho thẻ trong lưới trò chơi */
 export const ICON_CARD = `<svg viewBox="0 0 56 56" aria-hidden="true"><rect x="3" y="18" width="50" height="20" rx="10" fill="#8a5a2e"/><g fill="#eee6d4"><circle cx="17" cy="24" r="2.4"/><circle cx="24" cy="24" r="2.4"/><circle cx="31" cy="24" r="2.4"/><circle cx="38" cy="24" r="2.4"/><circle cx="17" cy="32" r="2.4"/><circle cx="24" cy="32" r="2.4"/><circle cx="31" cy="32" r="2.4"/><circle cx="38" cy="32" r="2.4"/></g><circle cx="9" cy="28" r="3.5" fill="#33251b"/><circle cx="47" cy="28" r="3.5" fill="#33251b"/></svg>`;
 
+/** Các ô dân: x, y, rộng, cao (khớp với các hình chữ nhật vẽ bên dưới) */
+const CELLS = [50, 81, 112, 143, 174].flatMap((x) => [
+  { x, y: 14, w: 27, h: 31 },
+  { x, y: 48, w: 27, h: 30 },
+]);
+
+/** Hai sắc sỏi xen kẽ cho tự nhiên */
+const STONE_FILLS = ["#eee6d4", "#e3d9c3"] as const;
+
+/**
+ * Sỏi rải tự nhiên trong từng ô: vị trí và cỡ lệch nhau, không đè lên nhau, không xếp thành mặt xúc xắc.
+ * Dùng bộ sinh số cố định (không Math.random) nên hình giống nhau ở mọi lần tải.
+ */
+function scatterStones(): string {
+  let seed = 20260721;
+  const rand = (): number => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  const stones: string[] = [];
+  for (const cell of CELLS) {
+    const placed: { x: number; y: number; r: number }[] = [];
+    const target = 6 + Math.floor(rand() * 3);
+    for (let tries = 0; tries < 80 && placed.length < target; tries++) {
+      const r = 2.5 + rand() * 1;
+      const x = cell.x + r + 1.5 + rand() * (cell.w - 2 * r - 3);
+      const y = cell.y + r + 1.5 + rand() * (cell.h - 2 * r - 3);
+      if (placed.every((s) => Math.hypot(s.x - x, s.y - y) >= s.r + r + 0.6)) placed.push({ x, y, r });
+    }
+    for (const [i, s] of placed.entries()) {
+      const fill = STONE_FILLS[i % STONE_FILLS.length];
+      stones.push(`<circle cx="${s.x.toFixed(1)}" cy="${s.y.toFixed(1)}" r="${s.r.toFixed(1)}" fill="${fill}"/>`);
+    }
+  }
+  return `<g>${stones.join("")}</g>`;
+}
+
 /** Hình bàn trên thẻ nổi bật của trang chủ */
 export const FEATURED_ART = `<svg viewBox="0 0 250 92" aria-hidden="true">
   <rect x="4" y="6" width="242" height="80" rx="40" fill="#6b421f"/>
@@ -19,5 +56,5 @@ export const FEATURED_ART = `<svg viewBox="0 0 250 92" aria-hidden="true">
     )
     .join("")}</g>
   <circle cx="30" cy="46" r="8" fill="#33251b"/><circle cx="220" cy="46" r="8" fill="#33251b"/>
-  <g fill="#eee6d4"><circle cx="58" cy="24" r="3"/><circle cx="66" cy="30" r="3"/><circle cx="60" cy="36" r="3"/><circle cx="70" cy="22" r="3"/><circle cx="68" cy="38" r="3"/><circle cx="90" cy="25" r="3"/><circle cx="99" cy="31" r="3"/><circle cx="92" cy="37" r="3"/><circle cx="100" cy="22" r="3"/><circle cx="96" cy="38" r="3"/><circle cx="120" cy="26" r="3"/><circle cx="130" cy="30" r="3"/><circle cx="124" cy="37" r="3"/><circle cx="131" cy="21" r="3"/><circle cx="120" cy="20" r="3"/><circle cx="152" cy="24" r="3"/><circle cx="160" cy="31" r="3"/><circle cx="151" cy="36" r="3"/><circle cx="163" cy="22" r="3"/><circle cx="162" cy="38" r="3"/><circle cx="182" cy="25" r="3"/><circle cx="192" cy="29" r="3"/><circle cx="185" cy="37" r="3"/><circle cx="193" cy="21" r="3"/><circle cx="192" cy="38" r="3"/><circle cx="58" cy="57" r="3"/><circle cx="68" cy="62" r="3"/><circle cx="60" cy="70" r="3"/><circle cx="70" cy="54" r="3"/><circle cx="69" cy="71" r="3"/><circle cx="90" cy="58" r="3"/><circle cx="99" cy="63" r="3"/><circle cx="91" cy="70" r="3"/><circle cx="100" cy="54" r="3"/><circle cx="99" cy="71" r="3"/><circle cx="121" cy="57" r="3"/><circle cx="131" cy="62" r="3"/><circle cx="122" cy="70" r="3"/><circle cx="130" cy="54" r="3"/><circle cx="131" cy="71" r="3"/><circle cx="152" cy="57" r="3"/><circle cx="162" cy="62" r="3"/><circle cx="153" cy="70" r="3"/><circle cx="161" cy="54" r="3"/><circle cx="162" cy="71" r="3"/><circle cx="183" cy="57" r="3"/><circle cx="193" cy="62" r="3"/><circle cx="184" cy="70" r="3"/><circle cx="192" cy="54" r="3"/><circle cx="193" cy="71" r="3"/></g>
+  ${scatterStones()}
 </svg>`;

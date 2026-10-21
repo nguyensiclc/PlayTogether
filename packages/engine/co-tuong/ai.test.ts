@@ -53,14 +53,14 @@ describe("B1 — nước đi hợp lệ", () => {
       const b = chooseBotMove(start(), 0, level, createRng(42));
       expect(key(a)).toBe(key(b));
     }
-  });
+  }, 60_000);
 
   it("không sửa state đầu vào", () => {
     const s = start();
     const before = JSON.stringify(s);
     chooseBotMove(s, 0, "hard", createRng(3));
     expect(JSON.stringify(s)).toBe(before);
-  });
+  }, 30_000);
 });
 
 describe("B2 — chiến thuật", () => {

@@ -92,8 +92,8 @@ export function mountHome(root: HTMLElement): void {
         </div>
         <div class="games">${CARDS.map(gameCard).join("")}</div>
         <section class="rules-row" aria-label="Luật chơi">
-          <h2>Đọc luật trước khi chơi</h2>
-          ${CARDS.flatMap((g) => (g.gameId ? [`<button class="btn sm" type="button" data-rules="${g.gameId}">📖 ${g.name}</button>`] : [])).join("")}
+          <div class="section-head"><h2>Đọc luật trước khi chơi</h2></div>
+          <div class="rules-chips">${CARDS.flatMap((g) => (g.gameId ? [`<button class="btn sm" type="button" data-rules="${g.gameId}">📖 ${g.name}</button>`] : [])).join("")}</div>
         </section>
 
         <footer>
@@ -248,10 +248,10 @@ function recentHtml(): string {
   const items = list
     .map((r) => {
       const game = gameOf(r.gameId).info;
-      const others = r.with.length ? `Với ${escapeHtml(r.with.join(", "))} · ` : "";
+      const others = r.with.length ? `<span class="with">Với ${escapeHtml(r.with.join(", "))}</span>` : "";
       return `<div class="card recent">
         <span class="mini ${CATEGORY_BG[game.category]}">${game.icon}</span>
-        <div class="info"><div class="nm">${game.name} · Phòng ${r.code}</div><div class="small muted">${others}${timeAgo(r.at)}</div></div>
+        <div class="info"><div class="nm">${game.name} · Phòng ${r.code}</div><div class="small muted recent-meta">${others}<span class="when">${timeAgo(r.at)}</span></div></div>
         <a class="btn sm" href="${roomPath(r.code)}">Vào lại</a>
       </div>`;
     })
@@ -267,17 +267,16 @@ function filterGames(root: HTMLElement, chip: HTMLButtonElement): void {
 }
 
 function gameCard(g: GameCardInfo): string {
-  const meta = `${g.players} · ${CATEGORY_NAME[g.category]}`;
+  // Mỗi phần của meta là một cụm không ngắt giữa chừng ("2 người", "Dân gian"); thiếu chỗ thì cả cụm xuống dòng
+  const meta = `<span>${g.players}</span><span>${CATEGORY_NAME[g.category]}</span>`;
   const ico = `<div class="ico ${CATEGORY_BG[g.category]}">${g.gameId ? "" : `<span class="badge">Sắp có</span>`}${g.icon}</div>`;
   if (!g.gameId) {
     return `<div class="game soon" data-cat="${g.category}" aria-disabled="true">${ico}
-      <div class="row"><div><div class="nm">${g.name}</div><div class="mt">${meta}</div></div></div></div>`;
+      <div class="row"><div class="info"><div class="nm">${g.name}</div><div class="mt">${meta}</div></div></div></div>`;
   }
   const hasBot = gameOf(g.gameId).botSupported;
-  const botBtn = hasBot
-    ? `<span class="btn ghost sm desk-only" data-create-bot="${g.gameId}" style="margin-right:6px">🤖 Với máy</span>`
-    : "";
+  const botBtn = hasBot ? `<span class="btn ghost sm" data-create-bot="${g.gameId}">🤖 Với máy</span>` : "";
   return `<button type="button" class="game playable" data-create="${g.gameId}" data-cat="${g.category}">${ico}
-    <div class="row"><div><div class="nm">${g.name}</div><div class="mt">${meta}</div></div>
-    <div style="display:flex;align-items:center">${botBtn}<span class="btn primary sm desk-only">Tạo phòng</span></div></div></button>`;
+    <div class="row"><div class="info"><div class="nm">${g.name}</div><div class="mt">${meta}</div></div>
+    <div class="acts desk-only">${botBtn}<span class="btn primary sm">Tạo phòng</span></div></div></button>`;
 }

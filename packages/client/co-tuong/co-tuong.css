@@ -1,14 +1,16 @@
 /* Bàn chơi Cờ tướng (docs/design/co-tuong/mockup-*.jpg).
    Dùng lại khung .game-page, .player, .status-pill, .result của bàn Ô ăn quan trong style.css. */
 
+/* Khung gỗ dày quanh mặt bàn kem, như bộ thiết kế */
 .ct-board {
   position: relative;
-  border: 3px solid var(--board-edge);
-  border-radius: 16px;
-  background: var(--accent-soft);
+  padding: 6px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--frame-hi), var(--frame-lo));
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.5),
-    0 8px 20px rgba(60, 35, 10, 0.22);
+    inset 0 2px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+    0 10px 24px rgba(60, 35, 10, 0.28);
   line-height: 0;
   overflow: hidden;
   user-select: none;
@@ -19,6 +21,8 @@
   display: block;
   width: 100%;
   height: auto;
+  border-radius: 12px;
+  background: var(--accent-soft);
 }
 .ct-svg .grid,
 .ct-svg .markers {
@@ -250,7 +254,7 @@
   margin: 14px auto 6px;
 }
 .result .mini .ct-board {
-  border-width: 2px;
+  padding: 3px;
   border-radius: 10px;
   box-shadow: none;
 }

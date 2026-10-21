@@ -110,7 +110,8 @@ export class CaroBoard {
   // ---------- Thao tác ----------
 
   private cellOf(e: PointerEvent): number | null {
-    return cellAt(this.paint.size, this.el.getBoundingClientRect(), e.clientX, e.clientY);
+    // Khung của riêng lưới (host), không tính viền gỗ quanh bàn, để ô chạm trúng đúng chỗ nhìn thấy
+    return cellAt(this.paint.size, this.host.getBoundingClientRect(), e.clientX, e.clientY);
   }
 
   private onDown(e: PointerEvent): void {

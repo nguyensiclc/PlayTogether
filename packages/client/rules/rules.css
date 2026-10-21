@@ -106,15 +106,15 @@
   }
 }
 
-/* Nút mở luật ở trang chủ */
+/* Nút mở luật ở trang chủ: tiêu đề một dòng riêng, các chip xuống dòng khi hẹp; cách các phần khác bằng --section-gap */
 .rules-row {
+  margin-top: var(--section-gap, 22px);
+}
+.rules-row .section-head {
+  margin: 0 0 10px;
+}
+.rules-chips {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 8px;
-  margin: 18px 0 4px;
-}
-.rules-row h2 {
-  font-size: 16px;
-  margin-right: 4px;
 }
