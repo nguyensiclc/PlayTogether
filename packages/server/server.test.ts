@@ -128,4 +128,11 @@ describe("server thật qua WebSocket", () => {
     const bad = new WebSocket(`ws://localhost:${srv.port}/khac`);
     await expect(new Promise((resolve, reject) => bad.on("error", reject).on("open", resolve))).rejects.toBeDefined();
   });
+
+  it("GET /api/lan-ip trả về IP nội bộ của server", async () => {
+    const res = await fetch(`http://localhost:${srv.port}/api/lan-ip`);
+    expect(res.status).toBe(200);
+    const data = (await res.json()) as { lanIp: string | null };
+    expect(data).toHaveProperty("lanIp");
+  });
 });

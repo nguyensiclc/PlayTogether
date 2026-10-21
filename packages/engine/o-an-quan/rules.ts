@@ -3,7 +3,13 @@
 import type { ForfeitReason, GameModule, GameResult, SeatId } from "../game-module.ts";
 import type { Dir, EndReason, GameEvent, Move, Options, ScoreDetail, Seat, SowMove, State } from "./types.ts";
 
-export const defaultOptions: Options = { giaTriQuan: 10, camAnQuanNon: false, latBan: false, thoiGianLuot: 30 };
+export const defaultOptions: Options = {
+  giaTriQuan: 10,
+  camAnQuanNon: false,
+  latBan: false,
+  thoiGianLuot: 30,
+  targetScore: null,
+};
 
 /** Số điểm trừ khi bù dân (luật mục 6) */
 const BU_DAN = 5;
@@ -322,6 +328,7 @@ const OPTION_VALUES: { [K in keyof Options]: readonly Options[K][] } = {
   camAnQuanNon: [true, false],
   latBan: [true, false],
   thoiGianLuot: [15, 30, 60, null],
+  targetScore: [70, 100, 200, 300, 500, null],
 };
 
 /**

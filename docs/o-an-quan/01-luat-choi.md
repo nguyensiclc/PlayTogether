@@ -106,15 +106,28 @@ Sau khi ăn ô `k`, xét tiếp ô `k+1` và `k+2` theo chiều đi:
 - Lật bàn **không** cộng thêm thời gian. Thời gian đã dùng để cân nhắc vẫn bị tính vào lượt.
 - Ý nghĩa: người đi sau được "chọn bên" sau khi thấy nước mở đầu, giúp giảm lợi thế của người đi trước. Đổi bên không phải lúc nào cũng có lợi, nên người chơi cần so điểm và thế cờ trước khi quyết định.
 
-## 10. Thời gian
+## 10. Đấu trận nhiều ván (tuỳ chọn)
+
+- Tuỳ chọn `targetScore`, **mặc định: không giới hạn** (đánh từng ván riêng lẻ).
+- Các mốc lựa chọn: **70, 100, 200, 300, 500 điểm**.
+- **Cách thức hoạt động:**
+  - Hai người chơi thi đấu một chuỗi ván liên tiếp. Điểm số của mỗi người chơi ở cuối mỗi ván được **cộng dồn** vào tổng điểm trận đấu của người đó.
+  - Sau mỗi ván, nếu có người chơi đạt tổng điểm **≥ mốc điểm thắng** (`targetScore`):
+    - Người có tổng điểm cao hơn là **người chiến thắng chung cuộc trận đấu**.
+    - Nếu cả hai cùng đạt mốc và bằng điểm nhau: thi đấu tiếp ván tiếp theo cho đến khi phân định thắng thua.
+  - Nếu chưa có ai đạt mốc điểm thắng: trận đấu tiếp tục ván tiếp theo (Ván nữa), điểm số tích lũy được giữ nguyên.
+  - Khi trận đấu đã có người thắng chung cuộc, nút "Ván nữa" chuyển thành "Trận mới" (bắt đầu chuỗi ván mới với điểm số tích lũy về 0).
+  - Nếu một trong hai người chơi rời phòng hoặc đổi ghế, chuỗi đấu trận sẽ bị hủy và tính lại từ đầu.
+
+## 11. Thời gian
 
 - Mỗi lượt có **30 giây** (tuỳ chọn: 15, 30, 60 giây hoặc không giới hạn).
 - Hết giờ thì hệ thống **tự đi một nước rải ngẫu nhiên hợp lệ** thay người chơi. Nước tự đi không bao giờ là Lật bàn.
 - Bị đi thay **3 lượt liên tiếp** thì người chơi đó bị xử thua.
 
-## 11. Ví dụ minh hoạ
+## 12. Ví dụ minh hoạ
 
-### 11.1 Ăn dân (bàn khởi đầu, A chọn ô 3, chiều +1)
+### 12.1 Ăn dân (bàn khởi đầu, A chọn ô 3, chiều +1)
 
 | Bước | Diễn biến | Trạng thái liên quan |
 |---|---|---|
@@ -123,7 +136,7 @@ Sau khi ăn ô `k`, xét tiếp ô `k+1` và `k+2` theo chiều đi:
 | 3 | Ô kế là **ô 3**, đang trống. Ô sau đó là **ô 4** (6 dân) → trường hợp (c): **ăn 6 dân** | ô4=0 |
 | 4 | Xét ăn liên hoàn: ô 5 có 6 dân, không trống → **kết thúc lượt** | A: 6 điểm |
 
-### 11.2 Cơ bản và Quan Già (theo ví dụ của trang tham chiếu)
+### 12.2 Cơ bản và Quan Già (theo ví dụ của trang tham chiếu)
 
 Viên cuối rơi xuống, ô kế tiếp trống, sau đó là ô quan có **1 quan + 2 dân**. Ô sau ô quan trống, rồi tới một ô có **4 dân**.
 
@@ -132,11 +145,12 @@ Viên cuối rơi xuống, ô kế tiếp trống, sau đó là ô quan có **1 
 | Cơ bản (`camAnQuanNon` tắt) | Ăn ô quan được **12** điểm, ăn liên hoàn thêm **4** → tổng **16** |
 | Quan Già (`camAnQuanNon` bật) | Ô quan chỉ có 2 dân → dừng ngay trước ô quan, **0** điểm |
 
-## 12. Bảng tuỳ chọn phòng
+## 13. Bảng tuỳ chọn phòng
 
 | Tuỳ chọn | Tên hiển thị | Giá trị | Mặc định |
 |---|---|---|---|
 | `giaTriQuan` | Giá trị quan | 10, 5 | 10 |
 | `camAnQuanNon` | Quan Già | bật, tắt | tắt |
 | `latBan` | Lật bàn | bật, tắt | tắt |
+| `targetScore` | Mốc điểm thắng | 70, 100, 200, 300, 500, không giới hạn (từng ván) | không giới hạn |
 | `thoiGianLuot` | Thời gian mỗi lượt | 15, 30, 60, không giới hạn (giây) | 30 |

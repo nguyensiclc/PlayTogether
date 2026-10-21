@@ -1,7 +1,7 @@
 // Phòng chờ (docs/design/nen-tang/phong-cho*.html, UX mục 2.3, Q22): link mời, QR, ghế, người xem, tuỳ chọn, bắt đầu.
 
 import type { SeatId } from "@playtogether/engine";
-import type { Options } from "@playtogether/engine/o-an-quan";
+import type { Options, TargetScore } from "@playtogether/engine/o-an-quan";
 import type { PublicMember, PublicRoom, You } from "@playtogether/protocol";
 import { roomPath } from "@playtogether/protocol";
 import { escapeHtml } from "../dom.ts";
@@ -29,6 +29,61 @@ const TOGGLES: { key: "camAnQuanNon" | "latBan"; label: string; hint: string }[]
   { key: "latBan", label: "Lật bàn", hint: "Người đi sau được đổi bên 1 lần" },
 ];
 
+const TARGET_SCORES: { value: TargetScore; label: string }[] = [
+  { value: null, label: "Từng ván" },
+  { value: 70, label: "70 điểm" },
+  { value: 100, label: "100 điểm" },
+  { value: 200, label: "200 điểm" },
+  { value: 300, label: "300 điểm" },
+  { value: 500, label: "500 điểm" },
+];
+
+const LAN_IP_KEY = "playtogether:lanIp";
+
+export function getStoredLanIp(): string | null {
+  try {
+    return localStorage.getItem(LAN_IP_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredLanIp(ip: string): void {
+  try {
+    localStorage.setItem(LAN_IP_KEY, ip);
+  } catch {
+    // Không làm gì nếu localStorage bị chặn
+  }
+}
+
+export async function fetchLanIp(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/lan-ip");
+    if (!res.ok) return null;
+    const data = (await res.json()) as { lanIp?: string | null };
+    return data.lanIp ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Xây dựng link mời vào phòng.
+ * Nếu máy mở bằng localhost / 127.0.0.1, tự động thay bằng IP nội bộ để bạn bè cùng mạng Wi-Fi/LAN vào được.
+ */
+export function buildInviteLink(
+  code: string,
+  lanIp: string | null,
+  loc: { hostname: string; protocol: string; port: string; origin: string } = location,
+): string {
+  const isLocal = loc.hostname === "localhost" || loc.hostname === "127.0.0.1" || loc.hostname === "::1";
+  if (isLocal && lanIp) {
+    const port = loc.port ? `:${loc.port}` : "";
+    return `${loc.protocol}//${lanIp}${port}${roomPath(code)}`;
+  }
+  return `${loc.origin}${roomPath(code)}`;
+}
+
 export class LobbyView {
   private readonly root: HTMLElement;
   private readonly actions: LobbyActions;
@@ -36,6 +91,7 @@ export class LobbyView {
   private you: You | null = null;
   private qrOpen = false;
   private copied = false;
+  private lanIp: string | null = getStoredLanIp();
 
   /** Tự tạo phần tử riêng trong `host`: khi màn hình khác thay chỗ, bộ lắng nghe cũng mất theo */
   constructor(host: HTMLElement, actions: LobbyActions) {
@@ -44,13 +100,27 @@ export class LobbyView {
     this.actions = actions;
     // Một bộ lắng nghe cho cả màn hình, vì nội dung vẽ lại mỗi lần phòng thay đổi
     this.root.addEventListener("click", (e) => this.onClick(e));
+    void this.syncLanIp();
+  }
+
+  private async syncLanIp(): Promise<void> {
+    const ip = await fetchLanIp();
+    if (ip && ip !== this.lanIp) {
+      this.lanIp = ip;
+      setStoredLanIp(ip);
+      if (this.room && this.you) this.render(this.room, this.you);
+    }
+  }
+
+  private inviteLink(code: string): string {
+    return buildInviteLink(code, this.lanIp);
   }
 
   render(room: PublicRoom, you: You): void {
     this.room = room;
     this.you = you;
     const isHost = room.hostId === you.memberId;
-    const link = `${location.origin}${roomPath(room.code)}`;
+    const link = this.inviteLink(room.code);
     const seated = room.seats.filter((m) => m !== null).length;
     this.root.innerHTML = `
       <div class="screen lobby">
@@ -144,7 +214,7 @@ export class LobbyView {
 
   private async copyLink(): Promise<void> {
     if (!this.room || !this.you) return;
-    await copyText(`${location.origin}${roomPath(this.room.code)}`);
+    await copyText(this.inviteLink(this.room.code));
     this.copied = true;
     this.render(this.room, this.you);
   }
@@ -156,7 +226,7 @@ export class LobbyView {
       await navigator.share({
         title: "Chơi Ô ăn quan",
         text: `Vào chơi Ô ăn quan với mình, phòng ${this.room.code}`,
-        url: `${location.origin}${roomPath(this.room.code)}`,
+        url: this.inviteLink(this.room.code),
       });
     } catch {
       // Người dùng đóng bảng chia sẻ: không cần làm gì
@@ -179,13 +249,24 @@ function optionsHtml(o: Options, editable: boolean): string {
         `<button type="button" class="seg-btn${o.giaTriQuan === v ? " on" : ""}" data-act="opt" data-key="giaTriQuan" data-value="${v}" aria-pressed="${o.giaTriQuan === v}"${dis}>${v} dân</button>`,
     )
     .join("");
+  const targetSeg = TARGET_SCORES.map((item) => {
+    const isSelected = o.targetScore === item.value;
+    const valAttr = item.value === null ? "null" : String(item.value);
+    return `<button type="button" class="seg-btn${isSelected ? " on" : ""}" data-act="opt" data-key="targetScore" data-value="${valAttr}" aria-pressed="${isSelected}"${dis}>${item.label}</button>`;
+  }).join("");
   const toggles = TOGGLES.map(
     (t) => `<div class="opt-row inline">
       <div><b>${t.label}</b><div class="small muted">${t.hint}</div></div>
       <button type="button" class="toggle${o[t.key] ? " on" : ""}" role="switch" aria-checked="${o[t.key]}" aria-label="${t.label}" data-act="opt" data-key="${t.key}" data-value="${!o[t.key]}"${dis}></button>
     </div>`,
   ).join("");
-  return `<div class="opt-row"><b>Giá trị quan</b><div class="seg">${seg}</div></div>${toggles}`;
+  return `
+    <div class="opt-row"><b>Giá trị quan</b><div class="seg">${seg}</div></div>
+    <div class="opt-row">
+      <div><b>Mốc điểm thắng (Đấu trận)</b><div class="small muted">Cộng dồn điểm nhiều ván; chạm mốc là thắng</div></div>
+      <div class="seg seg-grid">${targetSeg}</div>
+    </div>
+    ${toggles}`;
 }
 
 /** Đọc tuỳ chọn từ nút vừa bấm; server sẽ kiểm tra lại bằng engine */
@@ -193,6 +274,11 @@ function readOption(el: HTMLElement): Partial<Options> {
   const { key, value } = el.dataset;
   if (key === "giaTriQuan") return { giaTriQuan: value === "5" ? 5 : 10 };
   if (key === "camAnQuanNon" || key === "latBan") return { [key]: value === "true" };
+  if (key === "targetScore") {
+    if (value === "null" || !value) return { targetScore: null };
+    const num = Number(value);
+    return { targetScore: num as TargetScore };
+  }
   return {};
 }
 

@@ -125,6 +125,7 @@ interface Options {
   camAnQuanNon: boolean;               // UI: "Quan Già"
   latBan: boolean;                     // UI: "Lật bàn"
   thoiGianLuot: 15 | 30 | 60 | null;   // giây
+  targetScore: 70 | 100 | 200 | 300 | 500 | null; // Mốc điểm thắng (Đấu trận, null = từng ván)
 }
 
 interface State {
@@ -272,6 +273,13 @@ interface PublicRoom {
   actionNo: number;                // tăng sau mỗi thao tác được chấp nhận, kể cả Lật bàn (Q22c)
   rematchVotes: string[];          // id công khai của người đã bấm Ván nữa
   nextFirst: SeatId | null;        // ghế đi trước ván sau (người thua; hoà thì đổi lượt — luật mục 2)
+  match: MatchScore | null;        // điểm tích luỹ đấu trận khi options.targetScore !== null
+}
+
+interface MatchScore {
+  scores: number[];                // tổng điểm tích luỹ theo ghế
+  round: number;                   // số ván đã chơi trong trận
+  winner: SeatId | null;           // ghế thắng chung cuộc (khi đạt >= targetScore)
 }
 
 interface PublicMember { id: string; name: string; connected: boolean; }
@@ -323,12 +331,13 @@ Mọi message có `room` đều kèm `you: { memberId, seat }` của người nh
 ### HTTP
 
 - `GET /api/rooms/:code` → `{ code, gameId, hostName, players, freeSeats, status }`, không có thì 404. Dùng cho màn nhập nickname khi vào bằng link lần đầu (UX mục 2.2), trước khi kết nối WebSocket.
+- `GET /api/lan-ip` → `{ lanIp }`. Trả về địa chỉ IP mạng nội bộ của server (dùng cho link mời và mã QR khi host mở qua localhost).
 - `GET /healthz` → `ok`.
 - Bản build: server phục vụ luôn `packages/client/dist`; đường dẫn không có đuôi file (vd `/r/ABCD`) trả về `index.html`.
 
 ## 8. Đồng hồ lượt
 
-- Server đặt `turnDeadline = now + thoiGianLuot + animationBudget(events)`, với `animationBudget ≈ 180ms × số drop + 400ms × số capture` (tối đa 8 giây).
+- Server đặt `turnDeadline = now + thoiGianLuot + animationBudget(events)`, với `animationBudget ≈ 1.000ms × số drop + 1.400ms × số capture + 1.400ms khi hết lượt / bốc tiếp` (giúp người chơi theo dõi kịp, tua nhanh thì thời gian giảm tương ứng).
 - Hết giờ: server chọn ngẫu nhiên trong các nước `kind = "sow"` của `validMoves` (không bao giờ chọn `latBan`) rồi áp dụng như nước đi bình thường. Đếm số lượt bị đi thay liên tiếp của người đó, đủ 3 lần thì xử thua.
 - Client chỉ hiển thị đếm ngược dựa trên `turnDeadline`. Client không tự quyết định hết giờ.
 

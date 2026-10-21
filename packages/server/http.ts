@@ -5,6 +5,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { extname, join, normalize, sep } from "node:path";
 import type { RoomPreview } from "@playtogether/protocol";
 import { normalizeRoomCode } from "@playtogether/protocol";
+import { getLanIp } from "./lan-ip.ts";
 import type { RoomManager } from "./room-manager.ts";
 
 const MIME: Record<string, string> = {
@@ -31,6 +32,9 @@ export async function handleHttp(
   const api = ROOM_API.exec(path);
   if (api) return sendPreview(res, rooms, decodeURIComponent(api[1] ?? ""));
   if (path === "/healthz") return send(res, 200, "text/plain; charset=utf-8", "ok");
+  if (path === "/api/lan-ip") {
+    return send(res, 200, "application/json; charset=utf-8", JSON.stringify({ lanIp: getLanIp() }));
+  }
   if (!staticDir)
     return send(res, 404, "text/plain; charset=utf-8", "Chạy client bằng npm run dev, hoặc npm run build trước.");
   return serveStatic(res, staticDir, path);

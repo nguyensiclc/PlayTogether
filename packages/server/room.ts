@@ -2,7 +2,15 @@
 // Không chứa luật game: mọi câu hỏi về luật đều hỏi GameModule. Không I/O: thời gian và RNG truyền vào.
 
 import type { GameModule, Rng, SeatId } from "@playtogether/engine";
-import type { ErrorCode, GameId, PublicMember, PublicRoomOf, RoomStatus, You } from "@playtogether/protocol";
+import type {
+  ErrorCode,
+  GameId,
+  MatchScore,
+  PublicMember,
+  PublicRoomOf,
+  RoomStatus,
+  You,
+} from "@playtogether/protocol";
 
 /** Lỗi do thao tác không hợp lệ của người dùng; gateway gửi lại cho client dưới dạng message `error`. */
 export class RoomError extends Error {
@@ -59,6 +67,8 @@ export class Room<S, M, O, E> {
   private readonly rematchVotes = new Set<string>();
   /** Ghế đi trước của ván gần nhất, để đổi lượt khi hoà (luật mục 2) */
   private lastFirst: SeatId | null = null;
+  /** Điểm tích luỹ nhiều ván khi options.targetScore !== null */
+  private match: MatchScore | null = null;
 
   constructor(init: RoomInit<S, M, O, E>) {
     this.code = init.code;
@@ -106,10 +116,14 @@ export class Room<S, M, O, E> {
       if (!("error" in r)) {
         this.game = r.state;
         this.status = "finished";
+        this.onGameFinished();
         forfeited = { events: r.events };
       }
     }
-    if (seat !== null) this.seats[seat] = null;
+    if (seat !== null) {
+      this.seats[seat] = null;
+      this.match = null;
+    }
     this.members.delete(clientId);
     this.rematchVotes.delete(clientId);
     // Chủ phòng rời đi thì người ngồi ghế còn lại làm chủ phòng (UX mục 2.3)
@@ -125,6 +139,7 @@ export class Room<S, M, O, E> {
     if (holder && holder !== clientId) throw new RoomError("SEAT_TAKEN");
     const current = this.seatOf(clientId);
     if (current !== null) this.seats[current] = null;
+    if (current !== seat) this.match = null;
     this.seats[seat] = clientId;
     this.rematchVotes.clear();
   }
@@ -135,6 +150,7 @@ export class Room<S, M, O, E> {
     const seat = this.seatOf(clientId);
     if (seat === null) throw new RoomError("NOT_SEATED");
     this.seats[seat] = null;
+    this.match = null;
     this.rematchVotes.clear();
   }
 
@@ -144,6 +160,7 @@ export class Room<S, M, O, E> {
     this.requireHost(clientId);
     this.requireNotPlaying();
     this.options = this.module.parseOptions(raw, this.options);
+    this.match = null;
   }
 
   start(clientId: string, rng: Rng): void {
@@ -162,7 +179,10 @@ export class Room<S, M, O, E> {
     if ("error" in r) throw new RoomError(r.error === "NOT_YOUR_TURN" ? "NOT_YOUR_TURN" : "INVALID_MOVE");
     this.game = r.state;
     this.actionNo++;
-    if (this.module.result(this.game)) this.status = "finished";
+    if (this.module.result(this.game)) {
+      this.status = "finished";
+      this.onGameFinished();
+    }
     return { seat, events: r.events };
   }
 
@@ -183,6 +203,20 @@ export class Room<S, M, O, E> {
     if (seated.length < this.module.minPlayers || seated.length < this.seats.length) {
       throw new RoomError("NOT_ENOUGH_PLAYERS");
     }
+    const target = this.getTargetScore();
+    if (target !== null) {
+      if (!this.match || this.match.winner !== null) {
+        this.match = {
+          scores: Array.from({ length: this.seats.length }, () => 0),
+          round: 1,
+          winner: null,
+        };
+      } else {
+        this.match.round++;
+      }
+    } else {
+      this.match = null;
+    }
     // Ván đầu chọn ngẫu nhiên; các ván sau người thua đi trước (luật mục 2)
     const first = this.nextFirst() ?? Math.floor(rng() * seated.length);
     this.game = this.module.setup(this.options, seated, first);
@@ -190,6 +224,23 @@ export class Room<S, M, O, E> {
     this.status = "playing";
     this.actionNo++;
     this.rematchVotes.clear();
+  }
+
+  private getTargetScore(): number | null {
+    if (typeof this.options !== "object" || this.options === null) return null;
+    const t = (this.options as { targetScore?: unknown }).targetScore;
+    return typeof t === "number" && t > 0 ? t : null;
+  }
+
+  private onGameFinished(): void {
+    if (!this.game) return;
+    const res = this.module.result(this.game);
+    const target = this.getTargetScore();
+    if (!res || target === null || !this.match) return;
+    for (const [seat, score] of res.scores.entries()) {
+      this.match.scores[seat] = (this.match.scores[seat] ?? 0) + score;
+    }
+    this.match.winner = decideMatchWinner(this.match.scores, target);
   }
 
   /** Ghế đi trước ở ván sau: người thua; hoà thì đổi lượt so với ván trước. null nếu chưa có ván nào xong. */
@@ -226,6 +277,7 @@ export class Room<S, M, O, E> {
       actionNo: this.actionNo,
       rematchVotes: [...this.rematchVotes].flatMap((c) => this.members.get(c)?.id ?? []),
       nextFirst: this.status === "finished" ? this.nextFirst() : null,
+      match: this.match ? { ...this.match, scores: [...this.match.scores] } : null,
     };
   }
 
@@ -280,4 +332,11 @@ export class Room<S, M, O, E> {
     const seated = this.seats.find((c) => c !== null);
     return seated ?? [...this.members.keys()][0] ?? "";
   }
+}
+
+function decideMatchWinner(scores: readonly number[], target: number): SeatId | null {
+  const [s0, s1] = scores;
+  if (s0 === undefined || s1 === undefined || (s0 < target && s1 < target)) return null;
+  if (s0 === s1) return null;
+  return s0 > s1 ? 0 : 1;
 }
