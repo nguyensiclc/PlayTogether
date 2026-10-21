@@ -22,6 +22,7 @@ export function caroPageHtml(options: Options): string {
         <span class="chip desk-only">Bàn ${n} × ${n}</span>
         <span class="chip desk-only">Chặn 2 đầu: ${options.chanHaiDau ? "bật" : "tắt"}</span>
         <button class="btn sm desk-only" type="button" data-rules>📖 Luật chơi</button>
+        <button class="btn sm desk-only" type="button" data-history>📜 Lịch sử</button>
         <a class="btn sm desk-only" href="/">Về trang chủ</a>
         <button class="icon-btn mobile-only" type="button" data-rules aria-label="Luật chơi">?</button>
       </header>

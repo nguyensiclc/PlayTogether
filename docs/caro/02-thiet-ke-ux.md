@@ -71,6 +71,8 @@ Khi đến lượt mình, chưa có quân nào trên bàn và chưa ai nhường
 
 Mọi người đọc được luật **trước khi tạo phòng** (nút "📖 Cờ caro" ở hàng "Đọc luật trước khi chơi" trên trang chủ), trong **phòng chờ** (nút "📖 Luật chơi") và **khi đang chơi** (nút "?" trên điện thoại, "📖 Luật chơi" trên desktop). Là một hộp phủ lên màn hình (bottom sheet / modal), Esc hoặc "Đã hiểu" để đóng; hộp luật không làm mất thế cờ đang chơi. Nội dung nằm ở `packages/client/caro/rules-html.ts`, phải khớp `01-luat-choi.md`.
 
+Hộp này có hai tab: **Luật chơi** và **Lịch sử** (vài điều thú vị về nguồn gốc, tên gọi, các biến thể và mẹo chơi, để người chơi biết thêm). Nút "📜 Lịch sử" có ở phòng chờ và khi đang chơi trên desktop; trên điện thoại, nút **?** mở hộp rồi chuyển tab. Nội dung lịch sử nằm ở `packages/client/caro/history-html.ts`, viết dè dặt ở những mốc chưa có tài liệu chắc chắn.
+
 ## 4. Hiệu ứng
 
 | Sự kiện | Hiệu ứng | Thời lượng |
