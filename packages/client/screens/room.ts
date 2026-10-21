@@ -151,6 +151,8 @@ class RoomScreen {
         setOptions: (options) => this.socket.send({ type: "setOptions", options }),
         start: () => this.socket.send({ type: "start" }),
         leave: () => void this.requestLeave(),
+        addBot: (seat, level) => this.socket.send({ type: "addBot", seat, level }),
+        removeBot: (seat) => this.socket.send({ type: "removeBot", seat }),
       });
     }
     this.lobby.render(room, you);

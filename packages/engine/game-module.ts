@@ -31,6 +31,20 @@ export interface GameModule<S, M, O, E> {
   parseOptions(raw: unknown, base: O): O;
   /** Đọc nước đi từ dữ liệu ngoài: chỉ kiểm tra hình dạng (đúng luật hay không do `applyMove` quyết định). null nếu sai hình dạng */
   parseMove(raw: unknown): M | null;
+  /** Hỗ trợ đánh với máy nếu game có cài đặt bot */
+  bot?: BotSupport<S, M>;
+}
+
+export type BotLevelId = "easy" | "medium" | "hard";
+
+export interface BotOption {
+  id: BotLevelId;
+  name: string;
+}
+
+export interface BotSupport<S, M> {
+  levels: readonly BotOption[];
+  chooseMove(state: S, seat: SeatId, level: BotLevelId, rng: Rng): M | null;
 }
 
 export type ForfeitReason = "het-gio" | "bo-cuoc";

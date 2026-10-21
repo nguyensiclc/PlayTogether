@@ -21,4 +21,5 @@ export const coVuaGame: ClientGame = {
   rulesHtml: coVuaRulesHtml,
   historyHtml: coVuaHistoryHtml,
   createScreen: (root, room, you, actions) => new CoVuaGameView(root, room, you, actions),
+  botSupported: true,
 };

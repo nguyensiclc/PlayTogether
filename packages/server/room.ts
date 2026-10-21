@@ -1,7 +1,7 @@
 // Một phòng chơi (kỹ thuật mục 6): thành viên, ghế, chủ phòng, tuỳ chọn, vòng đời ván, Ván nữa.
 // Không chứa luật game: mọi câu hỏi về luật đều hỏi GameModule. Không I/O: thời gian và RNG truyền vào.
 
-import type { GameModule, Rng, SeatId } from "@playtogether/engine";
+import type { BotLevelId, GameModule, Rng, SeatId } from "@playtogether/engine";
 import type {
   ErrorCode,
   GameId,
@@ -35,6 +35,8 @@ interface Member {
   id: string;
   name: string;
   connected: boolean;
+  isBot?: boolean;
+  botLevel?: string;
 }
 
 export interface RoomInit<S, M, O, E> {
@@ -161,6 +163,88 @@ export class Room<S, M, O, E> {
     this.rematchVotes.clear();
   }
 
+  addBot(hostClientId: string, seat: SeatId, level: string): void {
+    this.requireHost(hostClientId);
+    this.requireNotPlaying();
+    if (!this.module.bot) throw new RoomError("BOT_NOT_SUPPORTED");
+    if (!Number.isInteger(seat) || seat < 0 || seat >= this.seats.length) throw new RoomError("BAD_MESSAGE");
+    const holder = this.seats[seat];
+    if (holder) throw new RoomError("SEAT_TAKEN");
+    const botOption = this.module.bot.levels.find((l) => l.id === level);
+    if (!botOption) throw new RoomError("BAD_MESSAGE");
+
+    const botClientId = `__bot_${seat}`;
+    const botId = `bot_${seat}`;
+    this.members.set(botClientId, {
+      clientId: botClientId,
+      id: botId,
+      name: `Máy (${botOption.name})`,
+      connected: true,
+      isBot: true,
+      botLevel: level,
+    });
+    this.seats[seat] = botClientId;
+    this.resetWins();
+    this.match = null;
+    this.rematchVotes.clear();
+  }
+
+  forfeit(clientId: string): { events: E[] } | null {
+    this.member(clientId);
+    if (this.status !== "playing" || !this.game) throw new RoomError("WRONG_STATUS");
+    const seat = this.seatOf(clientId);
+    if (seat === null) throw new RoomError("NOT_SEATED");
+    const r = this.module.forfeit(this.game, seat, "bo-cuoc");
+    if ("error" in r) throw new RoomError("INVALID_MOVE");
+    this.game = r.state;
+    this.status = "finished";
+    this.actionNo++;
+    this.recordResult();
+    this.onGameFinished();
+    return { events: r.events };
+  }
+
+  removeBot(hostClientId: string, seat: SeatId): void {
+    this.requireHost(hostClientId);
+    this.requireNotPlaying();
+    if (!Number.isInteger(seat) || seat < 0 || seat >= this.seats.length) throw new RoomError("BAD_MESSAGE");
+    const holder = this.seats[seat];
+    if (!holder || !this.members.get(holder)?.isBot) throw new RoomError("BAD_MESSAGE");
+    this.members.delete(holder);
+    this.seats[seat] = null;
+    this.resetWins();
+    this.match = null;
+    this.rematchVotes.clear();
+  }
+
+  isBotSeat(seat: SeatId): boolean {
+    const c = this.seats[seat];
+    return c ? this.members.get(c)?.isBot === true : false;
+  }
+
+  pendingBotSeat(): SeatId | null {
+    if (this.status !== "playing" || !this.game || !this.module.bot) return null;
+    for (let seat = 0; seat < this.seats.length; seat++) {
+      if (this.isBotSeat(seat)) {
+        const moves = this.module.validMoves(this.game, seat);
+        if (moves.length > 0) return seat;
+      }
+    }
+    return null;
+  }
+
+  botMove(seat: SeatId, rng: Rng): { seat: SeatId; move: M; events: E[] } | null {
+    if (this.status !== "playing" || !this.game || !this.module.bot) return null;
+    const clientId = this.seats[seat];
+    if (!clientId) return null;
+    const m = this.members.get(clientId);
+    if (!m?.isBot) return null;
+    const level = (m.botLevel ?? "medium") as BotLevelId;
+    const move = this.module.bot.chooseMove(this.game, seat, level, rng);
+    if (!move) return null;
+    return this.move(clientId, move, this.actionNo);
+  }
+
   // ---------- Ván chơi ----------
 
   setOptions(clientId: string, raw: unknown): void {
@@ -203,6 +287,11 @@ export class Room<S, M, O, E> {
     if (this.status !== "finished") throw new RoomError("WRONG_STATUS");
     if (this.seatOf(clientId) === null) throw new RoomError("NOT_SEATED");
     this.rematchVotes.add(clientId);
+    for (const [seat, c] of this.seats.entries()) {
+      if (c && this.isBotSeat(seat)) {
+        this.rematchVotes.add(c);
+      }
+    }
     const everyone = this.seats.every((c) => c !== null && this.rematchVotes.has(c));
     if (!everyone) return false;
     this.startGame(rng);
@@ -279,7 +368,13 @@ export class Room<S, M, O, E> {
   view(forSeat: SeatId | null = null): PublicRoomOf<S, O> {
     const pub = (clientId: string): PublicMember | null => {
       const m = this.members.get(clientId);
-      return m ? { id: m.id, name: m.name, connected: m.connected } : null;
+      if (!m) return null;
+      return {
+        id: m.id,
+        name: m.name,
+        connected: m.connected,
+        ...(m.isBot ? { isBot: true, botLevel: m.botLevel } : {}),
+      };
     };
     const seated = new Set(this.seats);
     return {
@@ -299,6 +394,12 @@ export class Room<S, M, O, E> {
       nextFirst: this.status === "finished" ? this.nextFirst() : null,
       wins: [...this.wins],
       match: this.match ? { ...this.match, scores: [...this.match.scores] } : null,
+      ...(this.module.bot
+        ? {
+            botSupported: true,
+            botLevels: this.module.bot.levels,
+          }
+        : {}),
     };
   }
 

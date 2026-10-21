@@ -24,6 +24,9 @@ const PARSERS: Record<ClientMessage["type"], (m: Raw) => ClientMessage | null> =
   joinRoom: (m) => (typeof m.code === "string" ? { type: "joinRoom", code: m.code } : null),
   takeSeat: (m) => (isInt(m.seat) ? { type: "takeSeat", seat: m.seat } : null),
   leaveSeat: () => ({ type: "leaveSeat" }),
+  addBot: (m) =>
+    isInt(m.seat) && typeof m.level === "string" ? { type: "addBot", seat: m.seat, level: m.level } : null,
+  removeBot: (m) => (isInt(m.seat) ? { type: "removeBot", seat: m.seat } : null),
   // Giá trị từng tuỳ chọn do engine kiểm tra (parseOptions)
   setOptions: (m) => (isObject(m.options) ? { type: "setOptions", options: m.options } : null),
   start: () => ({ type: "start" }),

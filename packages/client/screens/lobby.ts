@@ -15,6 +15,8 @@ export interface LobbyActions {
   setOptions(options: object): void;
   start(): void;
   leave(): void;
+  addBot?(seat: SeatId, level: string): void;
+  removeBot?(seat: SeatId): void;
 }
 
 const SHARE_ICON =
@@ -150,13 +152,38 @@ export class LobbyView {
   }
 
   private seatHtml(m: PublicMember | null, seat: SeatId, room: PublicRoom, you: You): string {
+    const isHost = room.hostId === you.memberId;
     if (!m) {
       // Chỉ người đang xem mới cần nút ngồi vào ghế trống (UX mục 2.3)
       const canSit = you.seat === null;
+      const botButtons =
+        isHost && room.botSupported
+          ? `<div class="bot-btns" style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
+              <span class="small muted" style="width:100%">Đấu với máy:</span>
+              <button class="btn sm" type="button" data-act="add-bot" data-seat="${seat}" data-level="easy">🤖 Dễ</button>
+              <button class="btn sm" type="button" data-act="add-bot" data-seat="${seat}" data-level="medium">🤖 Vừa</button>
+              <button class="btn sm" type="button" data-act="add-bot" data-seat="${seat}" data-level="hard">🤖 Khó</button>
+            </div>`
+          : "";
       return `<div class="seat waiting">
         <span class="avatar empty">${seat + 1}</span>
-        <div class="who"><b class="dots">Đang chờ bạn bè</b><span class="small">Ghế ${seat + 1} · gửi link để mời</span></div>
+        <div class="who">
+          <b class="dots">Đang chờ bạn bè</b>
+          <span class="small">Ghế ${seat + 1} · gửi link để mời</span>
+          ${botButtons}
+        </div>
         ${canSit ? `<button class="btn sm" type="button" data-act="sit" data-seat="${seat}">Ngồi đây</button>` : ""}
+      </div>`;
+    }
+    if (m.isBot) {
+      return `<div class="seat bot">
+        <span class="avatar bot" style="font-size:22px;display:flex;align-items:center;justify-content:center">🤖</span>
+        <div class="who">
+          <b>${escapeHtml(m.name)}</b>
+          <span class="small muted">Ghế ${seat + 1} · Tự động</span>
+        </div>
+        <span class="badge live">🤖 Máy</span>
+        ${isHost ? `<button class="btn sm" type="button" data-act="remove-bot" data-seat="${seat}" style="margin-left:6px">Gỡ</button>` : ""}
       </div>`;
     }
     const me = m.id === you.memberId;
@@ -193,7 +220,14 @@ export class LobbyView {
     else if (act === "history") showHistory(this.room.gameId);
     else if (act === "start") this.actions.start();
     else if (act === "sit") this.actions.takeSeat(Number(el.dataset.seat));
-    else if (act === "opt") this.actions.setOptions(gameOf(this.room.gameId).lobbyOptions.read(el));
+    else if (act === "add-bot") {
+      const seat = Number(el.dataset.seat);
+      const level = el.dataset.level ?? "medium";
+      this.actions.addBot?.(seat, level);
+    } else if (act === "remove-bot") {
+      const seat = Number(el.dataset.seat);
+      this.actions.removeBot?.(seat);
+    } else if (act === "opt") this.actions.setOptions(gameOf(this.room.gameId).lobbyOptions.read(el));
     else if (act === "copy") void this.copyLink();
     else if (act === "share") void this.share();
     else if (act === "qr") {
