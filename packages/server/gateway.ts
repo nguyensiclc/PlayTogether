@@ -136,6 +136,7 @@ export class Gateway {
         c.send(message as ServerMessage);
       }
     },
+    resign: (_conn, s) => this.act(s, (room, id) => room.resign(id)),
     leaveRoom: (_conn, s) => {
       const room = this.requireRoom(s);
       // Lấy các tab của người rời trước khi rời, vì sau đó họ không còn là thành viên

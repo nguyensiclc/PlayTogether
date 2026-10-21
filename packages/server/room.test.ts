@@ -253,6 +253,27 @@ describe("rời phòng và mất kết nối", () => {
     expect(room.hasMember(HOST.clientId)).toBe(false);
   });
 
+  it("xin thua giữa ván: xử thua bỏ cuộc, giữ ghế và ở lại phòng, actionNo tăng", () => {
+    const room = fullRoom();
+    room.start(HOST.clientId, createRng(3));
+    const before = room.view().actionNo;
+    room.resign(HOST.clientId);
+    const v = room.view();
+    expect(v.status).toBe("finished");
+    expect(v.actionNo).toBe(before + 1);
+    expect(v.game!.result).toMatchObject({ reason: "bo-cuoc" });
+    expect(v.seats[0]).not.toBeNull();
+    expect(room.hasMember(HOST.clientId)).toBe(true);
+    expect(errorCode(() => room.resign(HOST.clientId))).toBe("WRONG_STATUS");
+  });
+
+  it("người xem không xin thua được", () => {
+    const room = fullRoom();
+    room.join(VIEWER, 2);
+    room.start(HOST.clientId, createRng(3));
+    expect(errorCode(() => room.resign(VIEWER.clientId))).toBe("NOT_SEATED");
+  });
+
   it("mất kết nối không làm mất ghế (M3 giữ ghế không giới hạn — Q22e)", () => {
     const room = fullRoom();
     room.start(HOST.clientId, createRng(3));

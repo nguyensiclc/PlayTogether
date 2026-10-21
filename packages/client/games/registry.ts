@@ -4,12 +4,14 @@
 import type { GameId } from "@playtogether/protocol";
 import { GAME_IDS } from "@playtogether/protocol";
 import { caroGame } from "../caro/client-game.ts";
+import { coTuongGame } from "../co-tuong/client-game.ts";
 import { oAnQuanGame } from "../o-an-quan/client-game.ts";
 import type { Category, ClientGame } from "./types.ts";
 
 export const CLIENT_GAMES: Record<GameId, ClientGame> = {
   "o-an-quan": oAnQuanGame,
   caro: caroGame,
+  "co-tuong": coTuongGame,
 };
 
 /** Game theo thứ tự hiển thị trên trang chủ */
