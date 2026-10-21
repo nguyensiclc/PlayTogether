@@ -5,7 +5,7 @@
 import type { SeatId } from "@playtogether/engine";
 import type { GameEvent, Move, Seat, State } from "@playtogether/engine/o-an-quan";
 import { oAnQuan, owner } from "@playtogether/engine/o-an-quan";
-import type { ErrorCode, PublicRoom, ServerMessage, You } from "@playtogether/protocol";
+import type { ErrorCode, OAnQuanRoom, PublicRoom, You } from "@playtogether/protocol";
 import { $ } from "../dom.ts";
 import { BoardDom } from "../o-an-quan/board-dom.ts";
 import { latBanSheetHtml } from "../o-an-quan/lat-ban-sheet.ts";
@@ -19,24 +19,14 @@ import { resultHtml } from "../o-an-quan/result-view.ts";
 import { type BoardView, points, viewFromState } from "../o-an-quan/view-model.ts";
 import { handleGameKey, type KeyActions } from "./game-keys.ts";
 import { gamePageHtml } from "./game-page.ts";
+import type { GameActions, GameScreen, RoomMessage } from "./game-screen.ts";
 import { identityInRoom, seatOfMember } from "./room-players.ts";
-
-/** Thao tác gửi lên server, do màn hình phòng cung cấp */
-export interface GameActions {
-  /** Trả về false nếu chưa gửi được (mất kết nối) */
-  move(move: Move, actionNo: number): boolean;
-  rematch(): void;
-  toLobby(): void;
-  leave(): void;
-}
-
-type RoomMessage = Extract<ServerMessage, { room: PublicRoom }>;
 
 /** Người xem thấy người ngồi ghế này ở dưới (Q22h: ghế 1 trên giao diện, chỉ số 0) */
 const SPECTATOR_BOTTOM_SEAT: SeatId = 0;
 
-export class GameView {
-  private room: PublicRoom;
+export class GameView implements GameScreen {
+  private room: OAnQuanRoom;
   private you: You;
   /** State đang hiển thị (đã chạy xong hiệu ứng) và actionNo tương ứng */
   private state: State;
@@ -67,6 +57,7 @@ export class GameView {
   };
 
   constructor(root: HTMLElement, room: PublicRoom, you: You, actions: GameActions) {
+    if (room.gameId !== "o-an-quan") throw new Error(`Cần phòng Ô ăn quan, nhận ${room.gameId}`);
     if (!room.game) throw new Error("Phòng chưa có ván");
     this.room = room;
     this.you = you;
@@ -124,13 +115,15 @@ export class GameView {
   private async apply(msg: RoomMessage): Promise<void> {
     const prev = this.state;
     const prevActionNo = this.actionNo;
+    // Phòng của game khác không tới đây: room.ts chọn màn hình theo gameId
+    if (msg.room.gameId !== "o-an-quan") return;
     this.room = msg.room;
     this.you = msg.you;
     const next = msg.room.game;
     if (!next) return;
     this.state = next;
     this.actionNo = msg.room.actionNo;
-    if (msg.type === "moveApplied" && msg.room.actionNo === prevActionNo + 1) {
+    if (msg.type === "moveApplied" && msg.gameId === "o-an-quan" && msg.room.actionNo === prevActionNo + 1) {
       this.pending = false;
       await this.animate(msg.seat, msg.move, msg.events, prev);
     } else if (msg.type === "gameStarted" || msg.room.actionNo !== prevActionNo) {

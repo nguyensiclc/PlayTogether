@@ -4,6 +4,7 @@
 import type { GameId } from "@playtogether/protocol";
 import { normalizeRoomCode, roomPath } from "@playtogether/protocol";
 import { $, escapeHtml } from "../dom.ts";
+import { GAME_INFO } from "../games.ts";
 import { getClientId, getName, randomName, recentRooms, setName } from "../identity.ts";
 import { GameSocket } from "../net/socket.ts";
 import { initialsOf } from "./room-players.ts";
@@ -40,6 +41,7 @@ const GAMES: GameInfo[] = [
     name: "Cờ caro",
     players: "2 người",
     category: "co",
+    gameId: "caro",
     icon: `<svg viewBox="0 0 56 56" aria-hidden="true"><g stroke="#2f6b5a" stroke-width="1.6" opacity=".5"><path d="M8 19h40M8 28h40M8 37h40M19 8v40M28 8v40M37 8v40"/></g><path d="M11 11l6 6M17 11l-6 6M29 29l6 6M35 29l-6 6" stroke="#b5462f" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="14" r="3.6" fill="none" stroke="#3a4f8f" stroke-width="2.6"/><circle cx="14" cy="32" r="3.6" fill="none" stroke="#3a4f8f" stroke-width="2.6"/></svg>`,
   },
   {
@@ -231,9 +233,6 @@ function createRoom(root: HTMLElement, gameId: GameId): void {
   socket.connect();
 }
 
-const MINI_BOARD =
-  '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="3" y="12" width="34" height="16" rx="8" fill="#8a5a2e"/><g fill="#eee6d4"><circle cx="13" cy="17" r="2"/><circle cx="20" cy="17" r="2"/><circle cx="27" cy="17" r="2"/><circle cx="13" cy="23" r="2"/><circle cx="20" cy="23" r="2"/><circle cx="27" cy="23" r="2"/></g></svg>';
-
 /** "5 phút trước", "2 giờ trước"… */
 function timeAgo(at: number): string {
   const minutes = Math.round((Date.now() - at) / 60000);
@@ -249,10 +248,11 @@ function recentHtml(): string {
   if (list.length === 0) return "";
   const items = list
     .map((r) => {
+      const game = GAME_INFO[r.gameId];
       const others = r.with.length ? `Với ${escapeHtml(r.with.join(", "))} · ` : "";
       return `<div class="card recent">
-        <span class="mini c-dg">${MINI_BOARD}</span>
-        <div class="info"><div class="nm">Ô ăn quan · Phòng ${r.code}</div><div class="small muted">${others}${timeAgo(r.at)}</div></div>
+        <span class="mini ${game.tile}">${game.icon}</span>
+        <div class="info"><div class="nm">${game.name} · Phòng ${r.code}</div><div class="small muted">${others}${timeAgo(r.at)}</div></div>
         <a class="btn sm" href="${roomPath(r.code)}">Vào lại</a>
       </div>`;
     })

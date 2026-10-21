@@ -1,7 +1,7 @@
 // Danh tính trên máy này (kỹ thuật mục 6): clientId bí mật, nickname, phòng gần đây. Lưu trong localStorage.
 
 import type { GameId } from "@playtogether/protocol";
-import { normalizeName } from "@playtogether/protocol";
+import { isGameId, normalizeName } from "@playtogether/protocol";
 
 const KEY = { clientId: "pt.clientId", name: "pt.name", recent: "pt.recentRooms" };
 /** Số phòng gần đây giữ lại */
@@ -69,7 +69,9 @@ export interface RecentRoom {
 export function recentRooms(): RecentRoom[] {
   try {
     const list = JSON.parse(read(KEY.recent) ?? "[]") as unknown;
-    return Array.isArray(list) ? (list as RecentRoom[]).filter((r) => typeof r?.code === "string") : [];
+    return Array.isArray(list)
+      ? (list as RecentRoom[]).filter((r) => typeof r?.code === "string" && isGameId(r.gameId))
+      : [];
   } catch {
     return [];
   }

@@ -12,7 +12,7 @@ const match = /^\/r\/([^/]+)\/?$/.exec(location.pathname);
 const code = match ? normalizeRoomCode(decodeURIComponent(match[1] ?? "")) : null;
 
 if (code) {
-  document.title = `Phòng ${code} · Ô ăn quan`;
+  document.title = `Phòng ${code} · PlayTogether`;
   void mountRoom(root, code);
 } else {
   // Mọi đường dẫn khác (kể cả /offline cũ, Q22a) về trang chủ

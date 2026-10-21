@@ -1,7 +1,7 @@
 // Quản lý các phòng (kỹ thuật mục 6): tạo phòng với mã không trùng, tìm phòng, dọn phòng bỏ trống.
 
-import type { Rng } from "@playtogether/engine";
-import type { GameEvent, Move, Options, State } from "@playtogether/engine/o-an-quan";
+import type { GameModule, Rng } from "@playtogether/engine";
+import { caro } from "@playtogether/engine/caro";
 import { oAnQuan } from "@playtogether/engine/o-an-quan";
 import type { GameId } from "@playtogether/protocol";
 import { ROOM_CODE_ALPHABET, ROOM_CODE_LENGTH } from "@playtogether/protocol";
@@ -10,8 +10,13 @@ import { type Joiner, Room } from "./room.ts";
 /** Phòng không còn ai kết nối trong chừng này thì bị xoá (kỹ thuật mục 6) */
 export const EMPTY_ROOM_TTL_MS = 10 * 60 * 1000;
 
-/** Game duy nhất hiện có */
-export type GameRoom = Room<State, Move, Options, GameEvent>;
+/** Game nào cũng dùng qua `GameModule`: lớp phòng không biết kiểu state, nước đi, tuỳ chọn của từng game */
+type AnyGameModule = GameModule<unknown, unknown, unknown, unknown>;
+
+/** Các game server chạy được. Thêm game mới là thêm một dòng ở đây. */
+const MODULES: Record<GameId, AnyGameModule> = { "o-an-quan": oAnQuan, caro };
+
+export type GameRoom = Room<unknown, unknown, unknown, unknown>;
 
 export class RoomManager {
   private readonly rooms = new Map<string, GameRoom>();
@@ -27,7 +32,7 @@ export class RoomManager {
     const room = new Room({
       code: this.newCode(),
       gameId,
-      module: oAnQuan,
+      module: MODULES[gameId],
       host,
       options,
       now,

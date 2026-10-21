@@ -2,7 +2,7 @@
 // Làm việc qua interface `Connection` nên test được mà không cần mạng thật.
 
 import type { Rng } from "@playtogether/engine";
-import type { ClientMessage, ServerMessage } from "@playtogether/protocol";
+import type { ClientMessage, PublicRoom, ServerMessage } from "@playtogether/protocol";
 import { MAX_MESSAGE_BYTES, normalizeName, normalizeRoomCode } from "@playtogether/protocol";
 import { parseClientMessage } from "./parse.ts";
 import { RoomError } from "./room.ts";
@@ -118,9 +118,20 @@ export class Gateway {
     },
     move: (_conn, s, m) => {
       const room = this.requireRoom(s);
-      const { seat, events } = room.move(this.idOf(s), m.move, m.actionNo);
+      const { seat, move, events } = room.move(this.idOf(s), m.move, m.actionNo);
       for (const [c, cs] of this.inRoom(room)) {
-        c.send({ type: "moveApplied", seat, move: m.move, events, room: room.view(), you: room.you(this.idOf(cs)) });
+        const you = room.you(this.idOf(cs));
+        // Kiểu của move, events, room cùng theo gameId của phòng: đảm bảo bởi MODULES trong room-manager
+        const message = {
+          type: "moveApplied",
+          gameId: room.gameId,
+          seat,
+          move,
+          events,
+          room: this.publicView(room, you.seat),
+          you,
+        };
+        c.send(message as ServerMessage);
       }
     },
     leaveRoom: (_conn, s) => {
@@ -174,7 +185,12 @@ export class Gateway {
     type: "roomJoined" | "roomUpdated" | "gameStarted",
   ): void {
     const you = room.you(this.idOf(s));
-    conn.send({ type, room: room.view(you.seat), you });
+    conn.send({ type, room: this.publicView(room, you.seat), you });
+  }
+
+  /** Phòng ở dạng công khai. Kiểu `game` và `options` theo `gameId` của phòng: đảm bảo bởi MODULES trong room-manager. */
+  private publicView(room: GameRoom, seat: number | null): PublicRoom {
+    return room.view(seat) as PublicRoom;
   }
 
   private *inRoom(room: GameRoom): Generator<[Connection, ConnState]> {

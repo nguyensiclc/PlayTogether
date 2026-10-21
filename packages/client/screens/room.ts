@@ -3,13 +3,12 @@
 
 import type { PublicRoom, RoomPreview, ServerMessage, You } from "@playtogether/protocol";
 import { $ } from "../dom.ts";
+import { GAME_INFO } from "../games.ts";
 import { getClientId, getName, rememberRoom, setName } from "../identity.ts";
 import { GameSocket } from "../net/socket.ts";
-import { GameView } from "./game.ts";
+import { createGameScreen, type GameScreen, type RoomMessage } from "./game-screen.ts";
 import { LobbyView } from "./lobby.ts";
 import { showNickname } from "./nickname.ts";
-
-type RoomMessage = Extract<ServerMessage, { room: PublicRoom }>;
 
 export async function mountRoom(root: HTMLElement, code: string): Promise<void> {
   if (getName()) {
@@ -55,7 +54,7 @@ class RoomScreen {
   private readonly banner: HTMLElement;
   private readonly body: HTMLElement;
   private lobby: LobbyView | null = null;
-  private game: GameView | null = null;
+  private game: GameScreen | null = null;
   /** Người dùng bấm "Về phòng chờ" ở màn kết quả */
   private wantLobby = false;
   private room: PublicRoom | null = null;
@@ -102,6 +101,7 @@ class RoomScreen {
   private update(m: RoomMessage): void {
     this.room = m.room;
     this.you = m.you;
+    document.title = `Phòng ${m.room.code} · ${GAME_INFO[m.room.gameId].name}`;
     rememberRoom({
       code: m.room.code,
       gameId: m.room.gameId,
@@ -120,7 +120,7 @@ class RoomScreen {
       return;
     }
     this.lobby = null;
-    this.game = new GameView(this.body, m.room, m.you, {
+    this.game = createGameScreen(this.body, m.room, m.you, {
       move: (move, actionNo) => this.socket.send({ type: "move", move, actionNo }),
       rematch: () => this.socket.send({ type: "rematch" }),
       toLobby: () => {

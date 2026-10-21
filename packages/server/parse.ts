@@ -1,6 +1,7 @@
 // Kiểm tra message client gửi lên trước khi xử lý (kỹ thuật mục 10): chỉ nhận đúng kiểu và đúng định dạng.
 
 import type { ClientMessage } from "@playtogether/protocol";
+import { isGameId } from "@playtogether/protocol";
 
 /** clientId do client tự sinh (UUID): chỉ chữ, số, gạch ngang, 8–64 ký tự */
 const CLIENT_ID_RE = /^[A-Za-z0-9-]{8,64}$/;
@@ -17,8 +18,8 @@ const PARSERS: Record<ClientMessage["type"], (m: Raw) => ClientMessage | null> =
       ? { type: "hello", clientId: m.clientId, name: m.name }
       : null,
   createRoom: (m) =>
-    m.gameId === "o-an-quan"
-      ? { type: "createRoom", gameId: "o-an-quan", ...(isObject(m.options) ? { options: m.options } : {}) }
+    isGameId(m.gameId)
+      ? { type: "createRoom", gameId: m.gameId, ...(isObject(m.options) ? { options: m.options } : {}) }
       : null,
   joinRoom: (m) => (typeof m.code === "string" ? { type: "joinRoom", code: m.code } : null),
   takeSeat: (m) => (isInt(m.seat) ? { type: "takeSeat", seat: m.seat } : null),
@@ -26,23 +27,11 @@ const PARSERS: Record<ClientMessage["type"], (m: Raw) => ClientMessage | null> =
   // Giá trị từng tuỳ chọn do engine kiểm tra (parseOptions)
   setOptions: (m) => (isObject(m.options) ? { type: "setOptions", options: m.options } : null),
   start: () => ({ type: "start" }),
-  move: (m) => {
-    const move = parseMove(m.move);
-    return move && isInt(m.actionNo) ? { type: "move", move, actionNo: m.actionNo } : null;
-  },
+  // Hình dạng của nước đi tuỳ game nên do module game kiểm tra ở Room.move (parseMove)
+  move: (m) => (isObject(m.move) && isInt(m.actionNo) ? { type: "move", move: m.move, actionNo: m.actionNo } : null),
   rematch: () => ({ type: "rematch" }),
   leaveRoom: () => ({ type: "leaveRoom" }),
 };
-
-/** Nước đi: chỉ kiểm tra hình dạng; đúng luật hay không do engine quyết định */
-function parseMove(raw: unknown): Extract<ClientMessage, { type: "move" }>["move"] | null {
-  if (!isObject(raw)) return null;
-  if (raw.kind === "latBan") return { kind: "latBan" };
-  if (raw.kind === "sow" && isInt(raw.square) && (raw.dir === 1 || raw.dir === -1)) {
-    return { kind: "sow", square: raw.square, dir: raw.dir };
-  }
-  return null;
-}
 
 /** Đọc một message dạng chuỗi JSON. Sai JSON, sai loại hoặc sai định dạng thì trả về null. */
 export function parseClientMessage(text: string): ClientMessage | null {

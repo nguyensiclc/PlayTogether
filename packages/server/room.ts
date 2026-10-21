@@ -152,18 +152,21 @@ export class Room<S, M, O, E> {
     this.startGame(rng);
   }
 
-  move(clientId: string, move: M, actionNo: number): { seat: SeatId; events: E[] } {
+  /** `rawMove` là dữ liệu client gửi lên: module game kiểm tra hình dạng, rồi luật quyết định có hợp lệ không */
+  move(clientId: string, rawMove: unknown, actionNo: number): { seat: SeatId; move: M; events: E[] } {
     this.member(clientId);
     if (this.status !== "playing" || !this.game) throw new RoomError("WRONG_STATUS");
     const seat = this.seatOf(clientId);
     if (seat === null) throw new RoomError("NOT_SEATED");
     if (actionNo !== this.actionNo) throw new RoomError("STALE_MOVE");
+    const move = this.module.parseMove(rawMove);
+    if (move === null) throw new RoomError("INVALID_MOVE");
     const r = this.module.applyMove(this.game, seat, move);
     if ("error" in r) throw new RoomError(r.error === "NOT_YOUR_TURN" ? "NOT_YOUR_TURN" : "INVALID_MOVE");
     this.game = r.state;
     this.actionNo++;
     if (this.module.result(this.game)) this.status = "finished";
-    return { seat, events: r.events };
+    return { seat, move, events: r.events };
   }
 
   /** Bỏ phiếu Ván nữa; mọi người ngồi ghế đều bấm thì bắt đầu ngay. Trả về true nếu đã bắt đầu. */

@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import { type Connection, Gateway, RATE_LIMIT_PER_SECOND } from "./gateway.ts";
 import { parseClientMessage } from "./parse.ts";
 import { EMPTY_ROOM_TTL_MS, RoomManager } from "./room-manager.ts";
+import { asCaro, asOAnQuan } from "./test-utils.ts";
 
 class FakeConn implements Connection {
   readonly inbox: ServerMessage[] = [];
@@ -50,6 +51,12 @@ describe("parseClientMessage", () => {
       actionNo: 2,
     });
     expect(parseClientMessage('{"type":"hello","clientId":"abcd-1234-efgh","name":"Mèo"}')?.type).toBe("hello");
+    expect(parseClientMessage('{"type":"createRoom","gameId":"caro"}')).toEqual({ type: "createRoom", gameId: "caro" });
+    expect(parseClientMessage('{"type":"move","move":{"x":1,"y":2},"actionNo":4}')).toEqual({
+      type: "move",
+      move: { x: 1, y: 2 },
+      actionNo: 4,
+    });
   });
 
   it("từ chối JSON hỏng, loại lạ, thiếu trường, sai kiểu", () => {
@@ -59,10 +66,11 @@ describe("parseClientMessage", () => {
       '{"type":"xoaPhong"}',
       '{"type":"__proto__"}',
       '{"type":"hello","clientId":"ngắn","name":"A"}',
-      '{"type":"move","move":{"kind":"sow","square":3,"dir":2},"actionNo":1}',
       '{"type":"move","move":{"kind":"sow","square":3,"dir":1}}',
       '{"type":"takeSeat","seat":"0"}',
       '{"type":"createRoom","gameId":"co-tuong"}',
+      '{"type":"move","move":"3,4","actionNo":1}',
+      '{"type":"move","move":{"x":1,"y":2}}',
     ]) {
       expect(parseClientMessage(bad), bad).toBeNull();
     }
@@ -107,7 +115,7 @@ describe("Gateway", () => {
     send(host, { type: "createRoom", gameId: "o-an-quan", options: { latBan: true } });
     const code = host.last("roomJoined").room.code;
     expect(host.last("roomJoined").you.seat).toBe(0);
-    expect(host.last("roomJoined").room.options.latBan).toBe(true);
+    expect(asOAnQuan(host.last("roomJoined").room).options.latBan).toBe(true);
 
     const guest = connect("client-guest-1", "  Mèo   Mun  ");
     send(guest, { type: "joinRoom", code: code.toLowerCase() });
@@ -131,7 +139,7 @@ describe("Gateway", () => {
     send(host, { type: "start" });
     const started = host.last("gameStarted");
     expect(guest.last("gameStarted").room.actionNo).toBe(started.room.actionNo);
-    const game = started.room.game!;
+    const game = asOAnQuan(started.room).game!;
     const moverSeat = game.controller[game.turn];
     const mover = moverSeat === host.last("gameStarted").you.seat ? host : guest;
     const move = oAnQuan.validMoves(game, moverSeat).find((m) => m.kind === "sow")!;
@@ -180,6 +188,62 @@ describe("Gateway", () => {
     send(c, { type: "leaveSeat" });
     expect(c.closed).toBe("rate-limited");
     tick(1000);
+  });
+
+  it("hai game cùng chạy trong một server: phòng Caro và phòng Ô ăn quan độc lập", () => {
+    const { connect, send } = setup();
+    const a = connect("client-host-aaa", "A");
+    const b = connect("client-host-bbb", "B");
+    send(a, { type: "createRoom", gameId: "caro", options: { kichThuoc: 19, chanHaiDau: true } });
+    send(b, { type: "createRoom", gameId: "o-an-quan" });
+    const caroRoom = asCaro(a.last("roomJoined").room);
+    const oaqRoom = asOAnQuan(b.last("roomJoined").room);
+    expect(caroRoom.code).not.toBe(oaqRoom.code);
+    expect(caroRoom.options).toMatchObject({ kichThuoc: 19, chanHaiDau: true });
+    expect(oaqRoom.options.giaTriQuan).toBe(10);
+  });
+
+  it("chơi Cờ caro qua gateway tới khi thắng; nước sai hình dạng và sai luật bị từ chối", () => {
+    const { connect, send } = setup();
+    const host = connect("client-host-1", "A");
+    send(host, { type: "createRoom", gameId: "caro" });
+    const guest = connect("client-guest-1", "B");
+    send(guest, { type: "joinRoom", code: host.last("roomJoined").room.code });
+    send(host, { type: "start" });
+    const started = asCaro(host.last("gameStarted").room);
+    const game = started.game!;
+    const [xSeat, oSeat] = game.players;
+    const byConn = (seat: number) => (seat === host.last("gameStarted").you.seat ? host : guest);
+    let actionNo = started.actionNo;
+    const step = (seat: number, x: number, y: number) => {
+      send(byConn(seat), { type: "move", move: { x, y }, actionNo });
+      actionNo++;
+    };
+    // Nước của Ô ăn quan gửi vào phòng Caro: sai hình dạng
+    send(byConn(xSeat), { type: "move", move: { kind: "sow", square: 3, dir: 1 }, actionNo });
+    expect(byConn(xSeat).last("error").code).toBe("INVALID_MOVE");
+    // Ngoài bàn: đúng hình dạng nhưng sai luật
+    send(byConn(xSeat), { type: "move", move: { x: 99, y: 0 }, actionNo });
+    expect(byConn(xSeat).last("error").code).toBe("INVALID_MOVE");
+    // Sai lượt
+    send(byConn(oSeat), { type: "move", move: { x: 0, y: 0 }, actionNo });
+    expect(byConn(oSeat).last("error").code).toBe("NOT_YOUR_TURN");
+
+    for (let k = 0; k < 4; k++) {
+      step(xSeat, 3 + k, 3);
+      step(oSeat, 3 + k, 5);
+    }
+    step(xSeat, 7, 3);
+    const last = host.last("moveApplied");
+    expect(last.gameId).toBe("caro");
+    if (last.gameId !== "caro") return;
+    expect(last.events.map((e) => e.t)).toEqual(["place", "win", "gameOver"]);
+    expect(last.room.status).toBe("finished");
+    expect(last.room.game?.result).toMatchObject({ winner: xSeat, reason: "nam-quan" });
+    expect(guest.last("moveApplied").room.actionNo).toBe(last.room.actionNo);
+    // Ván đã kết thúc
+    send(byConn(oSeat), { type: "move", move: { x: 0, y: 0 }, actionNo });
+    expect(byConn(oSeat).last("error").code).toBe("WRONG_STATUS");
   });
 
   it("message quá 4KB bị ngắt", () => {

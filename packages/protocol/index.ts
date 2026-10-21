@@ -2,9 +2,27 @@
 // Chỉ có kiểu dữ liệu và vài hàm thuần chuẩn hoá đầu vào, không I/O.
 
 import type { SeatId } from "@playtogether/engine";
-import type { GameEvent, Move, Options, State } from "@playtogether/engine/o-an-quan";
+import type {
+  GameEvent as CaroEvent,
+  Move as CaroMove,
+  Options as CaroOptions,
+  State as CaroState,
+} from "@playtogether/engine/caro";
+import type {
+  GameEvent as OAnQuanEvent,
+  Move as OAnQuanMove,
+  Options as OAnQuanOptions,
+  State as OAnQuanState,
+} from "@playtogether/engine/o-an-quan";
 
-export type GameId = "o-an-quan";
+/** Các game đã có. Thêm game mới = thêm một giá trị ở đây, một module engine và một màn hình client. */
+export const GAME_IDS = ["o-an-quan", "caro"] as const;
+export type GameId = (typeof GAME_IDS)[number];
+
+export function isGameId(value: unknown): value is GameId {
+  return (GAME_IDS as readonly unknown[]).includes(value);
+}
+
 /** "finished" cũng được coi là phòng chờ: chủ phòng chỉnh tuỳ chọn và bắt đầu ván mới được */
 export type RoomStatus = "lobby" | "playing" | "finished";
 
@@ -19,9 +37,9 @@ export interface PublicMember {
 }
 
 /** Phòng ở dạng công khai, gửi cho mọi người trong phòng. `S`, `O` là state và tuỳ chọn của game. */
-export interface PublicRoomOf<S, O> {
+export interface PublicRoomOf<S, O, G extends GameId = GameId> {
   code: string;
-  gameId: GameId;
+  gameId: G;
   /** `id` công khai của chủ phòng */
   hostId: string;
   /** Độ dài = số người chơi tối đa; null là ghế trống */
@@ -38,8 +56,11 @@ export interface PublicRoomOf<S, O> {
   nextFirst: SeatId | null;
 }
 
-/** Phòng Ô ăn quan, game duy nhất hiện có */
-export type PublicRoom = PublicRoomOf<State, Options>;
+export type OAnQuanRoom = PublicRoomOf<OAnQuanState, OAnQuanOptions, "o-an-quan">;
+export type CaroRoom = PublicRoomOf<CaroState, CaroOptions, "caro">;
+
+/** Phòng của một trong các game; client thu hẹp kiểu bằng `room.gameId` */
+export type PublicRoom = OAnQuanRoom | CaroRoom;
 
 /** Người nhận message là ai trong phòng */
 export interface You {
@@ -60,13 +81,14 @@ export interface RoomPreview {
 
 export type ClientMessage =
   | { type: "hello"; clientId: string; name: string }
-  | { type: "createRoom"; gameId: GameId; options?: Partial<Options> }
+  // Tuỳ chọn và nước đi là dữ liệu của từng game: server kiểm tra bằng parseOptions / parseMove của module game
+  | { type: "createRoom"; gameId: GameId; options?: object }
   | { type: "joinRoom"; code: string }
   | { type: "takeSeat"; seat: SeatId }
   | { type: "leaveSeat" }
-  | { type: "setOptions"; options: Partial<Options> }
+  | { type: "setOptions"; options: object }
   | { type: "start" }
-  | { type: "move"; move: Move; actionNo: number }
+  | { type: "move"; move: object; actionNo: number }
   | { type: "rematch" }
   | { type: "leaveRoom" };
 
@@ -74,9 +96,21 @@ export type ServerMessage =
   | { type: "roomJoined"; room: PublicRoom; you: You }
   | { type: "roomUpdated"; room: PublicRoom; you: You }
   | { type: "gameStarted"; room: PublicRoom; you: You }
-  | { type: "moveApplied"; seat: SeatId; move: Move; events: GameEvent[]; room: PublicRoom; you: You }
+  | MoveApplied<"o-an-quan", OAnQuanMove, OAnQuanEvent, OAnQuanRoom>
+  | MoveApplied<"caro", CaroMove, CaroEvent, CaroRoom>
   | { type: "leftRoom" }
   | { type: "error"; code: ErrorCode; message: string };
+
+/** Nước đi đã được áp dụng. `gameId` ở ngoài cùng để client thu hẹp kiểu của `move`, `events` và `room` cùng lúc. */
+export interface MoveApplied<G extends GameId, M, E, R> {
+  type: "moveApplied";
+  gameId: G;
+  seat: SeatId;
+  move: M;
+  events: E[];
+  room: R;
+  you: You;
+}
 
 export type ErrorCode =
   | "BAD_MESSAGE"
