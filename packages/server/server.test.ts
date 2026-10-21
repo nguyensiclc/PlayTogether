@@ -7,7 +7,7 @@ import type { ClientMessage, PublicRoom, RoomPreview, ServerMessage } from "@pla
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { type RunningServer, startServer } from "./index.ts";
-import { asCaro, asOAnQuan } from "./test-utils.ts";
+import { asCaro, asCoVua, asOAnQuan } from "./test-utils.ts";
 
 let srv: RunningServer;
 
@@ -180,6 +180,80 @@ describe("server thật qua WebSocket", () => {
     guest.send({ type: "rematch" });
     const again = asCaro(roomOf(await host.waitFor((m) => m.type === "gameStarted", fromHost)));
     expect(again.game?.players[0]).toBe(room.nextFirst);
+    host.close();
+    guest.close();
+  }, 30_000);
+
+  it("Cờ vua: tạo phòng, đi quân qua WebSocket, đồng bộ trạng thái, xin thua và ván nữa", async () => {
+    const host = new TestClient(srv.port);
+    const guest = new TestClient(srv.port);
+    await Promise.all([host.ready(), guest.ready()]);
+
+    host.send({ type: "hello", clientId: "co-vua-host-0001", name: "Trắng" });
+    guest.send({ type: "hello", clientId: "co-vua-guest-0001", name: "Đen" });
+
+    host.send({ type: "createRoom", gameId: "co-vua" });
+    const code = roomOf(await host.waitFor((m) => m.type === "roomJoined")).code;
+
+    guest.send({ type: "joinRoom", code });
+    await guest.waitFor((m) => m.type === "roomJoined");
+
+    const fromHostStart = host.count;
+    const fromGuestStart = guest.count;
+    host.send({ type: "start" });
+    const started = (await host.waitFor((m) => m.type === "gameStarted", fromHostStart)) as Extract<
+      ServerMessage,
+      { type: "gameStarted" }
+    >;
+    await guest.waitFor((m) => m.type === "gameStarted", fromGuestStart);
+
+    let room = asCoVua(started.room);
+    expect(room.gameId).toBe("co-vua");
+    expect(room.game?.turn).toBe("w");
+
+    const whiteClient = room.game!.players[0] === 0 ? host : guest;
+    const blackClient = room.game!.players[0] === 0 ? guest : host;
+
+    // Nước 1: Trắng đi e2 -> e4 (12 -> 28)
+    const fromHostMove1 = host.count;
+    const fromGuestMove1 = guest.count;
+    whiteClient.send({ type: "move", move: { from: 12, to: 28 }, actionNo: room.actionNo });
+
+    const move1Host = (await host.waitFor((m) => m.type === "moveApplied", fromHostMove1)) as Extract<
+      ServerMessage,
+      { type: "moveApplied" }
+    >;
+    const move1Guest = (await guest.waitFor((m) => m.type === "moveApplied", fromGuestMove1)) as Extract<
+      ServerMessage,
+      { type: "moveApplied" }
+    >;
+    expect(move1Host.gameId).toBe("co-vua");
+    expect(move1Guest.gameId).toBe("co-vua");
+
+    room = asCoVua(move1Host.room);
+    expect(room.game?.turn).toBe("b");
+    expect(room.game?.board[28]?.type).toBe("p");
+
+    // Nước 2: Đen đi e7 -> e5 (52 -> 36)
+    const fromHostMove2 = host.count;
+    const fromGuestMove2 = guest.count;
+    blackClient.send({ type: "move", move: { from: 52, to: 36 }, actionNo: room.actionNo });
+
+    const move2Host = (await host.waitFor((m) => m.type === "moveApplied", fromHostMove2)) as Extract<
+      ServerMessage,
+      { type: "moveApplied" }
+    >;
+    await guest.waitFor((m) => m.type === "moveApplied", fromGuestMove2);
+    room = asCoVua(move2Host.room);
+    expect(room.game?.turn).toBe("w");
+
+    // Guest (ghế 1) rời phòng -> Host (ghế 0) thắng
+    const fromHostLeave = host.count;
+    guest.send({ type: "leaveRoom" });
+    const finishedRoom = asCoVua(roomOf(await host.waitFor((m) => m.type === "roomUpdated", fromHostLeave)));
+    expect(finishedRoom.status).toBe("finished");
+    expect(finishedRoom.game?.result?.winner).toBe(0);
+
     host.close();
     guest.close();
   }, 30_000);

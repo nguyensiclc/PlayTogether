@@ -52,6 +52,7 @@ export function mountHome(root: HTMLElement): void {
             <p class="join-error small" hidden>Mã phòng gồm 4 ký tự, vd ABCD.</p>
             <div class="cta desk-only">
               <button class="btn primary" type="button" data-create="${FEATURED?.id}">Tạo phòng ${FEATURED?.info.name}</button>
+              ${FEATURED && gameOf(FEATURED.id).botSupported ? `<button class="btn secondary" type="button" data-create-bot="${FEATURED.id}">🤖 Chơi với máy</button>` : ""}
               <a class="btn ghost" href="#tat-ca">Xem tất cả trò chơi ↓</a>
             </div>
             <div class="steps desk-only"><div><b>1</b>Chọn trò</div><div><b>2</b>Gửi link</div><div><b>3</b>Chơi ngay</div></div>
@@ -66,7 +67,10 @@ export function mountHome(root: HTMLElement): void {
                   <h2>${FEATURED?.info.name}</h2>
                   <div class="meta"><span class="chip">👥 ${FEATURED?.info.players}</span><span class="chip">⏱ ${FEATURED?.info.duration}</span><span class="chip">${FEATURED ? CATEGORY_NAME[FEATURED.info.category] : ""}</span></div>
                 </div>
-                <div class="actions"><button class="btn primary" type="button" data-create="${FEATURED?.id}">Tạo phòng</button></div>
+                <div class="actions">
+                  <button class="btn primary" type="button" data-create="${FEATURED?.id}">Tạo phòng</button>
+                  ${FEATURED && gameOf(FEATURED.id).botSupported ? `<button class="btn secondary" type="button" data-create-bot="${FEATURED.id}">🤖 Chơi với máy</button>` : ""}
+                </div>
               </div>
             </article>
           </div>
@@ -109,7 +113,16 @@ export function mountHome(root: HTMLElement): void {
     });
   }
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-create]")) {
-    btn.addEventListener("click", () => createRoom(root, btn.dataset.create as GameId));
+    btn.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest("[data-create-bot]")) return;
+      createRoom(root, btn.dataset.create as GameId);
+    });
+  }
+  for (const btn of root.querySelectorAll<HTMLElement>("[data-create-bot]")) {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      createRoomWithBot(root, btn.dataset.createBot as GameId);
+    });
   }
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-rules]")) {
     btn.addEventListener("click", () => showRules(btn.dataset.rules as GameId));
@@ -182,6 +195,30 @@ function createRoom(root: HTMLElement, gameId: GameId): void {
   socket.connect();
 }
 
+/** Tạo phòng kèm thêm sẵn Bot để chơi một mình (UX mục 6) */
+function createRoomWithBot(root: HTMLElement, gameId: GameId, level = "medium"): void {
+  for (const b of root.querySelectorAll<HTMLButtonElement>("[data-create], [data-create-bot]")) b.disabled = true;
+  let sent = false;
+  const socket = new GameSocket(() => {
+    if (sent) return [];
+    sent = true;
+    return [
+      { type: "hello", clientId: getClientId(), name: currentName() },
+      { type: "createRoom", gameId },
+    ];
+  });
+  socket.onMessage((m) => {
+    if (m.type === "roomJoined") {
+      socket.send({ type: "addBot", seat: 1, level });
+      location.assign(roomPath(m.room.code));
+    }
+    if (m.type === "error" && m.code === "ALREADY_HOSTING") {
+      showHostLimit(root, m.message);
+    }
+  });
+  socket.connect();
+}
+
 /** Báo đang làm chủ một phòng khác và cho vào lại phòng đó */
 function showHostLimit(root: HTMLElement, code: string): void {
   for (const b of root.querySelectorAll<HTMLButtonElement>("[data-create]")) b.disabled = false;
@@ -236,7 +273,11 @@ function gameCard(g: GameCardInfo): string {
     return `<div class="game soon" data-cat="${g.category}" aria-disabled="true">${ico}
       <div class="row"><div><div class="nm">${g.name}</div><div class="mt">${meta}</div></div></div></div>`;
   }
+  const hasBot = gameOf(g.gameId).botSupported;
+  const botBtn = hasBot
+    ? `<span class="btn ghost sm desk-only" data-create-bot="${g.gameId}" style="margin-right:6px">🤖 Với máy</span>`
+    : "";
   return `<button type="button" class="game playable" data-create="${g.gameId}" data-cat="${g.category}">${ico}
     <div class="row"><div><div class="nm">${g.name}</div><div class="mt">${meta}</div></div>
-    <span class="btn primary sm desk-only">Tạo phòng</span></div></button>`;
+    <div style="display:flex;align-items:center">${botBtn}<span class="btn primary sm desk-only">Tạo phòng</span></div></div></button>`;
 }

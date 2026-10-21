@@ -15,6 +15,12 @@ import type {
   State as CoTuongState,
 } from "@playtogether/engine/co-tuong";
 import type {
+  GameEvent as CoVuaEvent,
+  Move as CoVuaMove,
+  Options as CoVuaOptions,
+  State as CoVuaState,
+} from "@playtogether/engine/co-vua";
+import type {
   GameEvent as OAnQuanEvent,
   Move as OAnQuanMove,
   Options as OAnQuanOptions,
@@ -22,7 +28,7 @@ import type {
 } from "@playtogether/engine/o-an-quan";
 
 /** Các game đã có. Thêm game mới = thêm một giá trị ở đây, một module engine và một màn hình client. */
-export const GAME_IDS = ["o-an-quan", "caro", "co-tuong"] as const;
+export const GAME_IDS = ["o-an-quan", "caro", "co-tuong", "co-vua"] as const;
 export type GameId = (typeof GAME_IDS)[number];
 
 export function isGameId(value: unknown): value is GameId {
@@ -40,6 +46,8 @@ export interface PublicMember {
   id: string;
   name: string;
   connected: boolean;
+  isBot?: boolean;
+  botLevel?: string;
 }
 
 export interface MatchScore {
@@ -73,14 +81,18 @@ export interface PublicRoomOf<S, O, G extends GameId = GameId> {
   wins: number[];
   /** Thông tin trận đấu nhiều ván khi options.targetScore !== null; null khi options.targetScore === null */
   match: MatchScore | null;
+  /** Game này có hỗ trợ đánh với máy không */
+  botSupported?: boolean;
+  botLevels?: readonly { id: string; name: string }[];
 }
 
 export type OAnQuanRoom = PublicRoomOf<OAnQuanState, OAnQuanOptions, "o-an-quan">;
 export type CaroRoom = PublicRoomOf<CaroState, CaroOptions, "caro">;
 export type CoTuongRoom = PublicRoomOf<CoTuongState, CoTuongOptions, "co-tuong">;
+export type CoVuaRoom = PublicRoomOf<CoVuaState, CoVuaOptions, "co-vua">;
 
 /** Phòng của một trong các game; client thu hẹp kiểu bằng `room.gameId` */
-export type PublicRoom = OAnQuanRoom | CaroRoom | CoTuongRoom;
+export type PublicRoom = OAnQuanRoom | CaroRoom | CoTuongRoom | CoVuaRoom;
 
 /** Người nhận message là ai trong phòng */
 export interface You {
@@ -106,6 +118,8 @@ export type ClientMessage =
   | { type: "joinRoom"; code: string }
   | { type: "takeSeat"; seat: SeatId }
   | { type: "leaveSeat" }
+  | { type: "addBot"; seat: SeatId; level: string }
+  | { type: "removeBot"; seat: SeatId }
   | { type: "setOptions"; options: object }
   | { type: "start" }
   | { type: "move"; move: object; actionNo: number }
@@ -121,6 +135,7 @@ export type ServerMessage =
   | MoveApplied<"o-an-quan", OAnQuanMove, OAnQuanEvent, OAnQuanRoom>
   | MoveApplied<"caro", CaroMove, CaroEvent, CaroRoom>
   | MoveApplied<"co-tuong", CoTuongMove, CoTuongEvent, CoTuongRoom>
+  | MoveApplied<"co-vua", CoVuaMove, CoVuaEvent, CoVuaRoom>
   | { type: "leftRoom" }
   | { type: "error"; code: ErrorCode; message: string };
 
@@ -150,7 +165,8 @@ export type ErrorCode =
   | "NOT_YOUR_TURN"
   | "INVALID_MOVE"
   | "STALE_MOVE"
-  | "RATE_LIMITED";
+  | "RATE_LIMITED"
+  | "BOT_NOT_SUPPORTED";
 
 /** Mã phòng: 4 ký tự, bỏ các ký tự dễ nhầm 0 O 1 I L (kỹ thuật mục 6) */
 export const ROOM_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";

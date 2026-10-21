@@ -290,4 +290,42 @@ describe("Gateway", () => {
     gw.message(c, JSON.stringify({ type: "hello", clientId: "client-0001", name: "x".repeat(5000) }));
     expect(c.closed).toBe("rate-limited");
   });
+
+  it("Cờ vua: thêm bot, bắt đầu ván và bot tự đánh với botDelayMs = 0", () => {
+    const t = 1_000;
+    const rooms = new RoomManager(createRng(7));
+    const gw = new Gateway({ rooms, rng: createRng(9), now: () => t, botDelayMs: 0 });
+    const c = new FakeConn();
+    gw.open(c);
+    const send = (m: ClientMessage) => gw.message(c, JSON.stringify(m));
+    send({ type: "hello", clientId: "client-host", name: "Cờ Thủ" });
+    send({ type: "createRoom", gameId: "co-vua" });
+    const created = c.last("roomJoined");
+    expect(created.room.botSupported).toBe(true);
+
+    // Thêm bot ở ghế 1
+    send({ type: "addBot", seat: 1, level: "easy" });
+    const updated = c.last("roomUpdated");
+    expect(updated.room.seats[1]?.name).toBe("Máy (Dễ)");
+    expect(updated.room.seats[1]?.isBot).toBe(true);
+
+    // Bắt đầu ván
+    send({ type: "start" });
+    const started = c.last("gameStarted");
+    expect(started.room.status).toBe("playing");
+
+    // Nếu bot đi trước (ghế 1), bot sẽ tự đánh ngay lập tức
+    // Nếu host đi trước (ghế 0), host đánh nước đầu tiên, sau đó bot tự đánh trả lời
+    if (c.inbox.some((m) => m.type === "moveApplied")) {
+      const lastMove = c.last("moveApplied");
+      expect(lastMove.seat).toBe(1);
+    } else {
+      // Host đi e2 -> e4: from: 12, to: 28
+      send({ type: "move", move: { from: 12, to: 28 }, actionNo: started.room.actionNo });
+      // Sau khi host đi, botDelayMs = 0 nên bot tự động đi nước đáp trả
+      const botMove = c.last("moveApplied");
+      expect(botMove.seat).toBe(1);
+      expect(botMove.room.actionNo).toBe(started.room.actionNo + 2);
+    }
+  });
 });

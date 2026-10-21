@@ -72,4 +72,6 @@ export interface ClientGame {
   historyHtml(): string;
   /** Dựng màn hình chơi; `room.gameId` luôn bằng `id` */
   createScreen(root: HTMLElement, room: PublicRoom, you: You, actions: GameActions): GameScreen;
+  /** Game này có hỗ trợ chơi với máy không */
+  botSupported?: boolean;
 }

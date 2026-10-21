@@ -1,6 +1,13 @@
 // Test lớp phòng (kỹ thuật mục 6, UX mục 2.3, Q22). Chạy với engine Ô ăn quan thật, không cần mạng.
 
 import { createRng, pickRandom } from "@playtogether/engine";
+import {
+  type GameEvent as CoVuaEvent,
+  type Move as CoVuaMove,
+  type Options as CoVuaOptions,
+  type State as CoVuaState,
+  coVua,
+} from "@playtogether/engine/co-vua";
 import type { GameEvent, Move, Options, State } from "@playtogether/engine/o-an-quan";
 import { oAnQuan } from "@playtogether/engine/o-an-quan";
 import { describe, expect, it } from "vitest";
@@ -349,5 +356,68 @@ describe("Đấu trận nhiều ván (targetScore)", () => {
     expect(room.view().match).not.toBeNull();
     room.setOptions(HOST.clientId, { targetScore: 200 });
     expect(room.view().match).toBeNull();
+  });
+
+  describe("Đánh với máy (Bot)", () => {
+    function makeChessRoom(): Room<CoVuaState, CoVuaMove, CoVuaOptions, CoVuaEvent> {
+      let n = 0;
+      return new Room({
+        code: "CHSS",
+        gameId: "co-vua",
+        module: coVua,
+        host: HOST,
+        newMemberId: () => `m${++n}`,
+        now: 0,
+      });
+    }
+
+    it("hiện botSupported và danh sách botLevels trong phòng Cờ vua", () => {
+      const room = makeChessRoom();
+      const v = room.view();
+      expect(v.botSupported).toBe(true);
+      expect(v.botLevels).toEqual([
+        { id: "easy", name: "Dễ" },
+        { id: "medium", name: "Trung bình" },
+        { id: "hard", name: "Khó" },
+      ]);
+    });
+
+    it("chủ phòng có thể thêm và gỡ máy ở ghế trống", () => {
+      const room = makeChessRoom();
+      room.addBot(HOST.clientId, 1, "medium");
+      let v = room.view();
+      expect(v.seats[1]?.name).toBe("Máy (Trung bình)");
+      expect(v.seats[1]?.isBot).toBe(true);
+      expect(v.seats[1]?.botLevel).toBe("medium");
+
+      // Gỡ bot
+      room.removeBot(HOST.clientId, 1);
+      v = room.view();
+      expect(v.seats[1]).toBeNull();
+    });
+
+    it("từ chối thêm bot nếu không phải chủ phòng hoặc ghế đã có người", () => {
+      const room = makeChessRoom();
+      room.join(GUEST, 1); // GUEST ngồi ghế 1
+      expect(errorCode(() => room.addBot(GUEST.clientId, 1, "easy"))).toBe("NOT_HOST");
+      expect(errorCode(() => room.addBot(HOST.clientId, 1, "easy"))).toBe("SEAT_TAKEN");
+    });
+
+    it("bắt đầu ván với bot và bot tự động vote rematch", () => {
+      const room = makeChessRoom();
+      room.addBot(HOST.clientId, 1, "easy");
+      // Bắt đầu ván
+      room.start(HOST.clientId, createRng(1));
+      expect(room.view().status).toBe("playing");
+
+      // Giả lập kết thúc ván: xử thua host
+      room.forfeit(HOST.clientId);
+      expect(room.view().status).toBe("finished");
+
+      // Host bấm Ván nữa -> bot tự động vote rematch và ván mới bắt đầu ngay!
+      const started = room.rematch(HOST.clientId, createRng(2));
+      expect(started).toBe(true);
+      expect(room.view().status).toBe("playing");
+    });
   });
 });

@@ -28,6 +28,7 @@ export interface GatewayDeps {
   rooms: RoomManager;
   rng: Rng;
   now: () => number;
+  botDelayMs?: number;
 }
 
 type Handlers = {
@@ -111,30 +112,25 @@ export class Gateway {
     },
     takeSeat: (_conn, s, m) => this.act(s, (room, id) => room.takeSeat(id, m.seat)),
     leaveSeat: (_conn, s) => this.act(s, (room, id) => room.leaveSeat(id)),
+    addBot: (_conn, s, m) => this.act(s, (room, id) => room.addBot(id, m.seat, m.level)),
+    removeBot: (_conn, s, m) => this.act(s, (room, id) => room.removeBot(id, m.seat)),
     setOptions: (_conn, s, m) => this.act(s, (room, id) => room.setOptions(id, m.options)),
-    start: (_conn, s) => this.act(s, (room, id) => room.start(id, this.deps.rng), "gameStarted"),
+    start: (_conn, s) => {
+      this.act(s, (room, id) => room.start(id, this.deps.rng), "gameStarted");
+      const room = this.roomOf(s);
+      if (room) this.checkBotTurn(room);
+    },
     rematch: (_conn, s) => {
       const room = this.requireRoom(s);
       const started = room.rematch(this.idOf(s), this.deps.rng);
       this.broadcast(room, null, started ? "gameStarted" : "roomUpdated");
+      if (started) this.checkBotTurn(room);
     },
     move: (_conn, s, m) => {
       const room = this.requireRoom(s);
       const { seat, move, events } = room.move(this.idOf(s), m.move, m.actionNo);
-      for (const [c, cs] of this.inRoom(room)) {
-        const you = room.you(this.idOf(cs));
-        // Kiểu của move, events, room cùng theo gameId của phòng: đảm bảo bởi MODULES trong room-manager
-        const message = {
-          type: "moveApplied",
-          gameId: room.gameId,
-          seat,
-          move,
-          events,
-          room: this.publicView(room, you.seat),
-          you,
-        };
-        c.send(message as ServerMessage);
-      }
+      this.broadcastMove(room, { seat, move, events });
+      this.checkBotTurn(room);
     },
     resign: (_conn, s) => this.act(s, (room, id) => room.resign(id)),
     leaveRoom: (_conn, s) => {
@@ -179,6 +175,44 @@ export class Gateway {
     type: "roomUpdated" | "gameStarted" = "roomUpdated",
   ): void {
     for (const [c, cs] of this.inRoom(room)) if (c !== except) this.sendTo(c, cs, room, type);
+  }
+
+  private broadcastMove(room: GameRoom, result: { seat: number; move: unknown; events: unknown[] }): void {
+    for (const [c, cs] of this.inRoom(room)) {
+      const you = room.you(this.idOf(cs));
+      const message = {
+        type: "moveApplied",
+        gameId: room.gameId,
+        seat: result.seat,
+        move: result.move,
+        events: result.events,
+        room: this.publicView(room, you.seat),
+        you,
+      };
+      c.send(message as ServerMessage);
+    }
+  }
+
+  private checkBotTurn(room: GameRoom): void {
+    const seat = room.pendingBotSeat();
+    if (seat === null) return;
+    const delay = this.deps.botDelayMs ?? 400;
+    if (delay === 0) {
+      this.executeBotMove(room, seat);
+    } else {
+      setTimeout(() => {
+        if (room.pendingBotSeat() === seat) {
+          this.executeBotMove(room, seat);
+        }
+      }, delay);
+    }
+  }
+
+  private executeBotMove(room: GameRoom, seat: number): void {
+    const result = room.botMove(seat, this.deps.rng);
+    if (!result) return;
+    this.broadcastMove(room, result);
+    this.checkBotTurn(room);
   }
 
   private sendTo(
