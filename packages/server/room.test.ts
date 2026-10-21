@@ -206,6 +206,28 @@ describe("hết ván, ván nữa", () => {
     expect(v.game!.controller[0]).toBe(next);
   });
 
+  it("tỉ số: cộng một ván thắng cho người thắng, giữ qua Ván nữa, về 0 khi có ghế đổi người", () => {
+    const room = fullRoom();
+    expect(room.view().wins).toEqual([0, 0]);
+    let seed = 1;
+    let winner: number | null = null;
+    // Tìm ván có người thắng (Ô ăn quan hiếm khi hoà)
+    while (winner === null) {
+      room.start(HOST.clientId, createRng(seed));
+      playToEnd(room, seed++);
+      winner = room.view().game!.result!.winner;
+      if (winner === null) expect(room.view().wins).toEqual([0, 0]);
+    }
+    const expected = [0, 0];
+    expected[winner] = 1;
+    expect(room.view().wins).toEqual(expected);
+    room.rematch(HOST.clientId, createRng(1));
+    room.rematch(GUEST.clientId, createRng(1));
+    expect(room.view().wins).toEqual(expected);
+    room.leave(GUEST.clientId, 5);
+    expect(room.view().wins).toEqual([0, 0]);
+  });
+
   it("hết ván rồi chủ phòng chỉnh tuỳ chọn và bắt đầu lại từ phòng chờ được", () => {
     const room = fullRoom();
     room.start(HOST.clientId, createRng(5));

@@ -16,6 +16,8 @@ export interface CaroCardState {
   mark: Mark;
   /** Số quân đã đặt */
   placed: number;
+  /** Số ván đã thắng trong phòng (tỉ số giữa hai người) */
+  wins: number;
   /** Chưa ai đi: người cầm X hiện "đi trước" */
   fresh: boolean;
   /** Thẻ của "bạn" (người ngồi dưới) */
@@ -33,6 +35,7 @@ export class CaroPlayerCard {
   private readonly you: HTMLElement;
   private readonly sub: HTMLElement;
   private readonly reconn: HTMLElement;
+  private readonly wins: HTMLElement;
   private readonly icon: SVGElement;
 
   constructor() {
@@ -44,12 +47,14 @@ export class CaroPlayerCard {
         <div class="small muted" data-sub></div>
         <div class="reconn" hidden>Mất kết nối</div>
       </div>
+      <div class="score" title="Số ván thắng"><b data-wins></b><span class="tiny muted">thắng</span></div>
       <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"></svg>`;
     this.avatar = $(this.el, ".avatar");
     this.name = $(this.el, "[data-name]");
     this.you = $(this.el, "[data-you]");
     this.sub = $(this.el, "[data-sub]");
     this.reconn = $(this.el, ".reconn");
+    this.wins = $(this.el, "[data-wins]");
     this.icon = this.el.querySelector("svg") as SVGElement;
   }
 
@@ -58,6 +63,7 @@ export class CaroPlayerCard {
     this.avatar.textContent = who.initials;
     this.name.textContent = who.name;
     this.you.hidden = !s.you;
+    this.wins.textContent = String(s.wins);
     const tail = s.fresh && s.mark === 0 ? "đi trước" : `đã đặt ${s.placed}`;
     this.sub.textContent = `Quân ${MARK_CHAR[s.mark]} · ${tail}`;
     this.icon.innerHTML = MARK_ICON[s.mark];

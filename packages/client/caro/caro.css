@@ -242,3 +242,13 @@
     gap: 4px 14px;
   }
 }
+
+/* Tỉ số */
+.caro-page .player .score {
+  text-align: center;
+  min-width: 34px;
+}
+.result .score-line {
+  font-size: 15px;
+  margin: 10px 0 2px;
+}

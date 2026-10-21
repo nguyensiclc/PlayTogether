@@ -54,6 +54,8 @@ export interface PublicRoomOf<S, O, G extends GameId = GameId> {
   rematchVotes: string[];
   /** Ghế đi trước ở ván sau (người thua ván trước, hoà thì đổi lượt — luật mục 2). null khi chưa có ván nào */
   nextFirst: SeatId | null;
+  /** Số ván thắng của từng ghế trong phòng (theo thứ tự ghế); hoà không tính */
+  wins: number[];
 }
 
 export type OAnQuanRoom = PublicRoomOf<OAnQuanState, OAnQuanOptions, "o-an-quan">;

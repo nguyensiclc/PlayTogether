@@ -59,6 +59,8 @@ export class Room<S, M, O, E> {
   private readonly rematchVotes = new Set<string>();
   /** Ghế đi trước của ván gần nhất, để đổi lượt khi hoà (luật mục 2) */
   private lastFirst: SeatId | null = null;
+  /** Số ván thắng của từng ghế từ khi phòng có đủ người; hoà không tính. Về 0 khi có ghế đổi người. */
+  private wins: number[];
 
   constructor(init: RoomInit<S, M, O, E>) {
     this.code = init.code;
@@ -66,6 +68,7 @@ export class Room<S, M, O, E> {
     this.module = init.module;
     this.newMemberId = init.newMemberId;
     this.seats = Array.from({ length: init.module.maxPlayers }, () => null);
+    this.wins = this.seats.map(() => 0);
     this.options = init.module.parseOptions(init.options, init.module.defaultOptions);
     this.hostClientId = init.host.clientId;
     this.lastActivity = init.now;
@@ -106,10 +109,14 @@ export class Room<S, M, O, E> {
       if (!("error" in r)) {
         this.game = r.state;
         this.status = "finished";
+        this.recordResult();
         forfeited = { events: r.events };
       }
     }
-    if (seat !== null) this.seats[seat] = null;
+    if (seat !== null) {
+      this.seats[seat] = null;
+      this.resetWins();
+    }
     this.members.delete(clientId);
     this.rematchVotes.delete(clientId);
     // Chủ phòng rời đi thì người ngồi ghế còn lại làm chủ phòng (UX mục 2.3)
@@ -126,6 +133,7 @@ export class Room<S, M, O, E> {
     const current = this.seatOf(clientId);
     if (current !== null) this.seats[current] = null;
     this.seats[seat] = clientId;
+    this.resetWins();
     this.rematchVotes.clear();
   }
 
@@ -135,6 +143,7 @@ export class Room<S, M, O, E> {
     const seat = this.seatOf(clientId);
     if (seat === null) throw new RoomError("NOT_SEATED");
     this.seats[seat] = null;
+    this.resetWins();
     this.rematchVotes.clear();
   }
 
@@ -165,7 +174,10 @@ export class Room<S, M, O, E> {
     if ("error" in r) throw new RoomError(r.error === "NOT_YOUR_TURN" ? "NOT_YOUR_TURN" : "INVALID_MOVE");
     this.game = r.state;
     this.actionNo++;
-    if (this.module.result(this.game)) this.status = "finished";
+    if (this.module.result(this.game)) {
+      this.status = "finished";
+      this.recordResult();
+    }
     return { seat, move, events: r.events };
   }
 
@@ -193,6 +205,15 @@ export class Room<S, M, O, E> {
     this.status = "playing";
     this.actionNo++;
     this.rematchVotes.clear();
+  }
+
+  private recordResult(): void {
+    const winner = this.game ? this.module.result(this.game)?.winner : null;
+    if (winner !== null && winner !== undefined) this.wins[winner] = (this.wins[winner] ?? 0) + 1;
+  }
+
+  private resetWins(): void {
+    this.wins = this.seats.map(() => 0);
   }
 
   /** Ghế đi trước ở ván sau: người thua; hoà thì đổi lượt so với ván trước. null nếu chưa có ván nào xong. */
@@ -229,6 +250,7 @@ export class Room<S, M, O, E> {
       actionNo: this.actionNo,
       rematchVotes: [...this.rematchVotes].flatMap((c) => this.members.get(c)?.id ?? []),
       nextFirst: this.status === "finished" ? this.nextFirst() : null,
+      wins: [...this.wins],
     };
   }
 

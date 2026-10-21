@@ -188,6 +188,7 @@ export class CaroGameView implements GameScreen {
     const mark: Mark = s.players[0] === seat ? 0 : 1;
     const state: CaroCardState = {
       mark,
+      wins: this.room.wins[seat] ?? 0,
       placed: s.cells.filter((c) => c === mark).length,
       fresh: s.moveNo === 0,
       you: seat === this.you.seat,
@@ -278,6 +279,7 @@ export class CaroGameView implements GameScreen {
       identityOf: (seat) => identityInRoom(this.room, seat),
       mySeat: this.you.seat,
       nextFirst: this.room.nextFirst,
+      wins: this.room.wins,
       rematchSeats: this.room.rematchVotes.flatMap((id) => seatOfMember(this.room, id) ?? []),
     });
     // Người xem không có nút Ván nữa

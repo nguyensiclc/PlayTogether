@@ -17,6 +17,8 @@ export interface ResultViewData {
   mySeat: SeatId | null;
   /** Người đi trước ván sau (người thua, hoặc đổi lượt nếu hoà — luật mục 6) */
   nextFirst: SeatId | null;
+  /** Số ván thắng của từng ghế, đã tính cả ván vừa xong */
+  wins: readonly number[];
   /** Ghế những người đã bấm Ván nữa */
   rematchSeats: readonly SeatId[];
 }
@@ -59,6 +61,9 @@ export function resultHtml(d: ResultViewData): string {
     </div>
     <div class="detail">
       <div class="mini"><div class="caro-board">${mini}</div></div>
+      <div class="facts score-line">
+        <span>Tỉ số <b>${order.map((s) => `${label(s)} ${d.wins[s] ?? 0}`).join(" – ")}</b></span>
+      </div>
       <div class="facts">
         <span>Số nước <b>${detail.moves}</b></span>
         <span>${order.map((s) => `${label(s)} đi <b>${movesOf(s)}</b>`).join(" · ")}</span>
