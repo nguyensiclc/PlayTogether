@@ -42,6 +42,11 @@ export class RoomManager {
     return room;
   }
 
+  /** Phòng đang còn mà `clientId` là chủ (mỗi người chỉ làm chủ một phòng để tránh tạo phòng hàng loạt) */
+  hostedBy(clientId: string): GameRoom | undefined {
+    return [...this.rooms.values()].find((r) => r.isHostedBy(clientId));
+  }
+
   get(code: string): GameRoom | undefined {
     return this.rooms.get(code);
   }

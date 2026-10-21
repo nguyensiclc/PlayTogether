@@ -237,8 +237,25 @@ function createRoom(root: HTMLElement, gameId: GameId): void {
   });
   socket.onMessage((m) => {
     if (m.type === "roomJoined") location.assign(roomPath(m.room.code));
+    // Mỗi người chỉ làm chủ một phòng: mời quay lại phòng đang có
+    if (m.type === "error" && m.code === "ALREADY_HOSTING") {
+      showHostLimit(root, m.message);
+    }
   });
   socket.connect();
+}
+
+/** Báo đang làm chủ một phòng khác và cho vào lại phòng đó */
+function showHostLimit(root: HTMLElement, code: string): void {
+  for (const b of root.querySelectorAll<HTMLButtonElement>("[data-create]")) b.disabled = false;
+  root.querySelector(".host-limit")?.remove();
+  const box = document.createElement("div");
+  box.className = "card host-limit";
+  box.setAttribute("role", "alert");
+  box.style.cssText = "padding:12px 14px;margin:12px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap";
+  box.innerHTML = `<span class="small" style="flex:1;min-width:200px">Bạn đang là chủ phòng <b>${escapeHtml(code)}</b>. Mỗi người chỉ làm chủ một phòng; hãy vào lại hoặc rời phòng đó trước khi tạo phòng mới.</span><a class="btn sm primary" href="${roomPath(code)}">Vào lại phòng</a>`;
+  $(root, "main").prepend(box);
+  box.scrollIntoView({ block: "center" });
 }
 
 /** "5 phút trước", "2 giờ trước"… */

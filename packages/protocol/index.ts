@@ -120,6 +120,8 @@ export type ErrorCode =
   | "ROOM_NOT_FOUND"
   | "NOT_IN_ROOM"
   | "NOT_HOST"
+  /** Đã là chủ của một phòng khác; `message` là mã phòng đó */
+  | "ALREADY_HOSTING"
   | "SEAT_TAKEN"
   | "NOT_SEATED"
   | "NOT_ENOUGH_PLAYERS"

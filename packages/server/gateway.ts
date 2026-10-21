@@ -92,6 +92,8 @@ export class Gateway {
       }
     },
     createRoom: (conn, s, m) => {
+      const hosted = this.deps.rooms.hostedBy(this.idOf(s));
+      if (hosted) return this.fail(conn, "ALREADY_HOSTING", hosted.code);
       this.detach(s);
       const room = this.deps.rooms.create(this.joiner(s), m.gameId, m.options, this.deps.now());
       s.roomCode = room.code;

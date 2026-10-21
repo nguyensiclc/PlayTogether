@@ -274,6 +274,10 @@ export class Room<S, M, O, E> {
     return this.seats[seat] ?? null;
   }
 
+  isHostedBy(clientId: string): boolean {
+    return this.hostClientId === clientId;
+  }
+
   /** Tên chủ phòng và người ngồi ghế, cho màn xem trước khi vào bằng link */
   hostName(): string {
     return this.members.get(this.hostClientId)?.name ?? "";

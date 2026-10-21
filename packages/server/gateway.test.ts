@@ -77,6 +77,44 @@ describe("parseClientMessage", () => {
   });
 });
 
+describe("mỗi người chỉ làm chủ một phòng", () => {
+  it("tạo phòng thứ hai khi đang là chủ phòng khác: ALREADY_HOSTING kèm mã phòng cũ, không tạo thêm", () => {
+    const { connect, send, rooms } = setup();
+    const a = connect("host-aaaa-1111", "A");
+    send(a, { type: "createRoom", gameId: "caro" });
+    const code = a.last("roomJoined").room.code;
+    const again = connect("host-aaaa-1111", "A");
+    send(again, { type: "createRoom", gameId: "o-an-quan" });
+    expect(again.last("error")).toMatchObject({ code: "ALREADY_HOSTING", message: code });
+    expect(rooms.size).toBe(1);
+  });
+
+  it("người khác vẫn tạo được; chủ phòng rời đi (phòng bị xoá) thì tạo lại được", () => {
+    const { connect, send, rooms } = setup();
+    const a = connect("host-aaaa-1111", "A");
+    send(a, { type: "createRoom", gameId: "caro" });
+    const b = connect("host-bbbb-2222", "B");
+    send(b, { type: "createRoom", gameId: "caro" });
+    expect(rooms.size).toBe(2);
+    send(a, { type: "leaveRoom" });
+    send(a, { type: "createRoom", gameId: "caro" });
+    expect(a.last("roomJoined").room.code).toBeTruthy();
+    expect(rooms.size).toBe(2);
+  });
+
+  it("chủ phòng nhường chủ cho người khác rồi (rời phòng còn người) thì tạo phòng mới được", () => {
+    const { connect, send } = setup();
+    const a = connect("host-aaaa-1111", "A");
+    send(a, { type: "createRoom", gameId: "caro" });
+    const code = a.last("roomJoined").room.code;
+    const b = connect("guest-bbb-2222", "B");
+    send(b, { type: "joinRoom", code });
+    send(a, { type: "leaveRoom" });
+    send(a, { type: "createRoom", gameId: "o-an-quan" });
+    expect(a.last("roomJoined").room.gameId).toBe("o-an-quan");
+  });
+});
+
 describe("RoomManager", () => {
   it("mã phòng 4 ký tự trong bảng 31 ký tự, không trùng", () => {
     const rooms = new RoomManager(createRng(1));
