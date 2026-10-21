@@ -55,8 +55,8 @@ function ownerOf(file: string, games: string[], layer: "client" | "engine"): str
 
 describe("kiến trúc: tách nền tảng và từng game", () => {
   it("có nhận ra các game (kiểm tra chính bộ kiểm tra này)", () => {
-    expect(CLIENT_GAMES.sort()).toEqual(expect.arrayContaining(["caro", "o-an-quan"]));
-    expect(ENGINE_GAMES.sort()).toEqual(expect.arrayContaining(["caro", "o-an-quan"]));
+    expect(CLIENT_GAMES.sort()).toEqual(expect.arrayContaining(["caro", "co-vua", "o-an-quan"]));
+    expect(ENGINE_GAMES.sort()).toEqual(expect.arrayContaining(["caro", "co-vua", "o-an-quan"]));
   });
 
   it("client: game không import game khác", () => {
@@ -83,11 +83,11 @@ describe("kiến trúc: tách nền tảng và từng game", () => {
     expect(bad).toEqual([]);
   });
 
-  it("client: nền tảng không nhắc tên game (chuỗi 'o-an-quan', 'caro') ngoài registry", () => {
+  it("client: nền tảng không nhắc tên game (chuỗi 'o-an-quan', 'caro', 'co-vua') ngoài registry", () => {
     const bad: string[] = [];
     for (const file of listFiles(join(PACKAGES, "client")).filter((f) => f.endsWith(".ts") && !isTest(f))) {
       if (ownerOf(file, CLIENT_GAMES, "client") || rel(file) === "client/games/registry.ts") continue;
-      if (/["'`](o-an-quan|caro)["'`]/.test(read(file))) bad.push(rel(file));
+      if (/["'`](o-an-quan|caro|co-vua)["'`]/.test(read(file))) bad.push(rel(file));
     }
     expect(bad).toEqual([]);
   });

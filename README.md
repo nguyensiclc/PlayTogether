@@ -25,6 +25,10 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 | [Cờ caro — Thiết kế kỹ thuật](docs/caro/03-thiet-ke-ky-thuat.md) | Dữ liệu, thuật toán, tổng quát hoá nền tảng đa game |
 | [Cờ caro — Kế hoạch prototype](docs/caro/04-ke-hoach-prototype.md) | Phạm vi, các mốc C1–C4, test case, câu hỏi mở C1–C13 |
 | [Cờ caro — Yêu cầu thiết kế](docs/design/caro/README.md) | Bản yêu cầu thiết kế (mockup đã chốt) |
+| [Cờ vua — Luật chơi](docs/co-vua/01-luat-choi.md) | Luật chuẩn FIDE, nước đặc biệt (nhập thành, bắt tốt qua đường, phong cấp) |
+| [Cờ vua — Thiết kế UX](docs/co-vua/02-thiet-ke-ux.md) | Bàn cờ SVG, tap-to-move, phong cấp, lật bàn theo góc nhìn người chơi |
+| [Cờ vua — Thiết kế kỹ thuật](docs/co-vua/03-thiet-ke-ky-thuat.md) | Mô hình dữ liệu, sinh nước đi hợp lệ, kiểm tra chiếu, bất biến fuzz test |
+| [Cờ vua — Kế hoạch prototype](docs/co-vua/04-ke-hoach-prototype.md) | Phạm vi, các mốc V1–V4, test cases V01–V25, câu hỏi mở V1–V5 |
 
 ## Trạng thái
 
@@ -32,5 +36,6 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 |---|---|
 | Ô ăn quan (game thử nghiệm đầu tiên) | Engine xong (M1, M1.1). Đang làm M3: chơi qua link mời |
 | Nền tảng phòng chơi (room, link mời) | M3: server WebSocket, phòng chờ, link mời, QR, tự kết nối lại |
-| Cờ caro | Engine, nền tảng đa game và giao diện đã xong (C1–C3, nhánh `caro`). Còn thử trên điện thoại thật (C4) |
+| Cờ caro | Engine, nền tảng đa game và giao diện đã xong (C1–C3). Còn thử trên điện thoại thật (C4) |
+| Cờ vua | Engine (V1), Protocol & Server (V2), Giao diện bàn cờ (V3) đã xong |
 | Tiến lên, Cờ tướng | Chưa bắt đầu |
