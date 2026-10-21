@@ -4,7 +4,7 @@
 import type { GameResult, SeatId } from "@playtogether/engine";
 import type { EndReason, Mark, ScoreDetail } from "@playtogether/engine/caro";
 import { escapeHtml } from "../dom.ts";
-import type { PlayerIdentity } from "../o-an-quan/player-card.ts";
+import { type PlayerIdentity, rematchHtml, resultTitle, resultTrophy } from "../game-ui/result-parts.ts";
 import { boardSvg } from "./board-svg.ts";
 
 export interface ResultViewData {
@@ -53,8 +53,8 @@ export function resultHtml(d: ResultViewData): string {
 
   return `
     <div class="side-hero">
-      <div class="trophy">${trophy(d.result.winner, d.mySeat)}</div>
-      <h1 id="result-title">${title(d.result.winner, d.mySeat, d.identityOf)}</h1>
+      <div class="trophy">${resultTrophy(d.result.winner, d.mySeat)}</div>
+      <h1 id="result-title">${resultTitle(d.result.winner, d.mySeat, d.identityOf)}</h1>
       <span class="chip reason">${REASON_CHIP[reason]}</span>
       ${why ? `<p class="why">${why}</p>` : ""}
       <span class="small muted desk-only">${names}</span>
@@ -74,37 +74,6 @@ export function resultHtml(d: ResultViewData): string {
         <button class="btn sm" type="button" data-leave>Rời phòng</button>
       </div>
     </div>`;
-}
-
-/** Dòng "… muốn chơi ván nữa" và nút Ván nữa theo trạng thái bỏ phiếu */
-function rematchHtml(d: ResultViewData): string {
-  const ready = d.rematchSeats
-    .filter((s) => s !== d.mySeat)
-    .map((s) => {
-      const who = d.identityOf(s);
-      return `<div class="ready"><span class="avatar sm ${who.avatarClass}">${escapeHtml(who.initials)}</span>${escapeHtml(who.name)} muốn chơi ván nữa</div>`;
-    })
-    .join("");
-  if (d.mySeat === null) return ready;
-  if (d.rematchSeats.includes(d.mySeat)) {
-    return `${ready}<button class="btn primary block" type="button" disabled data-again>Đang chờ đối thủ bấm Ván nữa…</button>`;
-  }
-  const first =
-    d.nextFirst === null
-      ? ""
-      : ` · ${d.nextFirst === d.mySeat ? "Bạn" : escapeHtml(d.identityOf(d.nextFirst).name)} đi trước`;
-  return `${ready}<button class="btn primary block" type="button" data-again>Ván nữa${first} <kbd class="desk-only">Enter</kbd></button>`;
-}
-
-function title(winner: SeatId | null, mySeat: SeatId | null, identityOf: (s: SeatId) => PlayerIdentity): string {
-  if (winner === null) return "Hoà!";
-  if (mySeat === null) return `${escapeHtml(identityOf(winner).name)} thắng!`;
-  return winner === mySeat ? "Bạn thắng!" : "Bạn thua";
-}
-
-function trophy(winner: SeatId | null, mySeat: SeatId | null): string {
-  if (winner === null) return "🤝";
-  return mySeat !== null && winner !== mySeat ? "🙂" : "🏆";
 }
 
 /** Câu giải thích thêm cho những lý do kết thúc dễ gây thắc mắc */

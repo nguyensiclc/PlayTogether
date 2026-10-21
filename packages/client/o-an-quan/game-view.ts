@@ -2,26 +2,27 @@
 // Server quyết định mọi thứ; client chỉ hỏi engine để biết ô nào sáng và lúc nào được Lật bàn.
 // Mỗi người luôn thấy hàng của mình ở dưới; người xem thấy người ngồi ghế 1 ở dưới (UX mục 2.4, Q22h).
 
+import "./o-an-quan.css";
 import type { SeatId } from "@playtogether/engine";
 import type { GameEvent, Move, Seat, State } from "@playtogether/engine/o-an-quan";
 import { oAnQuan, owner } from "@playtogether/engine/o-an-quan";
 import type { ErrorCode, OAnQuanRoom, PublicRoom, You } from "@playtogether/protocol";
 import { $ } from "../dom.ts";
-import { BoardDom } from "../o-an-quan/board-dom.ts";
-import { latBanSheetHtml } from "../o-an-quan/lat-ban-sheet.ts";
-import { dirForArrow, layoutFor } from "../o-an-quan/layout.ts";
-import { logLineHtml, logListHtml } from "../o-an-quan/log-view.ts";
-import { playEffect } from "../o-an-quan/move-effects.ts";
-import { describeMove, keepSideEntry, type LogEntry } from "../o-an-quan/move-log.ts";
-import { AUTO_FAST_MS, FAST_SPEED, Playback } from "../o-an-quan/playback.ts";
-import { PlayerCard } from "../o-an-quan/player-card.ts";
-import { resultHtml } from "../o-an-quan/result-view.ts";
-import { type BoardView, points, viewFromState } from "../o-an-quan/view-model.ts";
-import { showHistory, showRules } from "../rules/rules-dialog.ts";
+import type { LogEntry } from "../game-ui/log-view.ts";
+import { logLineHtml, logListHtml } from "../game-ui/log-view.ts";
+import type { GameActions, GameScreen, RoomMessage } from "../games/types.ts";
+import { identityInRoom, seatOfMember } from "../screens/room-players.ts";
+import { BoardDom } from "./board-dom.ts";
 import { handleGameKey, type KeyActions } from "./game-keys.ts";
 import { gamePageHtml } from "./game-page.ts";
-import type { GameActions, GameScreen, RoomMessage } from "./game-screen.ts";
-import { identityInRoom, seatOfMember } from "./room-players.ts";
+import { latBanSheetHtml } from "./lat-ban-sheet.ts";
+import { dirForArrow, layoutFor } from "./layout.ts";
+import { playEffect } from "./move-effects.ts";
+import { describeMove, keepSideEntry } from "./move-log.ts";
+import { AUTO_FAST_MS, FAST_SPEED, Playback } from "./playback.ts";
+import { PlayerCard } from "./player-card.ts";
+import { resultHtml } from "./result-view.ts";
+import { type BoardView, points, viewFromState } from "./view-model.ts";
 
 /** Người xem thấy người ngồi ghế này ở dưới (Q22h: ghế 1 trên giao diện, chỉ số 0) */
 const SPECTATOR_BOTTOM_SEAT: SeatId = 0;
@@ -80,7 +81,9 @@ export class GameView implements GameScreen {
       if (!this.q(".latban").hidden) this.declineLatBan();
     });
     for (const b of this.page.querySelectorAll<HTMLElement>("[data-info]")) {
-      b.addEventListener("click", () => (b.dataset.info === "history" ? showHistory : showRules)("o-an-quan"));
+      b.addEventListener("click", () =>
+        (b.dataset.info === "history" ? this.actions.showHistory : this.actions.showRules)(),
+      );
     }
     document.addEventListener("keydown", this.onKey);
     document.addEventListener("pointerdown", this.onOutside);

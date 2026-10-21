@@ -2,22 +2,13 @@
 // phòng chờ và trong lúc đang chơi.
 
 import type { GameId } from "@playtogether/protocol";
-import { caroHistoryHtml } from "../caro/history-html.ts";
-import { caroRulesHtml } from "../caro/rules-html.ts";
 import { $ } from "../dom.ts";
-import { GAME_INFO } from "../games.ts";
-import { oAnQuanHistoryHtml } from "../o-an-quan/history-html.ts";
-import { oAnQuanRulesHtml } from "../o-an-quan/rules-html.ts";
+import { gameOf } from "../games/registry.ts";
 import "./rules.css";
 
 export type InfoTab = "rules" | "history";
 
 const TAB_TITLE: Record<InfoTab, string> = { rules: "Luật chơi", history: "Lịch sử" };
-
-const CONTENT: Record<GameId, Record<InfoTab, () => string>> = {
-  "o-an-quan": { rules: oAnQuanRulesHtml, history: oAnQuanHistoryHtml },
-  caro: { rules: caroRulesHtml, history: caroHistoryHtml },
-};
 
 export const showRules = (gameId: GameId): void => showGameInfo(gameId, "rules");
 export const showHistory = (gameId: GameId): void => showGameInfo(gameId, "history");
@@ -36,7 +27,7 @@ export function showGameInfo(gameId: GameId, initial: InfoTab): void {
     .join("");
   box.innerHTML = `
     <header>
-      <h2 id="rules-title">${GAME_INFO[gameId].name}</h2>
+      <h2 id="rules-title">${gameOf(gameId).info.name}</h2>
       <button class="icon-btn" type="button" data-close aria-label="Đóng">✕</button>
     </header>
     <div class="rules-tabs" role="tablist">${tabs}</div>
@@ -44,7 +35,7 @@ export function showGameInfo(gameId: GameId, initial: InfoTab): void {
     <footer><button class="btn primary block" type="button" data-close>Đã hiểu</button></footer>`;
   const body = $(box, ".rules-body");
   const select = (tab: InfoTab) => {
-    body.innerHTML = CONTENT[gameId][tab]();
+    body.innerHTML = tab === "rules" ? gameOf(gameId).rulesHtml() : gameOf(gameId).historyHtml();
     body.scrollTop = 0;
     for (const b of box.querySelectorAll<HTMLElement>("[data-tab]")) {
       b.setAttribute("aria-selected", String(b.dataset.tab === tab));

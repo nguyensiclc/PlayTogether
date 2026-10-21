@@ -6,19 +6,18 @@ import type { SeatId } from "@playtogether/engine";
 import type { GameEvent, Mark, Move, PlaceMove, State } from "@playtogether/engine/caro";
 import { hasBlockedLine, isYield } from "@playtogether/engine/caro";
 import type { CaroRoom, ErrorCode, PublicRoom, You } from "@playtogether/protocol";
-import "../caro/caro.css";
-import { CaroBoard } from "../caro/board-dom.ts";
-import { xOf, yOf } from "../caro/board-svg.ts";
-import { caroPageHtml } from "../caro/game-page.ts";
-import { type CaroLogEntry, describePlace, describeYield } from "../caro/move-log.ts";
-import { type CaroCardState, CaroPlayerCard, MARK_CHAR } from "../caro/player-card.ts";
-import { resultHtml } from "../caro/result-view.ts";
+import "./caro.css";
 import { $, escapeHtml } from "../dom.ts";
-import { logListHtml } from "../o-an-quan/log-view.ts";
-import { showHistory, showRules } from "../rules/rules-dialog.ts";
-import { confirmBox } from "./confirm-leave.ts";
-import type { GameActions, GameScreen, RoomMessage } from "./game-screen.ts";
-import { identityInRoom, seatOfMember } from "./room-players.ts";
+import { confirmBox } from "../game-ui/confirm-box.ts";
+import { type LogEntry, logListHtml } from "../game-ui/log-view.ts";
+import type { GameActions, GameScreen, RoomMessage } from "../games/types.ts";
+import { identityInRoom, seatOfMember } from "../screens/room-players.ts";
+import { CaroBoard } from "./board-dom.ts";
+import { xOf, yOf } from "./board-svg.ts";
+import { caroPageHtml } from "./game-page.ts";
+import { describePlace, describeYield } from "./move-log.ts";
+import { type CaroCardState, CaroPlayerCard, MARK_CHAR } from "./player-card.ts";
+import { resultHtml } from "./result-view.ts";
 
 /** Người xem thấy người ngồi ghế này ở dưới (ghế 1 trên giao diện, chỉ số 0) */
 const SPECTATOR_BOTTOM_SEAT: SeatId = 0;
@@ -33,7 +32,7 @@ export class CaroGameView implements GameScreen {
   /** Đã gửi nước đi, đang chờ server */
   private pending = false;
   private online = true;
-  private log: CaroLogEntry[] = [];
+  private log: LogEntry[] = [];
   private readonly board: CaroBoard;
   private readonly page: HTMLElement;
   private readonly cards = { top: new CaroPlayerCard(), bottom: new CaroPlayerCard() };
@@ -68,9 +67,10 @@ export class CaroGameView implements GameScreen {
     this.q("[data-card-top]").replaceWith(this.cards.top.el);
     this.q("[data-card-bottom]").replaceWith(this.cards.bottom.el);
     this.q("[data-board]").replaceWith(this.board.el);
-    for (const b of this.page.querySelectorAll("[data-rules]")) b.addEventListener("click", () => showRules("caro"));
+    for (const b of this.page.querySelectorAll("[data-rules]"))
+      b.addEventListener("click", () => this.actions.showRules());
     for (const b of this.page.querySelectorAll("[data-history]"))
-      b.addEventListener("click", () => showHistory("caro"));
+      b.addEventListener("click", () => this.actions.showHistory());
     this.q("[data-yield]").addEventListener("click", () => void this.askYield());
     this.q("[data-unpick]").addEventListener("click", () => this.board.clearSelection());
     this.q("[data-place]").addEventListener("click", () => this.board.confirm());

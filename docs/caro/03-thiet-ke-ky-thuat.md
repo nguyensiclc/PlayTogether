@@ -116,7 +116,8 @@ packages/client/caro/
   board-svg.ts      vẽ bàn thành chuỗi SVG (bàn chính, kính lúp, bàn thu nhỏ) + hàm thuần cellAt, stepCell, loupeViewBox
   board-dom.ts      CaroBoard: nhận chạm / chuột / phím, giữ ô đang chọn, kính lúp
   player-card.ts, move-log.ts, result-view.ts, game-page.ts, caro.css
-packages/client/screens/caro-game.ts   CaroGameView implements GameScreen
+packages/client/caro/game-view.ts       CaroGameView implements GameScreen
+packages/client/caro/client-game.ts     mô tả Cờ caro cho nền tảng (đăng ký ở games/registry.ts)
 ```
 
 - Bàn vẽ lại cả SVG mỗi lần đổi ô chọn hoặc nước đi (tối đa 361 ô, rẻ). Hiệu ứng quân mới chỉ chạy ở lần vẽ ngay sau nước đi (`fresh`), nên rê chuột không chạy lại.

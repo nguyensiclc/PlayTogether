@@ -1,0 +1,815 @@
+/* Giao diện riêng của Ô ăn quan: bàn 12 ô, sỏi, bàn tay, chọn chiều rải, Lật bàn, bảng điểm kết quả.
+   Phần dùng chung (thẻ người chơi, viên trạng thái, kết quả, lớp phủ...) nằm ở packages/client/style.css. */
+
+.player .match-pill {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.player.fx-swap {
+  animation: swap var(--fx-ms) ease-in-out;
+}
+
+.kho {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.kho .qdot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--quan);
+  display: inline-block;
+}
+
+.kho .ddot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--stone);
+  border: 1px solid var(--stone-edge);
+  display: inline-block;
+}
+
+.delta {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--capture);
+  animation: delta 1.2s ease-out forwards;
+}
+
+.delta.minus {
+  color: var(--primary);
+}
+
+.row-label {
+  position: absolute;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.row-label.top {
+  top: -20px;
+  left: 4px;
+}
+
+.row-label.bottom {
+  bottom: -20px;
+  left: 4px;
+  color: var(--ink);
+}
+
+.row-label.right {
+  left: auto;
+  right: 4px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.board {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0.9fr repeat(5, 1.1fr) 0.9fr;
+  grid-template-rows: 84px 84px;
+  gap: 4px;
+  padding: 6px;
+  background: linear-gradient(180deg, var(--board-top), var(--board));
+  border: 3px solid var(--board-edge);
+  /* Hai đầu bàn là nửa elip, rộng bằng cột ô quan (~13.5% bề ngang bàn ở cả điện thoại lẫn desktop) */
+  border-radius: 13.5% / 50%;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.12),
+    0 8px 20px rgba(60, 35, 10, 0.25);
+}
+
+.cell {
+  position: relative;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  background: var(--cell);
+  border-radius: 10px;
+  box-shadow: inset 0 3px 7px var(--cell-shade);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Ô quan là nửa elip: bán kính ngang phía ngoài + phía trong = 100% bề ngang ô, nên trình duyệt
+   không phải thu nhỏ các bán kính (999px sẽ làm mọi bán kính co lại và ô bớt tròn) */
+
+.cell.quan.left {
+  border-radius: calc(100% - 10px) 10px 10px calc(100% - 10px) / 50% 10px 10px 50%;
+}
+
+.cell.quan.right {
+  border-radius: 10px calc(100% - 10px) calc(100% - 10px) 10px / 10px 50% 50% 10px;
+}
+
+.cell .count {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--count-ink);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+.cell.quan .count {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 8px;
+}
+
+.stone {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--on-dark), var(--stone) 55%, var(--stone-edge));
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+  transition:
+    background 600ms ease,
+    box-shadow 600ms ease;
+}
+
+.stone.new-stone {
+  background: radial-gradient(circle at 35% 30%, #ff8c85, #d93829 55%, #8f1d13);
+  box-shadow:
+    0 1px 3px rgba(180, 20, 10, 0.55),
+    inset 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.stone.big {
+  width: 20px;
+  height: 20px;
+  left: calc(50% - 10px);
+  top: 26%;
+  background: radial-gradient(circle at 35% 30%, var(--quan-shine), var(--quan) 60%);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.45);
+}
+
+.cell.dim {
+  filter: saturate(0.75) brightness(0.93);
+}
+
+.cell.valid {
+  box-shadow:
+    inset 0 3px 7px var(--cell-shade),
+    0 0 0 2px var(--valid);
+}
+
+.cell.selected {
+  box-shadow:
+    inset 0 3px 7px var(--cell-shade),
+    0 0 0 3px var(--accent),
+    0 0 16px rgba(242, 179, 61, 0.8);
+}
+
+.cell.off {
+  opacity: 0.5;
+}
+
+.cell.capture {
+  background: var(--capture-cell);
+  box-shadow:
+    inset 0 3px 7px var(--capture-shade),
+    0 0 0 3px var(--capture),
+    0 0 16px rgba(63, 163, 107, 0.7);
+}
+
+.gain {
+  position: absolute;
+  left: 50%;
+  top: -24px;
+  transform: translateX(-50%);
+  z-index: 4;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--capture);
+  color: var(--on-dark);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+/* "Bàn tay": biểu tượng bàn tay bốc và rải sỏi */
+
+.hand {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  transform: translate(-50%, -65%);
+  transition-property: left, top;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hand-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hand-icon {
+  width: 38px;
+  height: 42px;
+  display: block;
+}
+
+.hand-badge {
+  position: absolute;
+  top: -2px;
+  right: -8px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--ink);
+  border: 2px solid var(--accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Hiệu ứng bàn tay bốc sỏi */
+
+.hand.fx-pick {
+  animation: hand-pick var(--fx-ms, 300ms) cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+/* Hiệu ứng bàn tay thả sỏi */
+
+.hand.fx-drop {
+  animation: hand-drop var(--fx-ms, 350ms) ease-out;
+}
+
+/* Hiệu ứng viên sỏi mới rơi vào ô khi rải */
+
+.stone.drop-in {
+  animation: stone-drop-in 350ms cubic-bezier(0.2, 0.8, 0.3, 1.2) forwards;
+}
+
+/* Thanh mũi tên chọn chiều, nổi phía trên ô đang chọn */
+
+.dir-pick {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  background: var(--ink);
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.dir-pick::after {
+  content: "";
+  position: absolute;
+  left: var(--caret, 50%);
+  bottom: -6px;
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-bottom: 0;
+  border-top-color: var(--ink);
+}
+
+/* Hàng trên: thanh nằm dưới ô, mũi nhọn chỉ lên (Q21) */
+
+.dir-pick.below::after {
+  top: -6px;
+  bottom: auto;
+  border: 7px solid transparent;
+  border-top: 0;
+  border-bottom-color: var(--ink);
+}
+
+.dir-pick button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.dir-pick svg {
+  width: 20px;
+  height: 20px;
+}
+
+.toast {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: 50%;
+  max-width: 90%;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(34, 25, 18, 0.95);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  color: var(--on-dark);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toast.show {
+  animation: toast var(--fx-ms, 800ms) ease-out;
+}
+
+.log-line {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 19px;
+}
+
+.log-line b {
+  color: var(--ink);
+}
+
+.log-line .g {
+  color: var(--capture);
+  font-weight: 800;
+}
+
+.playback {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Hiệu ứng ô (UX mục 4) */
+
+.cell.fx-pick {
+  animation: lift var(--fx-ms) ease-out;
+}
+
+.cell.fx-pick2 {
+  animation: flash-yellow var(--fx-ms) ease-out;
+}
+
+.cell.fx-drop {
+  animation: pulse var(--fx-ms) ease-out;
+}
+
+.cell.fx-collect {
+  animation: flash-collect var(--fx-ms) ease-out;
+}
+
+.cell.fx-budan {
+  animation: flash-budan var(--fx-ms) ease-out;
+}
+
+.cell.fx-shake {
+  animation: shake var(--fx-ms) ease-in-out;
+}
+
+/* Hộp hỏi Lật bàn */
+
+.latban h2 {
+  font-size: 20px;
+}
+
+.latban .compare {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.latban .side {
+  background: var(--surface-2);
+  border: 1px solid var(--stone-edge);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.latban .side.after {
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
+}
+
+.latban .side b {
+  display: block;
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.latban .swap {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--on-dark);
+  display: grid;
+  place-items: center;
+}
+
+.latban .swap svg {
+  width: 18px;
+  height: 18px;
+}
+
+.result .vs {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin: 18px 0 6px;
+}
+
+.result .vs .p {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.result .vs .p b {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.result .vs .p.win b {
+  color: var(--capture);
+}
+
+.result .vs .sep {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.result table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0 14px;
+  font-size: 14px;
+}
+
+.result th,
+.result td {
+  padding: 8px 4px;
+  border-top: 1px solid var(--line);
+}
+
+.result thead th,
+.result thead td {
+  white-space: nowrap;
+  border-top: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.result th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.result td {
+  text-align: right;
+  font-weight: 600;
+  width: 70px;
+}
+
+.result tr.total th,
+.result tr.total td {
+  font-weight: 800;
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.result tr.match-row th,
+.result tr.match-row td {
+  font-weight: 800;
+  color: var(--accent);
+  font-size: 15px;
+  background: var(--surface-2);
+}
+
+.result tr.match-row td b {
+  font-size: 16px;
+}
+
+.result .side-hero .score {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .row-label {
+    font-size: 11px;
+  }
+
+  .row-label.top {
+    top: -22px;
+    left: 6px;
+  }
+
+  .row-label.bottom {
+    bottom: -24px;
+    left: 6px;
+  }
+
+  .row-label.bottom.right {
+    left: auto;
+    right: 6px;
+  }
+
+  .board {
+    grid-template-rows: 124px 124px;
+    gap: 8px;
+    padding: 10px;
+    border-width: 5px;
+  }
+
+  .cell {
+    border-radius: 16px;
+    box-shadow: inset 0 5px 12px var(--cell-shade);
+  }
+
+  .cell.quan.left {
+    border-radius: calc(100% - 16px) 16px 16px calc(100% - 16px) / 50% 16px 16px 50%;
+  }
+
+  .cell.quan.right {
+    border-radius: 16px calc(100% - 16px) calc(100% - 16px) 16px / 16px 50% 50% 16px;
+  }
+
+  .cell.valid {
+    box-shadow:
+      inset 0 5px 12px var(--cell-shade),
+      0 0 0 3px var(--valid);
+  }
+
+  .cell.selected {
+    box-shadow:
+      inset 0 5px 12px var(--cell-shade),
+      0 0 0 4px var(--accent),
+      0 0 22px rgba(242, 179, 61, 0.8);
+  }
+
+  .stone {
+    width: 14px;
+    height: 14px;
+  }
+
+  .stone.big {
+    width: 32px;
+    height: 32px;
+    left: calc(50% - 16px);
+  }
+
+  .cell .count {
+    font-size: 14px;
+    right: 8px;
+    bottom: 5px;
+  }
+
+  .cell.quan .count {
+    bottom: 12px;
+  }
+
+  .gain {
+    font-size: 15px;
+    top: -28px;
+  }
+
+  .latban h2 {
+    font-size: 22px;
+  }
+
+  .latban .compare {
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .latban .side {
+    padding: 16px;
+  }
+
+  .latban .side b {
+    font-size: 32px;
+    margin: 4px 0;
+  }
+
+  .latban .acts .btn {
+    justify-content: space-between;
+  }
+
+  .result .side-hero .score {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .result .side-hero .score b {
+    font-size: 44px;
+    line-height: 1;
+  }
+
+  .result .side-hero .score b.win {
+    color: var(--capture);
+  }
+
+  .result .side-hero .score span {
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .result .vs {
+    display: none;
+  }
+
+  .result td {
+    width: 90px;
+  }
+
+  .result table {
+    margin-top: 0;
+  }
+
+  .result tr.total th,
+  .result tr.total td {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell.fx-pick,
+  .cell.fx-drop,
+  .cell.fx-shake,
+  .player.fx-swap,
+  .hand.fx-pick,
+  .hand.fx-drop,
+  .stone.drop-in {
+    animation: none;
+  }
+}
+
+@keyframes hand-pick {
+  0% {
+    transform: translate(-50%, -100%) scale(0.85);
+    opacity: 0.3;
+  }
+  45% {
+    transform: translate(-50%, -45%) scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -65%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes hand-drop {
+  0% {
+    transform: translate(-50%, -65%) scale(1);
+  }
+  35% {
+    transform: translate(-50%, -52%) scale(0.95);
+  }
+  100% {
+    transform: translate(-50%, -65%) scale(1);
+  }
+}
+
+@keyframes stone-drop-in {
+  0% {
+    transform: translateY(-16px) scale(1.4);
+    opacity: 0.2;
+  }
+  65% {
+    transform: translateY(2px) scale(0.95);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes lift {
+  50% {
+    filter: brightness(1.25);
+  }
+}
+
+@keyframes pulse {
+  40% {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes flash-yellow {
+  40% {
+    box-shadow: inset 0 0 0 60px rgba(242, 179, 61, 0.75);
+  }
+}
+
+@keyframes flash-collect {
+  50% {
+    box-shadow: inset 0 0 0 60px rgba(255, 255, 255, 0.5);
+  }
+}
+
+@keyframes flash-budan {
+  40% {
+    box-shadow: inset 0 0 0 60px rgba(181, 70, 47, 0.55);
+  }
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes toast {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -44%) scale(0.96);
+  }
+  15%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes swap {
+  0%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+  45% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  55% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes delta {
+  0% {
+    opacity: 0;
+  }
+  15%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

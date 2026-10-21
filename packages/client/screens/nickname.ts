@@ -3,7 +3,7 @@
 import type { RoomPreview } from "@playtogether/protocol";
 import { MAX_NAME_LENGTH, normalizeName } from "@playtogether/protocol";
 import { $, escapeHtml } from "../dom.ts";
-import { GAME_INFO } from "../games.ts";
+import { gameOf } from "../games/registry.ts";
 import { randomName } from "../identity.ts";
 import { avatarClassOf, initialsOf } from "./room-players.ts";
 
@@ -19,9 +19,9 @@ export function showNickname(root: HTMLElement, preview: RoomPreview, onSubmit: 
       <header class="topbar"><a class="logo" href="/"><span class="logo-mark"><i></i></span>PlayTogether</a></header>
       <section class="invite-head">
         <div class="avatar ${avatarClassOf(0)} host-av">${escapeHtml(initialsOf(preview.hostName))}</div>
-        <h1>${escapeHtml(preview.hostName)} mời bạn<br>chơi ${GAME_INFO[preview.gameId].name}</h1>
+        <h1>${escapeHtml(preview.hostName)} mời bạn<br>chơi ${gameOf(preview.gameId).info.name}</h1>
         <div class="card room-card">
-          <span class="mini">${GAME_INFO[preview.gameId].icon}</span>
+          <span class="mini">${gameOf(preview.gameId).info.icon}</span>
           <div>
             <div>Phòng <span class="code">${preview.code}</span></div>
             <div class="seat-dots">${avatars}${preview.freeSeats > 0 ? '<span class="avatar empty">+</span>' : ""}<span class="small muted">${seatsText}</span></div>

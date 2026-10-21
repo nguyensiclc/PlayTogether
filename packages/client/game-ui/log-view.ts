@@ -1,7 +1,18 @@
 // HTML của nhật ký ván: danh sách đầy đủ (cột phải, desktop) và dòng mô tả nước vừa đi (dưới bàn, điện thoại).
 
 import { escapeHtml } from "../dom.ts";
-import type { LogEntry } from "./move-log.ts";
+
+/** Một dòng nhật ký ván; mọi game dùng chung dạng này */
+export interface LogEntry {
+  /** Số thứ tự nước đi trong ván */
+  n: number;
+  who: string;
+  text: string;
+  /** Điểm vừa ăn, hiện "+N" màu xanh */
+  gain?: number;
+  /** Sự kiện đặc biệt, hiện màu đỏ (vd "−5" khi bù dân) */
+  ev?: string;
+}
 
 /** Danh sách nhật ký, nước mới nhất ở trên */
 export function logListHtml(log: readonly LogEntry[]): string {

@@ -2,15 +2,8 @@
 // Chỉ hiển thị, không chứa logic ván.
 
 import type { Pile } from "@playtogether/engine/o-an-quan";
-import { $, create } from "../dom.ts";
-
-export interface PlayerIdentity {
-  name: string;
-  /** Chữ trong avatar */
-  initials: string;
-  /** Class màu avatar trong style.css (av1, av3…) */
-  avatarClass: string;
-}
+import { PlayerCardBase } from "../game-ui/player-card-base.ts";
+import type { PlayerIdentity } from "../game-ui/result-parts.ts";
 
 export interface CardState {
   pile: Pile;
@@ -25,49 +18,30 @@ export interface CardState {
   matchProgress?: { total: number; target: number } | null;
 }
 
-export class PlayerCard {
-  readonly el: HTMLElement;
-  private readonly avatar: HTMLElement;
-  private readonly name: HTMLElement;
-  private readonly you: HTMLElement;
+export class PlayerCard extends PlayerCardBase {
   private readonly dan: HTMLElement;
   private readonly quan: HTMLElement;
   private readonly delta: HTMLElement;
   private readonly score: HTMLElement;
   private readonly matchPill: HTMLElement;
-  private readonly kho: HTMLElement;
-  private readonly reconn: HTMLElement;
 
   constructor() {
-    this.el = create("div", "player");
-    this.el.innerHTML = `
-      <span class="avatar"></span>
-      <div class="info">
-        <div class="name"><span data-name></span><span class="small muted" data-you> (bạn)</span></div>
-        <div class="kho"><span class="ddot"></span><span data-dan></span> · <span class="qdot"></span><span data-quan></span><span class="delta" hidden></span></div>
-        <div class="reconn" hidden>Mất kết nối</div>
-      </div>
-      <div class="score">
+    super(
+      `<div class="kho" data-detail><span class="ddot"></span><span data-dan></span> · <span class="qdot"></span><span data-quan></span><span class="delta" hidden></span></div>`,
+      `<div class="score">
         <b></b><span class="tiny muted">điểm</span>
         <span class="match-pill" hidden></span>
-      </div>`;
-    this.avatar = $(this.el, ".avatar");
-    this.name = $(this.el, "[data-name]");
-    this.you = $(this.el, "[data-you]");
-    this.dan = $(this.el, "[data-dan]");
-    this.quan = $(this.el, "[data-quan]");
-    this.delta = $(this.el, ".delta");
-    this.score = $(this.el, ".score b");
-    this.matchPill = $(this.el, ".match-pill");
-    this.kho = $(this.el, ".kho");
-    this.reconn = $(this.el, ".reconn");
+      </div>`,
+    );
+    this.dan = this.$("[data-dan]");
+    this.quan = this.$("[data-quan]");
+    this.delta = this.$(".delta");
+    this.score = this.$(".score b");
+    this.matchPill = this.$(".match-pill");
   }
 
   render(who: PlayerIdentity, state: CardState): void {
-    this.avatar.className = `avatar ${who.avatarClass}`;
-    this.avatar.textContent = who.initials;
-    this.name.textContent = who.name;
-    this.you.hidden = !state.you;
+    this.renderBase(who, { you: state.you, active: state.active, offline: state.offline ?? false });
     this.dan.textContent = `${state.pile.dan} dân`;
     this.quan.textContent = `${state.pile.quan} quan`;
     this.score.textContent = String(state.points);
@@ -77,11 +51,6 @@ export class PlayerCard {
     } else {
       this.matchPill.hidden = true;
     }
-    this.el.classList.toggle("active", state.active);
-    const offline = state.offline ?? false;
-    this.el.classList.toggle("offline", offline);
-    this.kho.hidden = offline;
-    this.reconn.hidden = !offline;
   }
 
   /** "+N" khi ăn, "−5" khi bù dân, hiện thoáng qua cạnh kho điểm */

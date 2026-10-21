@@ -36,7 +36,13 @@
 /packages
   /engine            ← dùng chung, KHÔNG phụ thuộc DOM hay Node
     game-module.ts   ← interface GameModule, RNG
+    /games, /game-ui, /rules  ← hợp đồng ClientGame, registry, mảnh UI dùng chung, hộp luật (xem docs/kien-truc-module.md)
     /o-an-quan
+      client-game.ts     ← mô tả Ô ăn quan cho nền tảng (đăng ký ở games/registry.ts)
+      game-view.ts       ← bàn chơi online (GameScreen)
+      game-page.ts       ← khung HTML bàn chơi
+      game-keys.ts       ← phím tắt
+      lobby-options.ts, rules-html.ts, history-html.ts, art.ts, o-an-quan.css
       rules.ts       ← setup, validMoves, applyMove, result, forfeit, parseOptions
       types.ts
       rules.test.ts
@@ -63,9 +69,6 @@
       room.ts        ← trang phòng: hỏi nickname, vào phòng, chuyển phòng chờ / bàn chơi / kết quả, thanh mất kết nối
       nickname.ts    ← nhập nickname khi vào bằng link lần đầu
       lobby.ts       ← phòng chờ
-      game.ts        ← bàn chơi online
-      game-page.ts   ← khung HTML bàn chơi
-      game-keys.ts   ← phím tắt
       room-players.ts← tên, chữ trong avatar, màu avatar theo ghế
     /o-an-quan
       layout.ts          ← xếp 12 ô lên bàn 7 cột theo bên ngồi dưới
@@ -77,7 +80,7 @@
       result-view.ts     ← nội dung màn kết quả
       move-log.ts        ← nhật ký ván: mô tả từng nước từ events
       move-effects.ts    ← hiệu ứng cho từng event
-      log-view.ts        ← HTML nhật ký ván
+      (log-view.ts đã chuyển sang client/game-ui/, dùng chung mọi game)
 ```
 
 Engine có hai đường import: `@playtogether/engine` (GameModule, RNG) và `@playtogether/engine/o-an-quan` (luật và kiểu dữ liệu Ô ăn quan). Server và engine chỉ dùng cú pháp TypeScript "bỏ được" (`erasableSyntaxOnly`: không `enum`, không parameter property) để Node 24 chạy thẳng file `.ts`.

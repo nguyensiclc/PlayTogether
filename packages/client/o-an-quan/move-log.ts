@@ -2,17 +2,7 @@
 
 import type { EndReason, GameEvent, Move, TurnEndReason } from "@playtogether/engine/o-an-quan";
 import { isQuanSquare } from "@playtogether/engine/o-an-quan";
-
-export interface LogEntry {
-  /** Số lượt (nước rải thứ mấy của ván) */
-  n: number;
-  who: string;
-  text: string;
-  /** Điểm vừa ăn, hiện "+N" màu xanh */
-  gain?: number;
-  /** Sự kiện đặc biệt, hiện màu đỏ (vd "−5" khi bù dân) */
-  ev?: string;
-}
+import type { LogEntry } from "../game-ui/log-view.ts";
 
 export const END_TITLE: Record<EndReason, string> = {
   "het-quan": "Hết quan",

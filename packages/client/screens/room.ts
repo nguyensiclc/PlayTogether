@@ -3,11 +3,12 @@
 
 import type { PublicRoom, RoomPreview, ServerMessage, You } from "@playtogether/protocol";
 import { $ } from "../dom.ts";
-import { GAME_INFO } from "../games.ts";
+import { gameOf } from "../games/registry.ts";
+import type { GameScreen, RoomMessage } from "../games/types.ts";
 import { getClientId, getName, rememberRoom, setName } from "../identity.ts";
 import { GameSocket } from "../net/socket.ts";
+import { showHistory, showRules } from "../rules/rules-dialog.ts";
 import { confirmDeleteRoom, memberCount } from "./confirm-leave.ts";
-import { createGameScreen, type GameScreen, type RoomMessage } from "./game-screen.ts";
 import { LobbyView } from "./lobby.ts";
 import { showNickname } from "./nickname.ts";
 
@@ -102,7 +103,7 @@ class RoomScreen {
   private update(m: RoomMessage): void {
     this.room = m.room;
     this.you = m.you;
-    document.title = `Phòng ${m.room.code} · ${GAME_INFO[m.room.gameId].name}`;
+    document.title = `Phòng ${m.room.code} · ${gameOf(m.room.gameId).info.name}`;
     rememberRoom({
       code: m.room.code,
       gameId: m.room.gameId,
@@ -127,7 +128,7 @@ class RoomScreen {
       return;
     }
     this.lobby = null;
-    this.game = createGameScreen(this.body, m.room, m.you, {
+    this.game = gameOf(m.room.gameId).createScreen(this.body, m.room, m.you, {
       move: (move, actionNo) => this.socket.send({ type: "move", move, actionNo }),
       rematch: () => this.socket.send({ type: "rematch" }),
       toLobby: () => {
@@ -135,6 +136,8 @@ class RoomScreen {
         if (this.room && this.you) this.showLobby(this.room, this.you);
       },
       leave: () => void this.requestLeave(),
+      showRules: () => showRules(m.room.gameId),
+      showHistory: () => showHistory(m.room.gameId),
     });
     this.game.setOnline(this.socket.isOpen);
   }

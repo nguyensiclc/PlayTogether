@@ -2,7 +2,7 @@
 
 import type { SeatId } from "@playtogether/engine";
 import type { PublicRoom } from "@playtogether/protocol";
-import type { PlayerIdentity } from "../o-an-quan/player-card.ts";
+import type { PlayerIdentity } from "../game-ui/result-parts.ts";
 
 /** Màu avatar theo ghế (av1 cho ghế 1, av3 cho ghế 2, như mockup) */
 const AVATAR_BY_SEAT = ["av1", "av3"] as const;

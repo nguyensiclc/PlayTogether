@@ -13,6 +13,7 @@ Game đầu tiên: **Ô ăn quan**. Sau đó sẽ có Tiến lên, Cờ tướng
 - Kế hoạch, các mốc M1–M5 (gồm M1.1), test case T1–T20, câu hỏi mở: `docs/o-an-quan/04-ke-hoach-prototype.md`
 - Thiết kế màn hình (mockup, hệ màu): `docs/design/`. Màn hình đã có thiết kế thì code UI phải theo thiết kế đó.
 - Cờ caro: `docs/caro/` (luật, UX, kỹ thuật, kế hoạch). Câu hỏi mở của Caro đánh số `C1…` ở `docs/caro/04-ke-hoach-prototype.md` mục 6. Mockup đã chốt trong `docs/design/caro/` (Claude tự thiết kế), bản yêu cầu gốc ở `docs/design/caro/README.md`. Code UI Caro ở `packages/client/caro/` và `packages/client/screens/caro-game.ts`.
+- Kiến trúc module (cái gì dùng chung, cái gì riêng từng game, cách thêm game): `docs/kien-truc-module.md`. **Đọc trước khi thêm game hoặc thêm tính năng dùng cho nhiều game.**
 - Quy ước code, clean code: `docs/quy-uoc-code.md`. Code mới và code sửa phải theo quy ước này. Trước khi commit chạy `npm run check`.
 
 Nếu code cần làm khác tài liệu thì **cập nhật tài liệu trong cùng thay đổi** và nêu rõ lý do. Câu hỏi mở Q1–Q6 chưa chốt thì dùng phương án "Đề xuất hiện tại" trong bảng.
@@ -26,13 +27,30 @@ Nếu code cần làm khác tài liệu thì **cập nhật tài liệu trong c�
 - Mỗi game là một module theo interface `GameModule`. Lớp phòng (`packages/server`) không được chứa luật của game cụ thể.
 - Stack: TypeScript, Node 24 + `ws`, Vite (TS thuần) cho client, Vitest. Lưu trạng thái trong RAM.
 
-Cấu trúc thư mục dự kiến (xem mục 2 tài liệu kỹ thuật):
+Cấu trúc thư mục (chi tiết ở `docs/kien-truc-module.md`):
 
 ```
-packages/engine   ← luật game, dùng chung
-packages/server   ← http + ws, phòng chơi
-packages/client   ← UI
+packages/engine/game-module.ts   ← hợp đồng GameModule, RNG (dùng chung)
+packages/engine/<game>/          ← luật của một game
+packages/protocol                ← giao thức client–server (dùng chung, đăng ký danh sách game)
+packages/server                  ← http + ws, phòng chơi (dùng chung, không có luật game)
+packages/client                  ← nền tảng: screens/, games/, game-ui/, rules/, style.css
+packages/client/<game>/          ← mọi thứ giao diện riêng của một game
 ```
+
+## Quy tắc tách module (bắt buộc cho code mới)
+
+Mục tiêu: có hàng trăm game vẫn không lặp code. Thêm game = thêm thư mục + vài dòng đăng ký. `npm run check` có `packages/architecture.test.ts` kiểm tra các quy tắc 1–5.
+
+1. **Nền tảng không biết từng game.** Code ở `server/`, `protocol/` (ngoài chỗ đăng ký), `client/screens`, `client/games`, `client/game-ui`, `client/rules`, `client/style.css`, `engine/game-module.ts` không chứa luật, chữ, CSS hay `if/switch` theo `gameId`. Cần khác nhau theo game thì thêm trường vào `ClientGame` (client) hoặc `GameModule` (engine).
+2. **Game không biết game khác.** `client/<game>/` và `engine/<game>/` không import thư mục của game khác. Thứ cần cho hai game trở lên thì đưa vào phần dùng chung.
+3. **Nền tảng chỉ gặp game ở các điểm đăng ký**, mỗi điểm một dòng: `engine/package.json` (`exports`), `protocol/index.ts` (`GAME_IDS`, kiểu `<Game>Room`), `server/room-manager.ts` (`MODULES`), `client/games/registry.ts`.
+4. **Không sao chép, dùng chung.** Trước khi viết thành phần giao diện hoặc logic cho một game, kiểm tra `client/game-ui/`, `client/games/` và game khác xem đã có chưa. Phát hiện hai nơi giống nhau thì gom về phần dùng chung trong cùng thay đổi. Chỉ một game dùng thì để trong thư mục game; có game thứ hai cần thì mới chuyển lên.
+5. **Mỗi game đóng gói đủ trong thư mục của nó**: màn chơi, luật hiển thị (`rules-html.ts`), lịch sử (`history-html.ts`), tuỳ chọn phòng (`lobby-options.ts`), hình (`art.ts`), CSS (`<game>.css`), test. CSS riêng game **không** đặt trong `style.css`; `style.css` chỉ chứa nền tảng và các lớp dùng chung (`.player`, `.status-pill`, `.result`, `.sheet`…).
+6. **Mỗi file một việc, đặt đúng chỗ.** File mới: nền tảng hay game? Nếu phân vân, đặt trong game. Tên file theo vai trò (`game-view.ts`, `client-game.ts`, `rules-html.ts`), không đặt tên chung chung. Hàm dài quá 40 dòng hoặc complexity > 15 thì tách (Biome sẽ báo).
+7. **Thêm game mới theo danh sách ở `docs/kien-truc-module.md` mục 3**, và cập nhật tài liệu đó nếu cách làm đổi.
+8. **Đổi hợp đồng dùng chung** (`GameModule`, `ClientGame`, `GameActions`, protocol) thì sửa đồng thời mọi game đang có, cập nhật `docs/kien-truc-module.md`, và chạy e2e hai người chơi cho **mọi** game, không chỉ game đang làm.
+9. **Quy ước kèm theo**: dữ liệu từ client không tin (server kiểm tra bằng `parseMove`/`parseOptions` của module); không dùng `any`, không `!` trong code sản xuất; chuỗi hiển thị người dùng bằng tiếng Việt; vùng chạm ≥ 44px.
 
 ## Cách làm việc
 

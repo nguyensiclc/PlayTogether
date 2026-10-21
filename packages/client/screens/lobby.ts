@@ -4,11 +4,10 @@ import type { SeatId } from "@playtogether/engine";
 import type { PublicMember, PublicRoom, You } from "@playtogether/protocol";
 import { roomPath } from "@playtogether/protocol";
 import { escapeHtml } from "../dom.ts";
-import { GAME_INFO } from "../games.ts";
+import { gameOf } from "../games/registry.ts";
 import { BACK_ICON } from "../icons.ts";
 import { qrSvg } from "../qr.ts";
 import { showHistory, showRules } from "../rules/rules-dialog.ts";
-import { LOBBY_OPTIONS } from "./lobby-options.ts";
 import { avatarClassOf, initialsOf } from "./room-players.ts";
 
 export interface LobbyActions {
@@ -104,7 +103,7 @@ export class LobbyView {
     this.room = room;
     this.you = you;
     const isHost = room.hostId === you.memberId;
-    const game = GAME_INFO[room.gameId];
+    const game = gameOf(room.gameId).info;
     const link = `${this.inviteLink(room.code)}`;
     const seated = room.seats.filter((m) => m !== null).length;
     this.root.innerHTML = `
@@ -131,7 +130,7 @@ export class LobbyView {
             <section class="card seats">${room.seats.map((m, seat) => this.seatHtml(m, seat, room, you)).join('<span class="vs desk-only">VS</span>')}</section>
             ${spectatorsHtml(room.spectators)}
             <div class="section-head"><h2>Tuỳ chọn</h2><span class="small muted">${isHost ? "Bạn là chủ phòng" : "Chủ phòng chỉnh"}</span></div>
-            <section class="card opts">${LOBBY_OPTIONS[room.gameId].html(room, isHost)}</section>
+            <section class="card opts">${gameOf(room.gameId).lobbyOptions.html(room, isHost)}</section>
           </div>
           <aside class="lobby-side">
             <section class="card invite">
@@ -194,7 +193,7 @@ export class LobbyView {
     else if (act === "history") showHistory(this.room.gameId);
     else if (act === "start") this.actions.start();
     else if (act === "sit") this.actions.takeSeat(Number(el.dataset.seat));
-    else if (act === "opt") this.actions.setOptions(LOBBY_OPTIONS[this.room.gameId].read(el));
+    else if (act === "opt") this.actions.setOptions(gameOf(this.room.gameId).lobbyOptions.read(el));
     else if (act === "copy") void this.copyLink();
     else if (act === "share") void this.share();
     else if (act === "qr") {
@@ -215,8 +214,8 @@ export class LobbyView {
     if (!this.room) return;
     try {
       await navigator.share({
-        title: `Chơi ${GAME_INFO[this.room.gameId].name}`,
-        text: `Vào chơi ${GAME_INFO[this.room.gameId].name} với mình, phòng ${this.room.code}`,
+        title: `Chơi ${gameOf(this.room.gameId).info.name}`,
+        text: `Vào chơi ${gameOf(this.room.gameId).info.name} với mình, phòng ${this.room.code}`,
         url: `${this.inviteLink(this.room.code)}`,
       });
     } catch {
