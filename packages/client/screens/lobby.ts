@@ -8,6 +8,7 @@ import { GAME_INFO } from "../games.ts";
 import { BACK_ICON } from "../icons.ts";
 import { inviteOrigin } from "../invite-origin.ts";
 import { qrSvg } from "../qr.ts";
+import { showRules } from "../rules/rules-dialog.ts";
 import { LOBBY_OPTIONS } from "./lobby-options.ts";
 import { avatarClassOf, initialsOf } from "./room-players.ts";
 
@@ -59,6 +60,7 @@ export class LobbyView {
         <div class="game-head">
           <span class="mini">${game.icon}</span>
           <div><h2>${game.name}</h2><div class="code-big"><span class="desk-only">Phòng chờ · </span>Mã phòng <b>${room.code}</b></div></div>
+          <button class="btn sm" type="button" data-act="rules" style="margin-left:auto">📖 Luật chơi</button>
         </div>
         <div class="lobby-cols">
           <div class="lobby-main">
@@ -125,6 +127,7 @@ export class LobbyView {
     if (!el || !this.room || !this.you) return;
     const act = el.dataset.act;
     if (act === "leave") this.actions.leave();
+    else if (act === "rules") showRules(this.room.gameId);
     else if (act === "start") this.actions.start();
     else if (act === "sit") this.actions.takeSeat(Number(el.dataset.seat));
     else if (act === "opt") this.actions.setOptions(LOBBY_OPTIONS[this.room.gameId].read(el));

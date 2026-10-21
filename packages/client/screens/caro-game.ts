@@ -15,6 +15,7 @@ import { type CaroCardState, CaroPlayerCard, MARK_CHAR } from "../caro/player-ca
 import { resultHtml } from "../caro/result-view.ts";
 import { $, escapeHtml } from "../dom.ts";
 import { logListHtml } from "../o-an-quan/log-view.ts";
+import { showRules } from "../rules/rules-dialog.ts";
 import type { GameActions, GameScreen, RoomMessage } from "./game-screen.ts";
 import { identityInRoom, seatOfMember } from "./room-players.ts";
 
@@ -66,6 +67,7 @@ export class CaroGameView implements GameScreen {
     this.q("[data-card-top]").replaceWith(this.cards.top.el);
     this.q("[data-card-bottom]").replaceWith(this.cards.bottom.el);
     this.q("[data-board]").replaceWith(this.board.el);
+    for (const b of this.page.querySelectorAll("[data-rules]")) b.addEventListener("click", () => showRules("caro"));
     this.q("[data-unpick]").addEventListener("click", () => this.board.clearSelection());
     this.q("[data-place]").addEventListener("click", () => this.board.confirm());
     document.addEventListener("keydown", this.onKey);

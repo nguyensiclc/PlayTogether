@@ -7,6 +7,7 @@ import { $, escapeHtml } from "../dom.ts";
 import { GAME_INFO } from "../games.ts";
 import { getClientId, getName, randomName, recentRooms, setName } from "../identity.ts";
 import { GameSocket } from "../net/socket.ts";
+import { showRules } from "../rules/rules-dialog.ts";
 import { initialsOf } from "./room-players.ts";
 
 type Category = "dangian" | "co" | "bai";
@@ -149,6 +150,10 @@ export function mountHome(root: HTMLElement): void {
           </div>
         </div>
         <div class="games">${GAMES.map(gameCard).join("")}</div>
+        <section class="rules-row" aria-label="Luật chơi">
+          <h2>Đọc luật trước khi chơi</h2>
+          ${GAMES.flatMap((g) => (g.gameId ? [`<button class="btn sm" type="button" data-rules="${g.gameId}">📖 ${g.name}</button>`] : [])).join("")}
+        </section>
 
         <footer>
           <span class="desk-only">PlayTogether · Chơi cùng nhau</span>
@@ -168,6 +173,9 @@ export function mountHome(root: HTMLElement): void {
   }
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-create]")) {
     btn.addEventListener("click", () => createRoom(root, btn.dataset.create as GameId));
+  }
+  for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-rules]")) {
+    btn.addEventListener("click", () => showRules(btn.dataset.rules as GameId));
   }
   setupNickname($(root, "[data-nick]"));
   // Điện thoại: "Phòng gần đây" nằm trên "Nổi bật"; desktop: dưới khối hero hai cột (như mockup)
