@@ -90,6 +90,7 @@ Dùng chung với Ô ăn quan (mất kết nối, đối thủ rời phòng...).
 | Đến lượt, chưa chọn ô | "Lượt của bạn — chạm một ô trống" |
 | Đang chọn ô (điện thoại) | "Chạm lại ô đó hoặc bấm Đặt quân" |
 | Chạm ô đã có quân | Ô rung nhẹ, không hiện thông báo lỗi |
+| Người cuối cùng bấm Rời phòng | Hộp xác nhận "Bạn là người cuối cùng trong phòng"; đồng ý thì rời và server xoá phòng, "Ở lại" thì giữ nguyên. Áp dụng cho mọi game (phòng bị xoá khi không còn thành viên nào) |
 | Chuỗi bị chặn hai đầu (khi bật Chặn 2 đầu) | Thông báo nhỏ "Chuỗi 5 bị chặn 2 đầu — chưa thắng" để người chơi hiểu vì sao ván tiếp tục |
 
 ## 7. Danh sách màn hình cần thiết kế

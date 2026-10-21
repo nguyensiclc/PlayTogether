@@ -6,6 +6,7 @@ import { $ } from "../dom.ts";
 import { GAME_INFO } from "../games.ts";
 import { getClientId, getName, rememberRoom, setName } from "../identity.ts";
 import { GameSocket } from "../net/socket.ts";
+import { confirmDeleteRoom, memberCount } from "./confirm-leave.ts";
 import { createGameScreen, type GameScreen, type RoomMessage } from "./game-screen.ts";
 import { LobbyView } from "./lobby.ts";
 import { showNickname } from "./nickname.ts";
@@ -114,6 +115,12 @@ class RoomScreen {
     else this.showLobby(m.room, m.you);
   }
 
+  /** Người cuối cùng rời thì phải xác nhận, vì phòng sẽ bị xoá */
+  private async requestLeave(): Promise<void> {
+    if (this.room && memberCount(this.room) <= 1 && !(await confirmDeleteRoom())) return;
+    this.socket.send({ type: "leaveRoom" });
+  }
+
   private showGame(m: RoomMessage): void {
     if (this.game) {
       this.game.receive(m);
@@ -127,7 +134,7 @@ class RoomScreen {
         this.wantLobby = true;
         if (this.room && this.you) this.showLobby(this.room, this.you);
       },
-      leave: () => this.socket.send({ type: "leaveRoom" }),
+      leave: () => void this.requestLeave(),
     });
     this.game.setOnline(this.socket.isOpen);
   }
@@ -140,7 +147,7 @@ class RoomScreen {
         takeSeat: (seat) => this.socket.send({ type: "takeSeat", seat }),
         setOptions: (options) => this.socket.send({ type: "setOptions", options }),
         start: () => this.socket.send({ type: "start" }),
-        leave: () => this.socket.send({ type: "leaveRoom" }),
+        leave: () => void this.requestLeave(),
       });
     }
     this.lobby.render(room, you);
