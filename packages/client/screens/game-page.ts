@@ -26,8 +26,11 @@ export function gamePageHtml(options: Options): string {
         <span class="chip desk-only">Quan = ${options.giaTriQuan}</span>
         <span class="chip desk-only">Quan Già: ${onOff(options.camAnQuanNon)}</span>
         <span class="chip desk-only">Lật bàn: ${onOff(options.latBan)}</span>
+        ${options.targetScore ? `<span class="chip desk-only">Trận ${options.targetScore} điểm</span>` : ""}
+        <button class="btn sm desk-only" type="button" data-info="rules">📖 Luật chơi</button>
+        <button class="btn sm desk-only" type="button" data-info="history">📜 Lịch sử</button>
         <a class="btn sm desk-only" href="/">Về trang chủ</a>
-        <span class="icon-btn mobile-only" aria-hidden="true"></span>
+        <button class="icon-btn mobile-only" type="button" data-info="rules" aria-label="Luật chơi">?</button>
       </header>
       <div class="g-layout">
         <main class="stage">

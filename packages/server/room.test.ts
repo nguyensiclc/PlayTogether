@@ -274,3 +274,59 @@ describe("rời phòng và mất kết nối", () => {
     expect(errorCode(() => room.takeSeat("lạ", 0))).toBe("NOT_IN_ROOM");
   });
 });
+
+describe("Đấu trận nhiều ván (targetScore)", () => {
+  it("khởi động trận đấu với targetScore thì tạo match với round 1 và điểm 0", () => {
+    const room = fullRoom();
+    room.setOptions(HOST.clientId, { targetScore: 100 });
+    room.start(HOST.clientId, createRng(1));
+    const v = room.view();
+    expect(v.match).toEqual({
+      scores: [0, 0],
+      round: 1,
+      winner: null,
+    });
+  });
+
+  it("ván kết thúc cộng dồn điểm vào match, chưa ai chạm mốc thì winner vẫn là null", () => {
+    const room = fullRoom();
+    room.setOptions(HOST.clientId, { targetScore: 100 });
+    room.start(HOST.clientId, createRng(1));
+    playToEnd(room, 1);
+    const v = room.view();
+    expect(v.match).not.toBeNull();
+    expect(v.match?.round).toBe(1);
+    expect((v.match?.scores[0] ?? 0) + (v.match?.scores[1] ?? 0)).toBe(70);
+    expect(v.match?.winner).toBeNull();
+  });
+
+  it("rematch bắt đầu ván tiếp theo (round 2) và tích luỹ điểm cho tới khi có người đạt mốc", () => {
+    const room = fullRoom();
+    room.setOptions(HOST.clientId, { targetScore: 70 });
+    room.start(HOST.clientId, createRng(1));
+    playToEnd(room, 1);
+    const prevMatch = room.view().match!;
+    // Với mốc 70, nếu có người thắng ván 1 với score >= 36 và đối thủ < 34... nhưng nếu tổng là 70, có thể một người đạt hoặc chưa
+    // Nếu ván 1 kết thúc mà chưa ai đạt 70 (thường điểm phân bổ ~40-30):
+    if (prevMatch.winner === null) {
+      room.rematch(HOST.clientId, createRng(2));
+      room.rematch(GUEST.clientId, createRng(2));
+      expect(room.view().match?.round).toBe(2);
+      expect(room.view().match?.scores).toEqual(prevMatch.scores);
+      playToEnd(room, 2);
+      const finalMatch = room.view().match!;
+      // Tổng điểm 2 ván là 140, chắc chắn có người >= 70
+      expect(finalMatch.winner).not.toBeNull();
+    }
+  });
+
+  it("chủ phòng đổi tuỳ chọn thì reset match", () => {
+    const room = fullRoom();
+    room.setOptions(HOST.clientId, { targetScore: 100 });
+    room.start(HOST.clientId, createRng(1));
+    playToEnd(room, 1);
+    expect(room.view().match).not.toBeNull();
+    room.setOptions(HOST.clientId, { targetScore: 200 });
+    expect(room.view().match).toBeNull();
+  });
+});

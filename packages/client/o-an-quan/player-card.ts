@@ -21,6 +21,8 @@ export interface CardState {
   active: boolean;
   /** Mất kết nối: avatar mờ, hiện "Mất kết nối" thay cho kho điểm (Q22e) */
   offline?: boolean;
+  /** Tiến độ trận đấu nhiều ván (nếu có) */
+  matchProgress?: { total: number; target: number } | null;
 }
 
 export class PlayerCard {
@@ -32,6 +34,7 @@ export class PlayerCard {
   private readonly quan: HTMLElement;
   private readonly delta: HTMLElement;
   private readonly score: HTMLElement;
+  private readonly matchPill: HTMLElement;
   private readonly kho: HTMLElement;
   private readonly reconn: HTMLElement;
 
@@ -44,7 +47,10 @@ export class PlayerCard {
         <div class="kho"><span class="ddot"></span><span data-dan></span> · <span class="qdot"></span><span data-quan></span><span class="delta" hidden></span></div>
         <div class="reconn" hidden>Mất kết nối</div>
       </div>
-      <div class="score"><b></b><span class="tiny muted">điểm</span></div>`;
+      <div class="score">
+        <b></b><span class="tiny muted">điểm</span>
+        <span class="match-pill" hidden></span>
+      </div>`;
     this.avatar = $(this.el, ".avatar");
     this.name = $(this.el, "[data-name]");
     this.you = $(this.el, "[data-you]");
@@ -52,6 +58,7 @@ export class PlayerCard {
     this.quan = $(this.el, "[data-quan]");
     this.delta = $(this.el, ".delta");
     this.score = $(this.el, ".score b");
+    this.matchPill = $(this.el, ".match-pill");
     this.kho = $(this.el, ".kho");
     this.reconn = $(this.el, ".reconn");
   }
@@ -64,6 +71,12 @@ export class PlayerCard {
     this.dan.textContent = `${state.pile.dan} dân`;
     this.quan.textContent = `${state.pile.quan} quan`;
     this.score.textContent = String(state.points);
+    if (state.matchProgress) {
+      this.matchPill.hidden = false;
+      this.matchPill.textContent = `Tổng ${state.matchProgress.total}/${state.matchProgress.target}`;
+    } else {
+      this.matchPill.hidden = true;
+    }
     this.el.classList.toggle("active", state.active);
     const offline = state.offline ?? false;
     this.el.classList.toggle("offline", offline);

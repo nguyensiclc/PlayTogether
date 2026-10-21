@@ -13,10 +13,11 @@ import { dirForArrow, layoutFor } from "../o-an-quan/layout.ts";
 import { logLineHtml, logListHtml } from "../o-an-quan/log-view.ts";
 import { playEffect } from "../o-an-quan/move-effects.ts";
 import { describeMove, keepSideEntry, type LogEntry } from "../o-an-quan/move-log.ts";
-import { FAST_SPEED, Playback } from "../o-an-quan/playback.ts";
+import { AUTO_FAST_MS, FAST_SPEED, Playback } from "../o-an-quan/playback.ts";
 import { PlayerCard } from "../o-an-quan/player-card.ts";
 import { resultHtml } from "../o-an-quan/result-view.ts";
 import { type BoardView, points, viewFromState } from "../o-an-quan/view-model.ts";
+import { showHistory, showRules } from "../rules/rules-dialog.ts";
 import { handleGameKey, type KeyActions } from "./game-keys.ts";
 import { gamePageHtml } from "./game-page.ts";
 import type { GameActions, GameScreen, RoomMessage } from "./game-screen.ts";
@@ -78,6 +79,9 @@ export class GameView implements GameScreen {
     this.q(".scrim").addEventListener("click", () => {
       if (!this.q(".latban").hidden) this.declineLatBan();
     });
+    for (const b of this.page.querySelectorAll<HTMLElement>("[data-info]")) {
+      b.addEventListener("click", () => (b.dataset.info === "history" ? showHistory : showRules)("o-an-quan"));
+    }
     document.addEventListener("keydown", this.onKey);
     document.addEventListener("pointerdown", this.onOutside);
     this.showSnapshot();
@@ -167,23 +171,35 @@ export class GameView implements GameScreen {
     this.select(null);
     this.setStatus(move.kind === "latBan" ? `${this.nameOf(seat)} lật bàn…` : `${this.nameOf(seat)} đang rải…`, true);
     this.q(".playback").hidden = move.kind !== "sow";
+    const fastBtn = this.q("[data-fast]");
     const pb = new Playback();
-    pb.speed = this.q("[data-fast]").getAttribute("aria-pressed") === "true" ? FAST_SPEED : 1;
+    pb.speed = fastBtn.getAttribute("aria-pressed") === "true" ? FAST_SPEED : 1;
+    if (move.kind === "sow") {
+      pb.autoFastAfterMs = AUTO_FAST_MS;
+      pb.onSpeedChange = (speed) => {
+        fastBtn.setAttribute("aria-pressed", String(speed >= FAST_SPEED));
+      };
+    }
     this.playback = pb;
-    await pb.run(events, viewFromState(before), v, {
-      render: (view, ms) => this.renderView(view, ms),
-      effect: (e, ctx) =>
-        playEffect(e, ctx, {
-          board: this.board,
-          cardOf: (side) => this.cardOf(side),
-          giaTriQuan: v,
-          nameOf: (s) => this.nameOf(s),
-          turnAfter: after.turn,
-        }),
-    });
-    this.playback = null;
-    this.busy = false;
-    this.q(".playback").hidden = true;
+    try {
+      await pb.run(events, viewFromState(before), v, {
+        render: (view, ms) => this.renderView(view, ms),
+        effect: (e, ctx) =>
+          playEffect(e, ctx, {
+            board: this.board,
+            cardOf: (side) => this.cardOf(side),
+            giaTriQuan: v,
+            nameOf: (s) => this.nameOf(s),
+            turnAfter: after.turn,
+            status: (text) => this.setStatus(text, true),
+          }),
+      });
+    } finally {
+      this.playback = null;
+      this.busy = false;
+      this.q(".playback").hidden = true;
+      fastBtn.setAttribute("aria-pressed", "false");
+    }
   }
 
   // ---------- Truy vấn ----------
@@ -240,18 +256,34 @@ export class GameView implements GameScreen {
     this.q("[data-label-top]").textContent = label(top);
     this.q("[data-label-bottom]").textContent = label(bottom);
     const playing = this.state.status === "playing";
-    this.q("[data-sub]").textContent = `Phòng ${this.room.code} · Lượt ${this.state.moveNo + (playing ? 1 : 0)}`;
+    const subParts = [`Phòng ${this.room.code}`];
+    if (this.room.options.targetScore && this.room.match) {
+      subParts.push(`Trận ${this.room.options.targetScore}đ (Ván ${this.room.match.round})`);
+    }
+    subParts.push(`Lượt ${this.state.moveNo + (playing ? 1 : 0)}`);
+    this.q("[data-sub]").textContent = subParts.join(" · ");
   }
 
   private renderCard(card: PlayerCard, view: BoardView, side: Seat): void {
     const seat = view.controller[side];
     const pile = view.captured[side];
+    const currentPoints = points(pile, this.room.options.giaTriQuan);
+    const target = this.room.options.targetScore;
+    const match = this.room.match;
+    const matchProgress =
+      target && match
+        ? {
+            total: (match.scores[seat] ?? 0) + currentPoints,
+            target,
+          }
+        : null;
     card.render(identityInRoom(this.room, seat), {
       pile,
-      points: points(pile, this.room.options.giaTriQuan),
+      points: currentPoints,
       you: seat === this.you.seat,
       active: this.state.status === "playing" && this.state.turn === side,
       offline: this.room.seats[seat]?.connected === false,
+      matchProgress,
     });
   }
 
@@ -398,6 +430,8 @@ export class GameView implements GameScreen {
       mySeat: this.you.seat,
       nextFirst: this.room.nextFirst,
       rematchSeats: this.room.rematchVotes.flatMap((id) => seatOfMember(this.room, id) ?? []),
+      match: this.room.match,
+      targetScore: this.room.options.targetScore,
     });
     // Người xem không có nút Ván nữa
     box.querySelector("[data-again]")?.addEventListener("click", () => this.actions.rematch());
@@ -407,8 +441,13 @@ export class GameView implements GameScreen {
     box.hidden = false;
     this.q(".scrim").hidden = false;
     this.q(".latban").hidden = true;
-    const winner = result.winner;
-    this.setStatus(winner === null ? "Hoà!" : `${this.nameOf(winner)} thắng!`, true);
+    const match = this.room.match;
+    if (match && match.winner !== null) {
+      this.setStatus(`${this.nameOf(match.winner)} thắng chung cuộc trận đấu!`, true);
+    } else {
+      const winner = result.winner;
+      this.setStatus(winner === null ? "Hoà!" : `${this.nameOf(winner)} thắng!`, true);
+    }
     if (wasHidden) box.querySelector<HTMLElement>("[data-again]:not([disabled])")?.focus();
   }
 

@@ -36,6 +36,15 @@ export interface PublicMember {
   connected: boolean;
 }
 
+export interface MatchScore {
+  /** Tổng điểm tích lũy của từng ghế trong trận: [score0, score1] */
+  scores: number[];
+  /** Số ván đã chơi xong trong trận */
+  round: number;
+  /** Người thắng chung cuộc (đạt >= targetScore); null nếu trận chưa kết thúc */
+  winner: SeatId | null;
+}
+
 /** Phòng ở dạng công khai, gửi cho mọi người trong phòng. `S`, `O` là state và tuỳ chọn của game. */
 export interface PublicRoomOf<S, O, G extends GameId = GameId> {
   code: string;
@@ -56,6 +65,8 @@ export interface PublicRoomOf<S, O, G extends GameId = GameId> {
   nextFirst: SeatId | null;
   /** Số ván thắng của từng ghế trong phòng (theo thứ tự ghế); hoà không tính */
   wins: number[];
+  /** Thông tin trận đấu nhiều ván khi options.targetScore !== null; null khi options.targetScore === null */
+  match: MatchScore | null;
 }
 
 export type OAnQuanRoom = PublicRoomOf<OAnQuanState, OAnQuanOptions, "o-an-quan">;

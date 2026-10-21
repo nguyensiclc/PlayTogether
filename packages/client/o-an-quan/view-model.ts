@@ -49,13 +49,14 @@ export function applyEvent(view: BoardView, e: GameEvent, giaTriQuan: number): B
       break;
     case "drop":
       v.dan[e.i] = (v.dan[e.i] ?? 0) + 1;
-      v.hand = v.hand && v.hand.n > 1 ? { at: e.i, n: v.hand.n - 1 } : null;
+      v.hand = { at: e.i, n: Math.max(0, (v.hand?.n ?? 1) - 1) };
       break;
     case "capture":
       v.dan[e.i] = 0;
       if (e.quan) v.quan[e.i === 0 ? 0 : 1] = false;
       v.captured[e.by].dan += e.dan;
       v.captured[e.by].quan += e.quan;
+      v.hand = null;
       break;
     case "buDan": {
       const p = v.captured[e.seat];

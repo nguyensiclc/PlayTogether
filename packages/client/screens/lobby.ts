@@ -6,7 +6,6 @@ import { roomPath } from "@playtogether/protocol";
 import { escapeHtml } from "../dom.ts";
 import { GAME_INFO } from "../games.ts";
 import { BACK_ICON } from "../icons.ts";
-import { inviteOrigin } from "../invite-origin.ts";
 import { qrSvg } from "../qr.ts";
 import { showHistory, showRules } from "../rules/rules-dialog.ts";
 import { LOBBY_OPTIONS } from "./lobby-options.ts";
@@ -23,6 +22,52 @@ const SHARE_ICON =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>';
 const QR_ICON =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3"/></svg>';
+const LAN_IP_KEY = "playtogether:lanIp";
+
+export function getStoredLanIp(): string | null {
+  try {
+    return localStorage.getItem(LAN_IP_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredLanIp(ip: string): void {
+  try {
+    localStorage.setItem(LAN_IP_KEY, ip);
+  } catch {
+    // Không làm gì nếu localStorage bị chặn
+  }
+}
+
+export async function fetchLanIp(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/lan-ip");
+    if (!res.ok) return null;
+    const data = (await res.json()) as { lanIp?: string | null };
+    return data.lanIp ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Xây dựng link mời vào phòng.
+ * Nếu máy mở bằng localhost / 127.0.0.1, tự động thay bằng IP nội bộ để bạn bè cùng mạng Wi-Fi/LAN vào được.
+ */
+export function buildInviteLink(
+  code: string,
+  lanIp: string | null,
+  loc: { hostname: string; protocol: string; port: string; origin: string } = location,
+): string {
+  const isLocal = loc.hostname === "localhost" || loc.hostname === "127.0.0.1" || loc.hostname === "::1";
+  if (isLocal && lanIp) {
+    const port = loc.port ? `:${loc.port}` : "";
+    return `${loc.protocol}//${lanIp}${port}${roomPath(code)}`;
+  }
+  return `${loc.origin}${roomPath(code)}`;
+}
+
 export class LobbyView {
   private readonly root: HTMLElement;
   private readonly actions: LobbyActions;
@@ -30,6 +75,7 @@ export class LobbyView {
   private you: You | null = null;
   private qrOpen = false;
   private copied = false;
+  private lanIp: string | null = getStoredLanIp();
 
   /** Tự tạo phần tử riêng trong `host`: khi màn hình khác thay chỗ, bộ lắng nghe cũng mất theo */
   constructor(host: HTMLElement, actions: LobbyActions) {
@@ -38,6 +84,20 @@ export class LobbyView {
     this.actions = actions;
     // Một bộ lắng nghe cho cả màn hình, vì nội dung vẽ lại mỗi lần phòng thay đổi
     this.root.addEventListener("click", (e) => this.onClick(e));
+    void this.syncLanIp();
+  }
+
+  private async syncLanIp(): Promise<void> {
+    const ip = await fetchLanIp();
+    if (ip && ip !== this.lanIp) {
+      this.lanIp = ip;
+      setStoredLanIp(ip);
+      if (this.room && this.you) this.render(this.room, this.you);
+    }
+  }
+
+  private inviteLink(code: string): string {
+    return buildInviteLink(code, this.lanIp);
   }
 
   render(room: PublicRoom, you: You): void {
@@ -45,7 +105,7 @@ export class LobbyView {
     this.you = you;
     const isHost = room.hostId === you.memberId;
     const game = GAME_INFO[room.gameId];
-    const link = `${inviteOrigin()}${roomPath(room.code)}`;
+    const link = `${this.inviteLink(room.code)}`;
     const seated = room.seats.filter((m) => m !== null).length;
     this.root.innerHTML = `
       <div class="screen lobby">
@@ -145,7 +205,7 @@ export class LobbyView {
 
   private async copyLink(): Promise<void> {
     if (!this.room || !this.you) return;
-    await copyText(`${inviteOrigin()}${roomPath(this.room.code)}`);
+    await copyText(this.inviteLink(this.room.code));
     this.copied = true;
     this.render(this.room, this.you);
   }
@@ -157,7 +217,7 @@ export class LobbyView {
       await navigator.share({
         title: `Chơi ${GAME_INFO[this.room.gameId].name}`,
         text: `Vào chơi ${GAME_INFO[this.room.gameId].name} với mình, phòng ${this.room.code}`,
-        url: `${inviteOrigin()}${roomPath(this.room.code)}`,
+        url: `${this.inviteLink(this.room.code)}`,
       });
     } catch {
       // Người dùng đóng bảng chia sẻ: không cần làm gì

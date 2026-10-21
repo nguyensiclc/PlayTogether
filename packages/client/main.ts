@@ -2,7 +2,6 @@
 
 import { normalizeRoomCode } from "@playtogether/protocol";
 import { $ } from "./dom.ts";
-import { loadInviteOrigin } from "./invite-origin.ts";
 import { mountHome } from "./screens/home.ts";
 import { mountRoom } from "./screens/room.ts";
 
@@ -14,7 +13,7 @@ const code = match ? normalizeRoomCode(decodeURIComponent(match[1] ?? "")) : nul
 
 if (code) {
   document.title = `Phòng ${code} · PlayTogether`;
-  void loadInviteOrigin().then(() => mountRoom(root, code));
+  void mountRoom(root, code);
 } else {
   // Mọi đường dẫn khác (kể cả /offline cũ, Q22a) về trang chủ
   if (location.pathname !== "/") history.replaceState(null, "", "/");

@@ -719,16 +719,20 @@ describe("T16 — fuzz", () => {
 
 describe("parseOptions — kiểm tra tuỳ chọn chủ phòng gửi lên", () => {
   it("nhận giá trị hợp lệ, giữ nguyên phần không gửi", () => {
-    expect(parseOptions({ giaTriQuan: 5, latBan: true }, defaultOptions)).toEqual({
+    expect(parseOptions({ giaTriQuan: 5, latBan: true, targetScore: 200 }, defaultOptions)).toEqual({
       ...defaultOptions,
       giaTriQuan: 5,
       latBan: true,
+      targetScore: 200,
     });
     expect(parseOptions({ thoiGianLuot: null }, defaultOptions).thoiGianLuot).toBeNull();
+    expect(parseOptions({ targetScore: null }, defaultOptions).targetScore).toBeNull();
+    expect(parseOptions({ targetScore: 500 }, defaultOptions).targetScore).toBe(500);
+    expect(parseOptions({ targetScore: 70 }, defaultOptions).targetScore).toBe(70);
   });
 
   it("bỏ qua giá trị sai kiểu, sai miền, và khoá lạ", () => {
-    const raw = { giaTriQuan: 7, camAnQuanNon: "có", latBan: 1, thoiGianLuot: 45, hack: true };
+    const raw = { giaTriQuan: 7, camAnQuanNon: "có", latBan: 1, thoiGianLuot: 45, targetScore: 999, hack: true };
     expect(parseOptions(raw, defaultOptions)).toEqual(defaultOptions);
     expect(parseOptions("rác", defaultOptions)).toEqual(defaultOptions);
     expect(parseOptions(null, defaultOptions)).toEqual(defaultOptions);

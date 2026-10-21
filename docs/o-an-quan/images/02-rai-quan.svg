@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 380" width="100%" height="100%" role="img" aria-labelledby="title-02">
+  <title id="title-02">Cách rải quân trong Ô ăn quan</title>
+  <defs>
+    <linearGradient id="bgGrad2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fdfbf7"/>
+      <stop offset="100%" stop-color="#f4eee1"/>
+    </linearGradient>
+    <linearGradient id="boardGrad2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9d6b38"/>
+      <stop offset="100%" stop-color="#7a4e24"/>
+    </linearGradient>
+    <linearGradient id="cellGrad2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fffdfa"/>
+      <stop offset="100%" stop-color="#f5ede0"/>
+    </linearGradient>
+    <linearGradient id="pickGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff7e6"/>
+      <stop offset="100%" stop-color="#ffe8b8"/>
+    </linearGradient>
+    <filter id="shadow2" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#3d2b1d" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+
+  <rect width="840" height="380" rx="16" fill="url(#bgGrad2)"/>
+
+  <!-- Title -->
+  <text x="420" y="36" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="800" fill="#2b1e14">CÁCH RẢI QUÂN (VÍ DỤ: BỐC Ô 3, RẢI SANG PHẢI +1)</text>
+  <text x="420" y="58" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#7a624d">Bốc hết 5 sỏi ở ô 3 → Rải lần lượt mỗi ô kế tiếp 1 viên (ô 4, 5, Q6, 7, 8)</text>
+
+  <!-- Board Outline -->
+  <g transform="translate(60, 80)" filter="url(#shadow2)">
+    <!-- Board frame -->
+    <path d="M 110 0 L 610 0 A 110 110 0 0 1 610 220 L 110 220 A 110 110 0 0 1 110 0 Z" fill="url(#boardGrad2)" stroke="#5a3818" stroke-width="4"/>
+
+    <!-- Left Quan (Q0) -->
+    <path d="M 110 8 A 102 102 0 0 0 110 212 Z" fill="url(#cellGrad2)"/>
+    <text x="56" y="90" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#7a4e24">QUAN 0</text>
+    <circle cx="56" cy="140" r="18" fill="#3d2b1d"/>
+    <text x="56" y="145" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="#f5ede0">1 Q</text>
+
+    <!-- Right Quan (Q6) - Dropped 1 stone into Q6 -->
+    <path d="M 610 8 A 102 102 0 0 1 610 212 Z" fill="url(#cellGrad2)" stroke="#b5462f" stroke-width="2"/>
+    <text x="664" y="90" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#7a4e24">QUAN 6</text>
+    <circle cx="664" cy="140" r="18" fill="#3d2b1d"/>
+    <text x="664" y="145" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="#f5ede0">1 Q</text>
+    <!-- Dropped stone badge -->
+    <circle cx="690" cy="115" r="11" fill="#b5462f" stroke="#fff" stroke-width="2"/>
+    <text x="690" y="119" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="800" fill="#fff">+1</text>
+
+    <!-- Top Cells: 11, 10, 9, 8, 7 -->
+    <rect x="114" y="8" width="92" height="98" rx="6" fill="url(#cellGrad2)"/>
+    <text x="124" y="28" font-family="sans-serif" font-size="12" font-weight="700" fill="#8c6f56">11</text>
+    <text x="160" y="65" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#3d2b1d">5</text>
+
+    <rect x="214" y="8" width="92" height="98" rx="6" fill="url(#cellGrad2)"/>
+    <text x="224" y="28" font-family="sans-serif" font-size="12" font-weight="700" fill="#8c6f56">10</text>
+    <text x="260" y="65" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#3d2b1d">5</text>
+
+    <rect x="314" y="8" width="92" height="98" rx="6" fill="url(#cellGrad2)"/>
+    <text x="324" y="28" font-family="sans-serif" font-size="12" font-weight="700" fill="#8c6f56">9</text>
+    <text x="360" y="65" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#3d2b1d">5</text>
+
+    <!-- Cell 8: received 5th stone (last stone) -->
+    <rect x="414" y="8" width="92" height="98" rx="6" fill="url(#cellGrad2)" stroke="#b5462f" stroke-width="3"/>
+    <text x="424" y="28" font-family="sans-serif" font-size="12" font-weight="700" fill="#8c6f56">8</text>
+    <text x="460" y="65" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="800" fill="#b5462f">6 (5+1)</text>
+    <rect x="424" y="78" width="72" height="20" rx="10" fill="#b5462f"/>
+    <text x="460" y="92" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#fff">Viên cuối</text>
+
+    <!-- Cell 7: received 4th stone -->
+    <rect x="514" y="8" width="92" height="98" rx="6" fill="url(#cellGrad2)" stroke="#b5462f" stroke-width="2"/>
+    <text x="524" y="28" font-family="sans-serif" font-size="12" font-weight="700" fill="#8c6f56">7</text>
+    <text x="560" y="65" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#b5462f">6 (5+1)</text>
+
+    <!-- Bottom Cells: 1, 2, 3, 4, 5 -->
+    <rect x="114" y="114" width="92" height="98" rx="6" fill="url(#cellGrad2)"/>
+    <text x="124" y="134" font-family="sans-serif" font-size="12" font-weight="700" fill="#8c6f56">1</text>
+    <text x="160" y="170" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#3d2b1d">5</text>
+
+    <rect x="214" y="114" width="92" height="98" rx="6" fill="url(#cellGrad2)"/>
+    <text x="224" y="134" font-family="sans-serif" font-size="12" font-weight="700" fill="#8c6f56">2</text>
+    <text x="260" y="170" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#3d2b1d">5</text>
+
+    <!-- Cell 3: PICKED (now 0) -->
+    <rect x="314" y="114" width="92" height="98" rx="6" fill="url(#pickGrad)" stroke="#e8a338" stroke-width="3"/>
+    <text x="324" y="134" font-family="sans-serif" font-size="12" font-weight="700" fill="#8c6f56">3</text>
+    <text x="360" y="170" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="800" fill="#e8a338">0</text>
+    <rect x="324" y="184" width="72" height="20" rx="10" fill="#e8a338"/>
+    <text x="360" y="198" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#2b1e14">Bốc 5 viên</text>
+
+    <!-- Cell 4: received 1st stone -->
+    <rect x="414" y="114" width="92" height="98" rx="6" fill="url(#cellGrad2)" stroke="#b5462f" stroke-width="2"/>
+    <text x="424" y="134" font-family="sans-serif" font-size="12" font-weight="700" fill="#8c6f56">4</text>
+    <text x="460" y="170" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#b5462f">6 (5+1)</text>
+
+    <!-- Cell 5: received 2nd stone -->
+    <rect x="514" y="114" width="92" height="98" rx="6" fill="url(#cellGrad2)" stroke="#b5462f" stroke-width="2"/>
+    <text x="524" y="134" font-family="sans-serif" font-size="12" font-weight="700" fill="#8c6f56">5</text>
+    <text x="560" y="170" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#b5462f">6 (5+1)</text>
+
+    <!-- Sowing Path Arrows -->
+    <!-- From 3 to 4 -->
+    <path d="M 370 145 C 390 135, 430 135, 450 145" fill="none" stroke="#b5462f" stroke-width="3" stroke-dasharray="4,3"/>
+    <!-- From 4 to 5 -->
+    <path d="M 470 145 C 490 135, 530 135, 550 145" fill="none" stroke="#b5462f" stroke-width="3" stroke-dasharray="4,3"/>
+    <!-- From 5 to Q6 -->
+    <path d="M 580 145 C 610 135, 630 115, 650 110" fill="none" stroke="#b5462f" stroke-width="3" stroke-dasharray="4,3"/>
+    <!-- From Q6 to 7 -->
+    <path d="M 650 90 C 630 75, 590 55, 570 55" fill="none" stroke="#b5462f" stroke-width="3" stroke-dasharray="4,3"/>
+    <!-- From 7 to 8 -->
+    <path d="M 540 55 C 520 45, 480 45, 460 55" fill="none" stroke="#b5462f" stroke-width="3" stroke-dasharray="4,3"/>
+    <!-- Final arrow pointer -->
+    <polygon points="455,58 465,50 465,60" fill="#b5462f"/>
+  </g>
+
+  <!-- Explanation note -->
+  <text x="420" y="335" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#2b1e14">Sau khi thả viên cuối vào ô 8, nhìn ngay sang ô kế tiếp (ô 9) để xét bước tiếp theo!</text>
+  <text x="420" y="358" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#7a624d">Nếu ô 9 có quân → Bốc rải tiếp · Nếu ô 9 trống &amp; ô 10 có quân → ĂN ô 10 · Nếu gặp ô quan hoặc 2 ô trống → Hết lượt</text>
+</svg>

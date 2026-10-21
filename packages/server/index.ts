@@ -9,6 +9,7 @@ import { WS_PATH } from "@playtogether/protocol";
 import { WebSocketServer } from "ws";
 import { Gateway } from "./gateway.ts";
 import { handleHttp } from "./http.ts";
+import { getLanIp } from "./lan-ip.ts";
 import { RoomManager } from "./room-manager.ts";
 
 /** Chu kỳ dọn phòng bỏ trống */
@@ -72,5 +73,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const dist = fileURLToPath(new URL("../client/dist", import.meta.url));
   const port = Number(process.env.PORT) || 3000;
   const running = await startServer({ port, staticDir: existsSync(dist) ? dist : null });
+  const lanIp = getLanIp();
   console.log(`PlayTogether server: http://localhost:${running.port} (WebSocket ${WS_PATH})`);
+  if (lanIp) console.log(`  LAN IP: http://${lanIp}:${running.port}`);
 }

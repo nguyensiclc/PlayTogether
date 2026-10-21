@@ -356,6 +356,11 @@ kbd {
   border-radius: 10px;
   padding: 3px;
 }
+.seg.seg-grid {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
 .seg label {
   position: relative;
 }
@@ -790,6 +795,14 @@ a.game:hover {
   line-height: 1;
   display: block;
 }
+.player .match-pill {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-top: 2px;
+}
 .player.active {
   box-shadow:
     0 0 0 2px var(--accent),
@@ -920,6 +933,15 @@ a.game:hover {
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, var(--on-dark), var(--stone) 55%, var(--stone-edge));
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+  transition:
+    background 600ms ease,
+    box-shadow 600ms ease;
+}
+.stone.new-stone {
+  background: radial-gradient(circle at 35% 30%, #ff8c85, #d93829 55%, #8f1d13);
+  box-shadow:
+    0 1px 3px rgba(180, 20, 10, 0.55),
+    inset 0 0 1px rgba(255, 255, 255, 0.6);
 }
 .stone.big {
   width: 20px;
@@ -970,25 +992,101 @@ a.game:hover {
   pointer-events: none;
 }
 
-/* "Bàn tay": ô đang rải tới */
+/* "Bàn tay": biểu tượng bàn tay bốc và rải sỏi */
 .hand {
   position: absolute;
-  z-index: 3;
-  min-width: 26px;
-  height: 26px;
-  margin: -13px 0 0 -13px;
-  padding: 0 4px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--accent);
-  border: 3px solid var(--ink);
-  color: var(--ink);
-  font-weight: 800;
-  font-size: 12px;
+  z-index: 10;
   pointer-events: none;
+  transform: translate(-50%, -65%);
   transition-property: left, top;
-  transition-timing-function: ease-out;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hand-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hand-icon {
+  width: 38px;
+  height: 42px;
+  display: block;
+}
+.hand-badge {
+  position: absolute;
+  top: -2px;
+  right: -8px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--ink);
+  border: 2px solid var(--accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Hiệu ứng bàn tay bốc sỏi */
+.hand.fx-pick {
+  animation: hand-pick var(--fx-ms, 300ms) cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+@keyframes hand-pick {
+  0% {
+    transform: translate(-50%, -100%) scale(0.85);
+    opacity: 0.3;
+  }
+  45% {
+    transform: translate(-50%, -45%) scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -65%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Hiệu ứng bàn tay thả sỏi */
+.hand.fx-drop {
+  animation: hand-drop var(--fx-ms, 350ms) ease-out;
+}
+@keyframes hand-drop {
+  0% {
+    transform: translate(-50%, -65%) scale(1);
+  }
+  35% {
+    transform: translate(-50%, -52%) scale(0.95);
+  }
+  100% {
+    transform: translate(-50%, -65%) scale(1);
+  }
+}
+
+/* Hiệu ứng viên sỏi mới rơi vào ô khi rải */
+.stone.drop-in {
+  animation: stone-drop-in 350ms cubic-bezier(0.2, 0.8, 0.3, 1.2) forwards;
+}
+@keyframes stone-drop-in {
+  0% {
+    transform: translateY(-16px) scale(1.4);
+    opacity: 0.2;
+  }
+  65% {
+    transform: translateY(2px) scale(0.95);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 /* Thanh mũi tên chọn chiều, nổi phía trên ô đang chọn */
@@ -1043,9 +1141,10 @@ a.game:hover {
   left: 50%;
   top: 50%;
   max-width: 90%;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border-radius: 999px;
-  background: rgba(43, 33, 24, 0.9);
+  background: rgba(34, 25, 18, 0.95);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   color: var(--on-dark);
   font-size: 14px;
   font-weight: 600;
@@ -1174,13 +1273,16 @@ a.game:hover {
 @keyframes toast {
   0% {
     opacity: 0;
+    transform: translate(-50%, -44%) scale(0.96);
   }
   15%,
   80% {
     opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
   100% {
     opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 @keyframes swap {
@@ -1469,6 +1571,16 @@ a.game:hover {
   color: var(--ink);
   font-size: 15px;
 }
+.result tr.match-row th,
+.result tr.match-row td {
+  font-weight: 800;
+  color: var(--accent);
+  font-size: 15px;
+  background: var(--surface-2);
+}
+.result tr.match-row td b {
+  font-size: 16px;
+}
 .result .acts {
   margin-top: 8px;
 }
@@ -1703,7 +1815,10 @@ a.game:hover {
   .cell.fx-pick,
   .cell.fx-drop,
   .cell.fx-shake,
-  .player.fx-swap {
+  .player.fx-swap,
+  .hand.fx-pick,
+  .hand.fx-drop,
+  .stone.drop-in {
     animation: none;
   }
 }

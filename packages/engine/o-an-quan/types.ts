@@ -5,6 +5,8 @@ import type { GameResult, SeatId } from "../game-module.ts";
 export type Seat = 0 | 1;
 export type Dir = 1 | -1;
 
+export type TargetScore = 70 | 100 | 200 | 300 | 500 | null;
+
 export interface Options {
   giaTriQuan: 10 | 5;
   /** UI: "Quan Già" */
@@ -13,6 +15,8 @@ export interface Options {
   latBan: boolean;
   /** giây, null = không giới hạn */
   thoiGianLuot: 15 | 30 | 60 | null;
+  /** Điểm mục tiêu để thắng chung cuộc trận đấu; null = chơi từng ván riêng lẻ */
+  targetScore: TargetScore;
 }
 
 export interface Pile {

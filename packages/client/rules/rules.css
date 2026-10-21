@@ -78,6 +78,14 @@
   border-radius: 10px;
   overflow: hidden;
 }
+.rules-img {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin: 8px auto;
+  border-radius: 10px;
+}
 .rules-body .cap {
   text-align: center;
   font-size: 13px;
