@@ -12,7 +12,8 @@ docs/design/
   nen-tang/        ← màn hình dùng chung mọi game: trang chủ, nickname, phòng chờ, mất kết nối
   o-an-quan/       ← màn hình riêng của Ô ăn quan: bàn chơi, kết quả, lật bàn, hướng dẫn luật
   caro/            ← màn hình riêng của Cờ caro; README trong thư mục là bản yêu cầu để nhờ canvas design
-  <game-khac>/     ← thêm khi làm Tiến lên, Cờ tướng, Caro
+  co-tuong/        ← màn hình riêng của Cờ tướng; README trong thư mục là bản yêu cầu để nhờ canvas design
+  <game-khac>/     ← thêm khi làm Tiến lên…
 ```
 
 ## Quy ước
@@ -88,6 +89,7 @@ Bóng đổ và lớp phủ trong suốt (`rgba`) được viết trực tiếp,
 | **Desktop**: Hộp hỏi Lật bàn (modal) | `o-an-quan/lat-ban-desktop.html` | M2 | mục 3 | **Đã chốt** (Q20), đã làm |
 | **Desktop**: Kết quả (modal) | `o-an-quan/ket-qua-desktop.html` | M2/M5 | mục 2.5 | **Đã chốt** (Q20), đã làm |
 | Cờ caro: phòng chờ (tuỳ chọn), bàn chơi (chưa chọn, đang chọn ô, đối thủ vừa đi, chuỗi thắng), kết quả, cả điện thoại lẫn desktop | `caro/` | C3 | `docs/caro/02-thiet-ke-ux.md` | **Đã chốt** (Claude tự thiết kế, bạn duyệt). Yêu cầu gốc ở `caro/README.md` |
+| Cờ tướng: phòng chờ (tuỳ chọn), bàn chơi (chọn quân, đối thủ đi, bị chiếu, người cầm Đen), kết quả, xin thua, luật chơi, cả điện thoại lẫn desktop | `co-tuong/` | T0 | `docs/co-tuong/02-thiet-ke-ux.md` | **Đã chốt** (Canva, bạn duyệt): ảnh `co-tuong/mockup-1..4.jpg`; đã làm điện thoại + desktop. Khác mockup: không có điểm Elo, ảnh đại diện và nút "Xin đi lại" (ngoài phạm vi). Yêu cầu gốc ở `co-tuong/README.md` |
 | Desktop: nhập nickname, mất kết nối, hướng dẫn | — | — | — | Dùng bố cục điện thoại căn giữa (nickname), modal (hướng dẫn = tab "Luật chơi" ở cột phải bàn chơi) |
 | Màn hình bắt đầu `/offline` | — | M2 | mục 2.6 | Chỉ để phát triển, không cần thiết kế |
 

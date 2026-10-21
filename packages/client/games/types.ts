@@ -11,6 +11,8 @@ export interface GameActions {
   /** `move` do module game của server kiểm tra. Trả về false nếu chưa gửi được (mất kết nối) */
   move(move: object, actionNo: number): boolean;
   rematch(): void;
+  /** Xin thua: bỏ cuộc ván đang chơi nhưng vẫn ở lại phòng */
+  resign(): void;
   toLobby(): void;
   leave(): void;
   /** Mở hộp Luật chơi / Lịch sử của game đang chơi */

@@ -2,6 +2,7 @@
 
 import type { GameModule, Rng } from "@playtogether/engine";
 import { caro } from "@playtogether/engine/caro";
+import { coTuong } from "@playtogether/engine/co-tuong";
 import { coVua } from "@playtogether/engine/co-vua";
 import { oAnQuan } from "@playtogether/engine/o-an-quan";
 import type { GameId } from "@playtogether/protocol";
@@ -15,7 +16,12 @@ export const EMPTY_ROOM_TTL_MS = 10 * 60 * 1000;
 type AnyGameModule = GameModule<unknown, unknown, unknown, unknown>;
 
 /** Các game server chạy được. Thêm game mới là thêm một dòng ở đây. */
-const MODULES: Record<GameId, AnyGameModule> = { "o-an-quan": oAnQuan, caro, "co-vua": coVua };
+const MODULES: Record<GameId, AnyGameModule> = {
+  "o-an-quan": oAnQuan,
+  caro,
+  "co-tuong": coTuong,
+  "co-vua": coVua,
+};
 
 export type GameRoom = Room<unknown, unknown, unknown, unknown>;
 

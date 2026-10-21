@@ -33,6 +33,7 @@ const PARSERS: Record<ClientMessage["type"], (m: Raw) => ClientMessage | null> =
   // Hình dạng của nước đi tuỳ game nên do module game kiểm tra ở Room.move (parseMove)
   move: (m) => (isObject(m.move) && isInt(m.actionNo) ? { type: "move", move: m.move, actionNo: m.actionNo } : null),
   rematch: () => ({ type: "rematch" }),
+  resign: () => ({ type: "resign" }),
   leaveRoom: () => ({ type: "leaveRoom" }),
 };
 

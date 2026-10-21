@@ -1,0 +1,294 @@
+/* Bàn chơi Cờ tướng (docs/design/co-tuong/mockup-*.jpg).
+   Dùng lại khung .game-page, .player, .status-pill, .result của bàn Ô ăn quan trong style.css. */
+
+.ct-board {
+  position: relative;
+  border: 3px solid var(--board-edge);
+  border-radius: 16px;
+  background: var(--accent-soft);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.5),
+    0 8px 20px rgba(60, 35, 10, 0.22);
+  line-height: 0;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ct-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.ct-svg .grid,
+.ct-svg .markers {
+  stroke: var(--board);
+  stroke-width: 0.045;
+  fill: none;
+  stroke-linecap: round;
+}
+.ct-svg .river text {
+  fill: var(--board);
+  opacity: 0.75;
+  font-size: 0.42px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-family: inherit;
+  pointer-events: none;
+}
+
+/* Quân: nền sáng, chữ và viền theo bên. Phân biệt bằng chữ, không chỉ bằng màu */
+.ct-svg .pc {
+  cursor: pointer;
+}
+.ct-svg .pc .disc {
+  fill: var(--surface);
+  stroke: var(--ink);
+  stroke-width: 0.06;
+  filter: drop-shadow(0 0.03px 0.05px rgba(60, 35, 10, 0.5));
+}
+.ct-svg .pc .ring {
+  fill: none;
+  stroke-width: 0.04;
+}
+.ct-svg .pc text {
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-family: inherit;
+  pointer-events: none;
+}
+.ct-svg .pc.red .ring {
+  stroke: var(--primary);
+}
+.ct-svg .pc.red text {
+  fill: var(--primary);
+}
+.ct-svg .pc.red .disc {
+  stroke: var(--primary);
+}
+.ct-svg .pc.black .ring {
+  stroke: var(--quan);
+}
+.ct-svg .pc.black text {
+  fill: var(--quan);
+}
+.ct-svg .pc.black .disc {
+  stroke: var(--quan);
+}
+.ct-svg .pc,
+.ct-svg .pc .disc {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ct-svg .pc.sel {
+  transform: translateY(-0.07px) scale(1.12);
+}
+.ct-svg .pc.sel .disc {
+  fill: var(--accent-soft);
+  stroke-width: 0.1;
+}
+
+/* Gợi ý nước đi và nước vừa đi */
+.ct-svg .tgt {
+  fill: var(--accent);
+  stroke: var(--surface);
+  stroke-width: 0.04;
+  pointer-events: none;
+}
+.ct-svg .tgt-cap {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 0.09;
+  stroke-dasharray: 0.16 0.1;
+  pointer-events: none;
+}
+.ct-svg .last-from {
+  fill: rgba(242, 179, 61, 0.28);
+  stroke: var(--accent);
+  stroke-width: 0.05;
+  stroke-dasharray: 0.1 0.08;
+}
+.ct-svg .last-to {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.08;
+}
+.ct-svg .chk {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 0.1;
+  pointer-events: none;
+  animation: ct-check 900ms ease-in-out infinite;
+}
+
+/* ---------- Hiệu ứng (UX mục 4) ---------- */
+.ct-svg .pc.fresh {
+  animation: ct-land 200ms ease-out;
+}
+.ct-board.fx-shake {
+  animation: ct-shake 320ms ease-in-out;
+}
+@keyframes ct-land {
+  from {
+    transform: scale(1.35);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes ct-check {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes ct-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ct-svg .pc.fresh,
+  .ct-board.fx-shake {
+    animation: none;
+  }
+  /* Không nhấp nháy: vòng chiếu giữ nét đậm */
+  .ct-svg .chk {
+    animation: none;
+    stroke-width: 0.14;
+  }
+}
+
+/* ---------- Bố cục bàn chơi ---------- */
+.ct-page .board-wrap {
+  position: relative;
+  width: 100%;
+  margin: 0;
+}
+.ct-page .locked {
+  border-radius: 16px;
+}
+.ct-page .status-row {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.ct-page .status-pill.danger {
+  background: var(--danger);
+}
+.ct-page .notice {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--host-ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Thẻ người chơi: bên đang cầm và quân đã bắt */
+.side-badge {
+  flex: none;
+  min-width: 40px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.side-badge.red {
+  color: var(--primary);
+}
+.side-badge.black {
+  color: var(--quan);
+}
+.ct-page .player .score {
+  text-align: center;
+  min-width: 34px;
+}
+.caps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 4px;
+}
+.caps:empty {
+  display: none;
+}
+.cap {
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1.5px solid currentColor;
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.cap.red {
+  color: var(--primary);
+}
+.cap.black {
+  color: var(--quan);
+}
+
+/* ---------- Kết quả ---------- */
+.result .mini {
+  width: 168px;
+  margin: 14px auto 6px;
+}
+.result .mini .ct-board {
+  border-width: 2px;
+  border-radius: 10px;
+  box-shadow: none;
+}
+.result .facts {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.result .facts b {
+  color: var(--ink);
+}
+.result .score-line {
+  font-size: 15px;
+  margin: 10px 0 2px;
+}
+
+@media (min-width: 1024px) {
+  /* Bàn cao hơn rộng (9,4 : 10,4): chiều rộng vừa chiều cao còn lại sau hai thẻ người chơi và viên trạng thái */
+  .ct-page .stage {
+    --ct-board-w: min(520px, 100%, max(300px, calc((100dvh - 360px) * 0.904)));
+    justify-content: center;
+  }
+  .ct-page .stage .player,
+  .ct-page .board-wrap {
+    width: var(--ct-board-w);
+    max-width: none;
+  }
+  .result .mini {
+    width: 190px;
+    margin-top: 0;
+  }
+  .result .facts {
+    gap: 4px 14px;
+  }
+}

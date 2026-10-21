@@ -9,6 +9,12 @@ import type {
   State as CaroState,
 } from "@playtogether/engine/caro";
 import type {
+  GameEvent as CoTuongEvent,
+  Move as CoTuongMove,
+  Options as CoTuongOptions,
+  State as CoTuongState,
+} from "@playtogether/engine/co-tuong";
+import type {
   GameEvent as CoVuaEvent,
   Move as CoVuaMove,
   Options as CoVuaOptions,
@@ -22,7 +28,7 @@ import type {
 } from "@playtogether/engine/o-an-quan";
 
 /** Các game đã có. Thêm game mới = thêm một giá trị ở đây, một module engine và một màn hình client. */
-export const GAME_IDS = ["o-an-quan", "caro", "co-vua"] as const;
+export const GAME_IDS = ["o-an-quan", "caro", "co-tuong", "co-vua"] as const;
 export type GameId = (typeof GAME_IDS)[number];
 
 export function isGameId(value: unknown): value is GameId {
@@ -82,10 +88,11 @@ export interface PublicRoomOf<S, O, G extends GameId = GameId> {
 
 export type OAnQuanRoom = PublicRoomOf<OAnQuanState, OAnQuanOptions, "o-an-quan">;
 export type CaroRoom = PublicRoomOf<CaroState, CaroOptions, "caro">;
+export type CoTuongRoom = PublicRoomOf<CoTuongState, CoTuongOptions, "co-tuong">;
 export type CoVuaRoom = PublicRoomOf<CoVuaState, CoVuaOptions, "co-vua">;
 
 /** Phòng của một trong các game; client thu hẹp kiểu bằng `room.gameId` */
-export type PublicRoom = OAnQuanRoom | CaroRoom | CoVuaRoom;
+export type PublicRoom = OAnQuanRoom | CaroRoom | CoTuongRoom | CoVuaRoom;
 
 /** Người nhận message là ai trong phòng */
 export interface You {
@@ -117,6 +124,8 @@ export type ClientMessage =
   | { type: "start" }
   | { type: "move"; move: object; actionNo: number }
   | { type: "rematch" }
+  /** Xin thua: bỏ cuộc ván đang chơi nhưng vẫn ở lại phòng */
+  | { type: "resign" }
   | { type: "leaveRoom" };
 
 export type ServerMessage =
@@ -125,6 +134,7 @@ export type ServerMessage =
   | { type: "gameStarted"; room: PublicRoom; you: You }
   | MoveApplied<"o-an-quan", OAnQuanMove, OAnQuanEvent, OAnQuanRoom>
   | MoveApplied<"caro", CaroMove, CaroEvent, CaroRoom>
+  | MoveApplied<"co-tuong", CoTuongMove, CoTuongEvent, CoTuongRoom>
   | MoveApplied<"co-vua", CoVuaMove, CoVuaEvent, CoVuaRoom>
   | { type: "leftRoom" }
   | { type: "error"; code: ErrorCode; message: string };

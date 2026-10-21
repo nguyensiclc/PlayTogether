@@ -13,12 +13,6 @@ export interface UpcomingGame {
 
 export const UPCOMING_GAMES: UpcomingGame[] = [
   {
-    name: "Cờ tướng",
-    players: "2 người",
-    category: "co",
-    icon: `<svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="20" fill="#fffaf0" stroke="#b5462f" stroke-width="3"/><circle cx="28" cy="28" r="15" fill="none" stroke="#b5462f" stroke-width="1.2"/><text x="28" y="35" text-anchor="middle" font-size="19" font-weight="700" fill="#b5462f" font-family="serif">帥</text></svg>`,
-  },
-  {
     name: "Tiến lên miền Nam",
     players: "2–4 người",
     category: "bai",

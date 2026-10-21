@@ -68,7 +68,7 @@ describe("parseClientMessage", () => {
       '{"type":"hello","clientId":"ngắn","name":"A"}',
       '{"type":"move","move":{"kind":"sow","square":3,"dir":1}}',
       '{"type":"takeSeat","seat":"0"}',
-      '{"type":"createRoom","gameId":"co-tuong"}',
+      '{"type":"createRoom","gameId":"no-such-game"}',
       '{"type":"move","move":"3,4","actionNo":1}',
       '{"type":"move","move":{"x":1,"y":2}}',
     ]) {

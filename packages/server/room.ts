@@ -138,6 +138,21 @@ export class Room<S, M, O, E> {
     return forfeited;
   }
 
+  /** Xin thua: xử thua bỏ cuộc người đang chơi, họ vẫn giữ ghế và ở lại phòng */
+  resign(clientId: string): void {
+    this.member(clientId);
+    if (this.status !== "playing" || !this.game) throw new RoomError("WRONG_STATUS");
+    const seat = this.seatOf(clientId);
+    if (seat === null) throw new RoomError("NOT_SEATED");
+    const r = this.module.forfeit(this.game, seat, "bo-cuoc");
+    if ("error" in r) throw new RoomError("WRONG_STATUS");
+    this.game = r.state;
+    this.actionNo++;
+    this.status = "finished";
+    this.recordResult();
+    this.onGameFinished();
+  }
+
   takeSeat(clientId: string, seat: SeatId): void {
     this.member(clientId);
     this.requireNotPlaying();

@@ -131,6 +131,7 @@ class RoomScreen {
     this.game = gameOf(m.room.gameId).createScreen(this.body, m.room, m.you, {
       move: (move, actionNo) => this.socket.send({ type: "move", move, actionNo }),
       rematch: () => this.socket.send({ type: "rematch" }),
+      resign: () => this.socket.send({ type: "resign" }),
       toLobby: () => {
         this.wantLobby = true;
         if (this.room && this.you) this.showLobby(this.room, this.you);
