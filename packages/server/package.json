@@ -1,0 +1,20 @@
+{
+  "name": "@playtogether/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --watch-path=. --watch-path=../engine --watch-path=../protocol index.ts",
+    "start": "node index.ts",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@playtogether/engine": "*",
+    "@playtogether/protocol": "*",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/ws": "^8.18.2"
+  }
+}

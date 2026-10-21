@@ -25,7 +25,13 @@ export interface GameModule<S, M, O, E> {
   applyMove(state: S, seat: SeatId, move: M): { state: S; events: E[] } | { error: string };
   viewFor(state: S, seat: SeatId | null): unknown;
   result(state: S): GameResult | null;
+  /** Xử thua `seat` (hết giờ hoặc bỏ cuộc). Lớp phòng gọi khi người chơi rời ván. */
+  forfeit(state: S, seat: SeatId, reason: ForfeitReason): { state: S; events: E[] } | { error: string };
+  /** Đọc tuỳ chọn từ dữ liệu ngoài: chỉ nhận giá trị hợp lệ, còn lại giữ theo `base`. Lớp phòng không tự kiểm tra luật. */
+  parseOptions(raw: unknown, base: O): O;
 }
+
+export type ForfeitReason = "het-gio" | "bo-cuoc";
 
 /** Nguồn ngẫu nhiên trả về số trong [0, 1). Engine luôn nhận RNG qua tham số. */
 export type Rng = () => number;

@@ -10,6 +10,7 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "@playtogether/engine": "*"
+    "@playtogether/engine": "*",
+    "qrcode-generator": "^2.0.4"
   }
 }

@@ -5,5 +5,5 @@
     "types": []
   },
   "include": ["**/*.ts"],
-  "exclude": ["dist"]
+  "exclude": ["dist", "vite.config.ts"]
 }

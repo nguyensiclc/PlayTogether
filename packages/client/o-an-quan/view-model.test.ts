@@ -15,11 +15,26 @@ describe("layoutFor", () => {
       const ring = [...l.bottom, l.right, ...[...l.top].reverse(), l.left];
       let i = l.bottom[0]!;
       for (const expected of ring.slice(1)) {
-        i = next(i, dirForArrow("right"));
+        i = next(i, dirForArrow("right", "bottom"));
         expect(i).toBe(expected);
       }
-      expect(next(i, dirForArrow("right"))).toBe(l.bottom[0]);
+      expect(next(i, dirForArrow("right", "bottom"))).toBe(l.bottom[0]);
     });
+  }
+});
+
+describe("dirForArrow — mũi tên chỉ đúng hướng sỏi chạy trên màn hình (Q21)", () => {
+  for (const seat of [0, 1] as const) {
+    const l = layoutFor(seat);
+    for (const row of ["top", "bottom"] as const) {
+      it(`bên ${seat === 0 ? "A" : "B"} ngồi dưới, hàng ${row === "top" ? "trên" : "dưới"}: ▶ sang ô bên phải, ◀ sang ô bên trái`, () => {
+        const cells = l[row];
+        for (let k = 0; k + 1 < cells.length; k++) {
+          expect(next(cells[k]!, dirForArrow("right", row))).toBe(cells[k + 1]);
+          expect(next(cells[k + 1]!, dirForArrow("left", row))).toBe(cells[k]);
+        }
+      });
+    }
   }
 });
 

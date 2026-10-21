@@ -40,6 +40,9 @@
   --live-ink: #23704a;
   --gold-soft: #fbe9c4;
   --accent-soft: #fff6df;
+  --host-ink: #7a5410;
+  --share: #0068ff;
+  --av2: #2f6b5a;
 
   --radius: 14px;
   --shadow: 0 1px 0 rgba(43, 33, 24, 0.06), 0 6px 18px rgba(43, 33, 24, 0.08);
@@ -250,6 +253,15 @@ kbd {
 }
 .btn.block {
   width: 100%;
+}
+.btn svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.invite .row .btn svg {
+  width: 20px;
+  height: 20px;
 }
 .btn.sm {
   min-height: 44px;
@@ -859,7 +871,8 @@ a.game:hover {
   padding: 6px;
   background: linear-gradient(180deg, var(--board-top), var(--board));
   border: 3px solid var(--board-edge);
-  border-radius: 20px;
+  /* Hai đầu bàn là nửa elip, rộng bằng cột ô quan (~13.5% bề ngang bàn ở cả điện thoại lẫn desktop) */
+  border-radius: 13.5% / 50%;
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.12),
     0 8px 20px rgba(60, 35, 10, 0.25);
@@ -876,11 +889,13 @@ a.game:hover {
   cursor: pointer;
   touch-action: manipulation;
 }
+/* Ô quan là nửa elip: bán kính ngang phía ngoài + phía trong = 100% bề ngang ô, nên trình duyệt
+   không phải thu nhỏ các bán kính (999px sẽ làm mọi bán kính co lại và ô bớt tròn) */
 .cell.quan.left {
-  border-radius: 999px 10px 10px 999px / 50% 10px 10px 50%;
+  border-radius: calc(100% - 10px) 10px 10px calc(100% - 10px) / 50% 10px 10px 50%;
 }
 .cell.quan.right {
-  border-radius: 10px 999px 999px 10px / 10px 50% 50% 10px;
+  border-radius: 10px calc(100% - 10px) calc(100% - 10px) 10px / 10px 50% 50% 10px;
 }
 .cell .count {
   position: absolute;
@@ -996,6 +1011,14 @@ a.game:hover {
   border: 7px solid transparent;
   border-bottom: 0;
   border-top-color: var(--ink);
+}
+/* Hàng trên: thanh nằm dưới ô, mũi nhọn chỉ lên (Q21) */
+.dir-pick.below::after {
+  top: -6px;
+  bottom: auto;
+  border: 7px solid transparent;
+  border-top: 0;
+  border-bottom-color: var(--ink);
 }
 .dir-pick button {
   width: 44px;
@@ -1529,17 +1552,16 @@ a.game:hover {
     gap: 8px;
     padding: 10px;
     border-width: 5px;
-    border-radius: 30px;
   }
   .cell {
     border-radius: 16px;
     box-shadow: inset 0 5px 12px var(--cell-shade);
   }
   .cell.quan.left {
-    border-radius: 999px 16px 16px 999px / 50% 16px 16px 50%;
+    border-radius: calc(100% - 16px) 16px 16px calc(100% - 16px) / 50% 16px 16px 50%;
   }
   .cell.quan.right {
-    border-radius: 16px 999px 999px 16px / 16px 50% 50% 16px;
+    border-radius: 16px calc(100% - 16px) calc(100% - 16px) 16px / 16px 50% 50% 16px;
   }
   .cell.valid {
     box-shadow:
@@ -1683,5 +1705,688 @@ a.game:hover {
   .cell.fx-shake,
   .player.fx-swap {
     animation: none;
+  }
+}
+
+/* =========================================================
+   M3: thành phần dùng chung (docs/design/shared/tokens.css)
+   ========================================================= */
+.lbl {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 5px 0 14px;
+  background: var(--surface);
+  border: 1px solid var(--stone-edge);
+  border-radius: 12px;
+}
+.field:focus-within {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(43, 33, 24, 0.12);
+}
+.field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+}
+.field input::placeholder {
+  color: var(--muted);
+}
+.field.code input {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.avatar.sm {
+  width: 30px;
+  height: 30px;
+  font-size: 12px;
+}
+.avatar.empty {
+  background: transparent;
+  border: 2px dashed var(--stone-edge);
+  color: var(--muted);
+}
+.av2 {
+  background: var(--av2);
+}
+.badge.host {
+  background: var(--gold-soft);
+  color: var(--host-ink);
+}
+.badge.offline {
+  background: var(--danger);
+  color: var(--on-dark);
+}
+.btn:disabled {
+  background: var(--line);
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: default;
+}
+.toggle {
+  width: 46px;
+  height: 28px;
+  min-height: 28px;
+  min-width: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--line);
+  position: relative;
+  flex: none;
+  cursor: pointer;
+}
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--on-dark);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: left 0.15s;
+}
+/* Vùng chạm của công tắc tối thiểu 44px dù nút trông nhỏ hơn */
+.toggle::before {
+  content: "";
+  position: absolute;
+  inset: -8px -2px;
+}
+.toggle.on {
+  background: var(--capture);
+}
+.toggle.on::after {
+  left: 21px;
+}
+.toggle:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.seg-btn {
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+.seg-btn.on {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+}
+.seg-btn:disabled {
+  cursor: default;
+}
+.dots::after {
+  content: "…";
+}
+
+/* Thanh "Mất kết nối" và bàn tạm khoá (UX mục 5, docs/design/nen-tang/mat-ket-noi.html) */
+.banner {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--danger);
+  color: var(--on-dark);
+  font-size: 14px;
+  font-weight: 600;
+}
+.spin {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: var(--on-dark);
+  flex: none;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.locked {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: rgba(244, 234, 216, 0.55);
+}
+.locked span {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: var(--shadow);
+}
+.player.offline .avatar {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+.player.offline .name {
+  color: var(--muted);
+}
+.reconn {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--danger);
+}
+.result .ready {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 4px 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--live-ink);
+}
+.result .ready .avatar {
+  width: 20px;
+  height: 20px;
+  font-size: 9px;
+}
+.loading p {
+  margin-top: 40vh;
+  text-align: center;
+}
+.not-found .card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+.not-found h1 {
+  font-size: 20px;
+}
+
+/* =========================================================
+   Trang chủ M3: nickname, vào bằng mã, phòng gần đây (Q22i)
+   ========================================================= */
+.home .nav .spacer {
+  flex: 1;
+}
+.chip.nick {
+  height: 36px;
+  padding: 0 10px 0 4px;
+  cursor: pointer;
+}
+.chip.nick .avatar {
+  width: 26px;
+  height: 26px;
+  font-size: 11px;
+}
+.chip.nick input {
+  width: 140px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+}
+.home .join {
+  margin-top: 16px;
+}
+.join-error {
+  margin-top: 6px;
+  color: var(--danger);
+}
+.home .steps {
+  display: flex;
+  gap: 22px;
+  margin-top: 28px;
+}
+.home .steps div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.home .steps b {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--on-dark);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+button.game {
+  border: 0;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition:
+    transform 0.12s,
+    box-shadow 0.12s;
+}
+button.game:hover {
+  box-shadow:
+    0 0 0 2px var(--ink),
+    var(--shadow);
+  transform: translateY(-2px);
+}
+.recent-list {
+  display: grid;
+  gap: 10px;
+}
+.recent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.recent .mini {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.recent .mini svg {
+  width: 32px;
+  height: 32px;
+}
+.recent .info {
+  flex: 1;
+  min-width: 0;
+}
+.recent .nm {
+  font-weight: 700;
+}
+@media (min-width: 1024px) {
+  .home .nav .field {
+    min-height: 42px;
+    width: 230px;
+  }
+  .home .nav .field input {
+    font-size: 14px;
+  }
+  .chip.nick {
+    height: 42px;
+  }
+  .recent-list {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+}
+
+/* =========================================================
+   Nhập nickname (docs/design/nen-tang/nhap-nickname.html)
+   ========================================================= */
+.nickname .invite-head {
+  margin-top: 28px;
+  text-align: center;
+}
+.nickname .host-av {
+  width: 72px;
+  height: 72px;
+  font-size: 26px;
+  margin: 0 auto 14px;
+  box-shadow:
+    0 0 0 5px var(--surface),
+    var(--shadow);
+}
+.nickname h1 {
+  font-size: 22px;
+}
+.room-card {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+.room-card .mini,
+.game-head .mini {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--cat-dangian-soft);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.room-card .mini svg,
+.game-head .mini svg {
+  width: 38px;
+  height: 38px;
+}
+.room-card .code {
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+.seat-dots {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+}
+.seat-dots .avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+  border: 2px solid var(--surface);
+}
+.seat-dots .avatar + .avatar {
+  margin-left: -6px;
+}
+.seat-dots .small {
+  margin-left: 8px;
+}
+.name-form {
+  margin-top: 26px;
+}
+.name-form .names {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 10px;
+}
+.name-form .names .chip {
+  height: 36px;
+  cursor: pointer;
+}
+.name-form .btn.primary {
+  margin-top: 16px;
+}
+.name-form .note {
+  text-align: center;
+  margin-top: 10px;
+}
+.counter {
+  padding-right: 10px;
+}
+
+/* =========================================================
+   Phòng chờ (docs/design/nen-tang/phong-cho*.html)
+   ========================================================= */
+.lobby {
+  padding-bottom: 120px;
+}
+/* Điện thoại: thẻ mời nằm ngay dưới tên phòng như mockup; desktop đưa sang cột phải */
+.lobby-cols {
+  display: flex;
+  flex-direction: column;
+}
+.lobby-side {
+  order: -1;
+}
+.game-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+.game-head h2 {
+  font-size: 20px;
+}
+.code-big {
+  font-size: 13px;
+  color: var(--muted);
+}
+.code-big b {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--ink);
+}
+.invite {
+  margin-top: 16px;
+  background: var(--ink);
+  color: var(--on-dark);
+}
+.invite .link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  margin: 10px 0;
+  padding: 0 5px 0 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.invite .link span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 14px;
+}
+.invite .link .btn {
+  background: var(--on-dark);
+  color: var(--ink);
+  border: 0;
+}
+.invite .row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+}
+.invite .row .btn {
+  min-height: 52px;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--on-dark);
+}
+.invite .row .btn.share {
+  background: var(--share);
+}
+.invite .qr {
+  display: none;
+  gap: 16px;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.invite .qr.open {
+  display: flex;
+}
+.invite .qr p {
+  opacity: 0.8;
+}
+.qr-code {
+  width: 112px;
+  height: 112px;
+  flex: none;
+  border-radius: 10px;
+  background: var(--on-dark);
+}
+.invite .note {
+  margin-top: 10px;
+  opacity: 0.7;
+}
+.seats {
+  padding: 4px 14px;
+}
+.seat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+}
+.seat + .seat,
+.vs + .seat {
+  border-top: 1px solid var(--line);
+}
+.seat .who {
+  flex: 1;
+  min-width: 0;
+}
+.seat .who b {
+  display: block;
+}
+.seat.waiting .who {
+  color: var(--muted);
+}
+.spect {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.opts {
+  padding: 2px 14px;
+}
+.opt-row.inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 54px;
+}
+.lobby .cta {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  z-index: 10;
+  padding: 12px 16px calc(18px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(244, 234, 216, 0), var(--bg) 30%);
+}
+.lobby .cta p {
+  text-align: center;
+  margin-top: 6px;
+}
+@media (min-width: 1024px) {
+  .lobby.screen {
+    max-width: none;
+    padding: 0 0 40px;
+  }
+  .lobby-top {
+    height: 68px;
+    margin: 0;
+    padding: 0 40px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 250, 240, 0.6);
+  }
+  .lobby .game-head,
+  .lobby-cols {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  .lobby .game-head {
+    padding-top: 30px;
+    padding-bottom: 22px;
+  }
+  .lobby .game-head .mini {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+  }
+  .lobby .game-head h2 {
+    font-size: 24px;
+  }
+  .lobby-side {
+    order: 0;
+  }
+  .lobby-cols {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 28px;
+    align-items: start;
+  }
+  .lobby-main > .section-head:first-child {
+    margin-top: 0;
+  }
+  .seats {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .vs {
+    font-weight: 800;
+    color: var(--muted);
+    font-size: 18px;
+  }
+  .seat {
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px;
+    text-align: center;
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .seat + .seat,
+  .vs + .seat {
+    border-top: 0;
+  }
+  .seat .avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 22px;
+  }
+  .opts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 28px;
+    padding: 6px 20px;
+  }
+  .opts .opt-row {
+    border-top: 0;
+  }
+  .invite {
+    margin-top: 0;
+    padding: 22px;
+  }
+  .invite .qr {
+    display: flex;
+  }
+  .lobby .cta {
+    position: static;
+    transform: none;
+    max-width: none;
+    padding: 16px 0 0;
+    background: none;
+  }
+  .lobby .cta .btn {
+    min-height: 56px;
+    font-size: 17px;
   }
 }

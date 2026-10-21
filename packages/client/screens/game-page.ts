@@ -1,5 +1,5 @@
-// Khung HTML của trang ván chơi trên một máy (docs/design/o-an-quan/ban-choi.html và ban-choi-desktop.html).
-// Các chỗ `data-*` là nơi OfflineGame gắn bàn, thẻ người chơi và cập nhật nội dung.
+// Khung HTML của bàn chơi online (docs/design/o-an-quan/ban-choi.html và ban-choi-desktop.html).
+// Các chỗ `data-*` là nơi GameView gắn bàn, thẻ người chơi và cập nhật nội dung.
 
 import type { Options } from "@playtogether/engine/o-an-quan";
 import { BACK_ICON } from "../icons.ts";
@@ -26,7 +26,7 @@ export function gamePageHtml(options: Options): string {
         <span class="chip desk-only">Quan = ${options.giaTriQuan}</span>
         <span class="chip desk-only">Quan Già: ${onOff(options.camAnQuanNon)}</span>
         <span class="chip desk-only">Lật bàn: ${onOff(options.latBan)}</span>
-        <button class="btn sm desk-only" type="button" data-setup>Đổi tuỳ chọn</button>
+        <a class="btn sm desk-only" href="/">Về trang chủ</a>
         <span class="icon-btn mobile-only" aria-hidden="true"></span>
       </header>
       <div class="g-layout">
@@ -36,9 +36,10 @@ export function gamePageHtml(options: Options): string {
           <div class="board-wrap">
             <span class="row-label top" data-label-top></span>
             <div data-board></div>
-            <span class="row-label bottom">Hàng của bạn</span>
+            <span class="row-label bottom" data-label-bottom></span>
             <span class="row-label bottom right mobile-only" data-pick-hint hidden>◀ ▶ chọn chiều rải</span>
             <span class="row-label bottom right desk-only"><kbd>1</kbd>–<kbd>5</kbd> chọn ô · <kbd>←</kbd><kbd>→</kbd> chọn chiều</span>
+            <div class="locked" hidden><span>🔒 Bàn tạm khoá</span></div>
           </div>
           <div class="spacer"></div>
           <p class="log-line mobile-only" aria-live="polite"></p>

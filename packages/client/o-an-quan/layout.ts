@@ -19,7 +19,13 @@ export function layoutFor(bottomSeat: Seat): BoardLayout {
     : { left: 6, right: 0, top: [5, 4, 3, 2, 1], bottom: [7, 8, 9, 10, 11] };
 }
 
-/** Mũi tên trên hàng của mình: ◀ = chiều -1, ▶ = chiều +1, với cả A và B. */
-export function dirForArrow(arrow: "left" | "right"): Dir {
-  return arrow === "left" ? -1 : 1;
+export type BoardRow = "top" | "bottom";
+
+/**
+ * Mũi tên chỉ đúng hướng sỏi chạy trên màn hình (Q21).
+ * Hàng dưới: ▶ là chiều +1. Hàng trên hiển thị ngược thứ tự chỉ số, nên ▶ là chiều -1.
+ */
+export function dirForArrow(arrow: "left" | "right", row: BoardRow): Dir {
+  const screenDir: Dir = arrow === "left" ? -1 : 1;
+  return row === "bottom" ? screenDir : (-screenDir as Dir);
 }

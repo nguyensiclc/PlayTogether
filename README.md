@@ -25,6 +25,6 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 
 | Hạng mục | Trạng thái |
 |---|---|
-| Ô ăn quan (game thử nghiệm đầu tiên) | M1 Engine xong. Đang làm M2: bàn chơi offline |
-| Nền tảng phòng chơi (room, link mời) | Thiết kế cùng Ô ăn quan |
+| Ô ăn quan (game thử nghiệm đầu tiên) | Engine xong (M1, M1.1). Đang làm M3: chơi qua link mời |
+| Nền tảng phòng chơi (room, link mời) | M3: server WebSocket, phòng chờ, link mời, QR, tự kết nối lại |
 | Tiến lên, Cờ tướng, Caro | Chưa bắt đầu |

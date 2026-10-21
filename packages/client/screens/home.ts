@@ -1,5 +1,12 @@
-// Trang chủ + danh sách trò chơi (docs/design/nen-tang/trang-chu*.html, đã chốt theo Q20).
-// Thành phần của M3 (mã phòng, phòng gần đây, nickname, Tạo phòng) được ẩn. Ô ăn quan dẫn tới /offline (Q19).
+// Trang chủ + danh sách trò chơi (docs/design/nen-tang/trang-chu*.html, Q20, Q22i):
+// nickname, vào bằng mã phòng, phòng gần đây, tạo phòng. "Luật chơi" để tới M5.
+
+import type { GameId } from "@playtogether/protocol";
+import { normalizeRoomCode, roomPath } from "@playtogether/protocol";
+import { $, escapeHtml } from "../dom.ts";
+import { getClientId, getName, randomName, recentRooms, setName } from "../identity.ts";
+import { GameSocket } from "../net/socket.ts";
+import { initialsOf } from "./room-players.ts";
 
 type Category = "dangian" | "co" | "bai";
 
@@ -7,22 +14,20 @@ interface GameInfo {
   name: string;
   players: string;
   category: Category;
-  /** Đường dẫn khi chơi được; không có nghĩa là "Sắp có" */
-  href?: string;
+  /** Game đã chơi được; không có nghĩa là "Sắp có" */
+  gameId?: GameId;
   icon: string;
 }
 
 const CATEGORY_NAME: Record<Category, string> = { dangian: "Dân gian", co: "Cờ", bai: "Bài" };
 const CATEGORY_BG: Record<Category, string> = { dangian: "c-dg", co: "c-co", bai: "c-bai" };
 
-const OFFLINE = "/offline";
-
 const GAMES: GameInfo[] = [
   {
     name: "Ô ăn quan",
     players: "2 người",
     category: "dangian",
-    href: OFFLINE,
+    gameId: "o-an-quan",
     icon: `<svg viewBox="0 0 56 56" aria-hidden="true"><rect x="3" y="18" width="50" height="20" rx="10" fill="#8a5a2e"/><g fill="#eee6d4"><circle cx="17" cy="24" r="2.4"/><circle cx="24" cy="24" r="2.4"/><circle cx="31" cy="24" r="2.4"/><circle cx="38" cy="24" r="2.4"/><circle cx="17" cy="32" r="2.4"/><circle cx="24" cy="32" r="2.4"/><circle cx="31" cy="32" r="2.4"/><circle cx="38" cy="32" r="2.4"/></g><circle cx="9" cy="28" r="3.5" fill="#33251b"/><circle cx="47" cy="28" r="3.5" fill="#33251b"/></svg>`,
   },
   {
@@ -90,17 +95,28 @@ export function mountHome(root: HTMLElement): void {
       <nav class="nav">
         <a class="logo" href="/"><span class="logo-mark"><i></i></span>PlayTogether</a>
         <div class="links desk-only"><a href="/" aria-current="page">Trò chơi</a></div>
+        <div class="spacer"></div>
+        <form class="field code desk-only" data-join><input name="code" placeholder="Mã phòng" maxlength="4" autocomplete="off" aria-label="Mã phòng"><button class="btn dark sm" type="submit">Vào</button></form>
+        <button type="button" class="chip nick" data-nick aria-label="Đổi tên"></button>
       </nav>
       <main class="wrap">
         <section class="hero">
           <div class="hero-text">
             <h1>Rủ bạn chơi,<br><em>chỉ cần một đường link.</em></h1>
-            <p class="lead">Chọn trò rồi chơi ngay, không cần đăng ký.</p>
+            <p class="lead mobile-only">Tạo phòng, gửi link qua Zalo hay Messenger. Không cần đăng ký.</p>
+            <p class="lead desk-only">Chọn trò, tạo phòng, gửi link qua Zalo hay Messenger. Bạn bè bấm là vào chơi, không cần đăng ký.</p>
+            <form class="join mobile-only" data-join>
+              <label class="lbl" for="join-code">Có mã phòng?</label>
+              <div class="field code"><input id="join-code" name="code" placeholder="VD: ABCD" maxlength="4" autocomplete="off"><button class="btn dark sm" type="submit">Vào phòng</button></div>
+            </form>
+            <p class="join-error small" hidden>Mã phòng gồm 4 ký tự, vd ABCD.</p>
             <div class="cta desk-only">
-              <a class="btn primary" href="${OFFLINE}">Chơi ngay Ô ăn quan</a>
+              <button class="btn primary" type="button" data-create="o-an-quan">Tạo phòng Ô ăn quan</button>
               <a class="btn ghost" href="#tat-ca">Xem tất cả trò chơi ↓</a>
             </div>
+            <div class="steps desk-only"><div><b>1</b>Chọn trò</div><div><b>2</b>Gửi link</div><div><b>3</b>Chơi ngay</div></div>
           </div>
+          <div class="mobile-only" data-recent></div>
           <div class="hero-feat">
             <div class="section-head mobile-only"><h2>Nổi bật</h2></div>
             <article class="card featured">
@@ -110,11 +126,13 @@ export function mountHome(root: HTMLElement): void {
                   <h2>Ô ăn quan</h2>
                   <div class="meta"><span class="chip">👥 2 người</span><span class="chip">⏱ 10–15 phút</span><span class="chip">Dân gian</span></div>
                 </div>
-                <div class="actions"><a class="btn primary" href="${OFFLINE}">Chơi ngay</a></div>
+                <div class="actions"><button class="btn primary" type="button" data-create="o-an-quan">Tạo phòng</button></div>
               </div>
             </article>
           </div>
         </section>
+
+        <div class="desk-only" data-recent></div>
 
         <div class="lib-head" id="tat-ca">
           <h2>Tất cả trò chơi <span class="count">· ${GAMES.length} trò</span></h2>
@@ -140,6 +158,106 @@ export function mountHome(root: HTMLElement): void {
   for (const chip of root.querySelectorAll<HTMLButtonElement>(".filters .chip")) {
     chip.addEventListener("click", () => filterGames(root, chip));
   }
+  for (const form of root.querySelectorAll<HTMLFormElement>("[data-join]")) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      joinByCode(root, form);
+    });
+  }
+  for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-create]")) {
+    btn.addEventListener("click", () => createRoom(root, btn.dataset.create as GameId));
+  }
+  setupNickname($(root, "[data-nick]"));
+  // Điện thoại: "Phòng gần đây" nằm trên "Nổi bật"; desktop: dưới khối hero hai cột (như mockup)
+  const recent = recentHtml();
+  for (const slot of root.querySelectorAll<HTMLElement>("[data-recent]")) slot.innerHTML = recent;
+}
+
+/** Tên lưu trên máy; lần đầu vào thì điền sẵn tên ngẫu nhiên (UX mục 2.1) */
+function currentName(): string {
+  return getName() ?? setName(randomName()) ?? randomName();
+}
+
+/** Chip nickname: bấm để sửa tại chỗ, Enter hoặc rời ô thì lưu */
+function setupNickname(chip: HTMLElement): void {
+  const show = () => {
+    const name = currentName();
+    chip.innerHTML = `<span class="avatar sm av1">${escapeHtml(initialsOf(name))}</span>${escapeHtml(name)}<span aria-hidden="true">✎</span>`;
+  };
+  show();
+  chip.addEventListener("click", () => {
+    if (chip.querySelector("input")) return;
+    chip.innerHTML = `<input maxlength="20" aria-label="Tên của bạn" value="${escapeHtml(currentName())}">`;
+    const input = $<HTMLInputElement>(chip, "input");
+    input.select();
+    input.addEventListener(
+      "blur",
+      () => {
+        setName(input.value);
+        show();
+      },
+      { once: true },
+    );
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") input.blur();
+    });
+  });
+}
+
+function joinByCode(root: HTMLElement, form: HTMLFormElement): void {
+  const input = $<HTMLInputElement>(form, "input");
+  const code = normalizeRoomCode(input.value);
+  $(root, ".join-error").hidden = code !== null;
+  if (code) location.assign(roomPath(code));
+  else input.focus();
+}
+
+/** Tạo phòng qua WebSocket rồi chuyển sang trang phòng (UX mục 1) */
+function createRoom(root: HTMLElement, gameId: GameId): void {
+  for (const b of root.querySelectorAll<HTMLButtonElement>("[data-create]")) b.disabled = true;
+  let sent = false;
+  // Chỉ gửi createRoom ở lần kết nối đầu, để rớt mạng giữa chừng không tạo thêm phòng
+  const socket = new GameSocket(() => {
+    if (sent) return [];
+    sent = true;
+    return [
+      { type: "hello", clientId: getClientId(), name: currentName() },
+      { type: "createRoom", gameId },
+    ];
+  });
+  socket.onMessage((m) => {
+    if (m.type === "roomJoined") location.assign(roomPath(m.room.code));
+  });
+  socket.connect();
+}
+
+const MINI_BOARD =
+  '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="3" y="12" width="34" height="16" rx="8" fill="#8a5a2e"/><g fill="#eee6d4"><circle cx="13" cy="17" r="2"/><circle cx="20" cy="17" r="2"/><circle cx="27" cy="17" r="2"/><circle cx="13" cy="23" r="2"/><circle cx="20" cy="23" r="2"/><circle cx="27" cy="23" r="2"/></g></svg>';
+
+/** "5 phút trước", "2 giờ trước"… */
+function timeAgo(at: number): string {
+  const minutes = Math.round((Date.now() - at) / 60000);
+  if (minutes < 1) return "vừa xong";
+  if (minutes < 60) return `${minutes} phút trước`;
+  if (minutes < 24 * 60) return `${Math.round(minutes / 60)} giờ trước`;
+  return `${Math.round(minutes / (24 * 60))} ngày trước`;
+}
+
+/** Mục "Phòng gần đây" (Q22i); không có phòng nào thì ẩn */
+function recentHtml(): string {
+  const list = recentRooms();
+  if (list.length === 0) return "";
+  const items = list
+    .map((r) => {
+      const others = r.with.length ? `Với ${escapeHtml(r.with.join(", "))} · ` : "";
+      return `<div class="card recent">
+        <span class="mini c-dg">${MINI_BOARD}</span>
+        <div class="info"><div class="nm">Ô ăn quan · Phòng ${r.code}</div><div class="small muted">${others}${timeAgo(r.at)}</div></div>
+        <a class="btn sm" href="${roomPath(r.code)}">Vào lại</a>
+      </div>`;
+    })
+    .join("");
+  return `<div class="section-head"><h2>Phòng gần đây</h2></div><div class="recent-list">${items}</div>`;
 }
 
 /** Lọc lưới trò chơi theo nhóm của chip vừa bấm ("" = tất cả). */
@@ -151,12 +269,12 @@ function filterGames(root: HTMLElement, chip: HTMLButtonElement): void {
 
 function gameCard(g: GameInfo): string {
   const meta = `${g.players} · ${CATEGORY_NAME[g.category]}`;
-  const ico = `<div class="ico ${CATEGORY_BG[g.category]}">${g.href ? "" : `<span class="badge">Sắp có</span>`}${g.icon}</div>`;
-  if (!g.href) {
+  const ico = `<div class="ico ${CATEGORY_BG[g.category]}">${g.gameId ? "" : `<span class="badge">Sắp có</span>`}${g.icon}</div>`;
+  if (!g.gameId) {
     return `<div class="game soon" data-cat="${g.category}" aria-disabled="true">${ico}
       <div class="row"><div><div class="nm">${g.name}</div><div class="mt">${meta}</div></div></div></div>`;
   }
-  return `<a class="game" href="${g.href}" data-cat="${g.category}">${ico}
+  return `<button type="button" class="game playable" data-create="${g.gameId}" data-cat="${g.category}">${ico}
     <div class="row"><div><div class="nm">${g.name}</div><div class="mt">${meta}</div></div>
-    <span class="btn primary sm desk-only">Chơi ngay</span></div></a>`;
+    <span class="btn primary sm desk-only">Tạo phòng</span></div></button>`;
 }

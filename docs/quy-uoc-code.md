@@ -53,7 +53,7 @@ npm run format     # tự sửa định dạng, sắp xếp import và các lỗ
 - **Không có số "ma thuật":** giá trị có ý nghĩa luật hay cấu hình phải đặt tên (`BU_DAN = 5`, `QUAN_GIA_MIN = 5`, `DURATION_MS`).
 - **Return sớm** thay cho `if` lồng sâu. Không lồng quá 3 cấp.
 - Ưu tiên bảng tra (`Record<…>`) hoặc map handler thay cho `switch` hay chuỗi `if` dài.
-- Không để code chết, code bị comment lại, hay `console.log` (Biome chặn `console`).
+- Không để code chết, code bị comment lại, hay `console.log` (Biome chặn `console`). Ngoại lệ duy nhất: `packages/server/index.ts` in một dòng log khi server khởi động.
 - Không đổi giá trị tham số đầu vào. Engine luôn làm việc trên bản sao.
 
 ## 5. Engine (`packages/engine`)
@@ -61,6 +61,14 @@ npm run format     # tự sửa định dạng, sắp xếp import và các lỗ
 - **Hàm thuần:** không sửa state đầu vào, không I/O, không `Date.now()`, không `Math.random()` (nhận `Rng` qua tham số), không phụ thuộc DOM hay Node.
 - Lỗi do người chơi (đi sai lượt, ô không hợp lệ…) → trả `{ error: CODE }` theo mã của giao thức. Lỗi do bug (vi phạm bất biến) → `throw new Error(...)`.
 - Mỗi luật mới phải có test. Thế cờ trong test có chú thích tính tay và tham chiếu mục tài liệu.
+
+## 5b. Server (`packages/server`) và giao thức (`packages/protocol`)
+
+- Node 24 chạy thẳng file `.ts`, nên server, engine và protocol chỉ dùng cú pháp TypeScript "bỏ được" (`erasableSyntaxOnly`): không `enum`, không `namespace`, không parameter property (`constructor(private x)`).
+- Lớp phòng không chứa luật game: mọi câu hỏi về luật đều hỏi `GameModule` (kể cả kiểm tra tuỳ chọn bằng `parseOptions`).
+- Mọi dữ liệu từ client đều được kiểm tra (`parse.ts`) trước khi xử lý. Lỗi do người dùng → `RoomError` với mã lỗi của giao thức; lỗi khác là bug.
+- Không I/O trong `Room`: thời gian và RNG truyền vào, để test được không cần mạng.
+- Không bao giờ gửi `clientId` của người này cho người khác; dùng `id` công khai.
 
 ## 6. Client (`packages/client`)
 

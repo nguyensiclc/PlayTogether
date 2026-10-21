@@ -170,13 +170,13 @@ p { margin: 0; }
   padding: 6px;
   background: linear-gradient(180deg, #96653b, var(--board));
   border: 3px solid var(--board-edge);
-  border-radius: 20px;
+  border-radius: 13.5% / 50%;   /* hai đầu bàn là nửa elip, ôm sát ô quan */
   box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 8px 20px rgba(60, 35, 10, .25);
 }
 .cell { position: relative; background: var(--cell); border-radius: 10px; box-shadow: inset 0 3px 7px var(--cell-shade); }
 .cell.quan { grid-row: 1 / 3; }
-.cell.quan.left { grid-column: 1; border-radius: 999px 10px 10px 999px / 50% 10px 10px 50%; }
-.cell.quan.right { grid-column: 7; border-radius: 10px 999px 999px 10px / 10px 50% 50% 10px; }
+.cell.quan.left { grid-column: 1; border-radius: calc(100% - 10px) 10px 10px calc(100% - 10px) / 50% 10px 10px 50%; }
+.cell.quan.right { grid-column: 7; border-radius: 10px calc(100% - 10px) calc(100% - 10px) 10px / 10px 50% 50% 10px; }
 .cell .count {
   position: absolute; right: 4px; bottom: 2px;
   font-size: 11px; font-weight: 700; color: #fff8e8;

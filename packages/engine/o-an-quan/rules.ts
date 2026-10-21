@@ -1,6 +1,6 @@
 // Luật Ô ăn quan, khớp 01-luat-choi.md và thuật toán ở mục 5 tài liệu kỹ thuật.
 // Hàm thuần: không sửa state đầu vào, không I/O, không ngẫu nhiên.
-import type { GameModule, GameResult, SeatId } from "../game-module.ts";
+import type { ForfeitReason, GameModule, GameResult, SeatId } from "../game-module.ts";
 import type { Dir, EndReason, GameEvent, Move, Options, ScoreDetail, Seat, SowMove, State } from "./types.ts";
 
 export const defaultOptions: Options = { giaTriQuan: 10, camAnQuanNon: false, latBan: false, thoiGianLuot: 30 };
@@ -306,7 +306,7 @@ function decideWinner(
 export function forfeit(
   state: State,
   seatId: SeatId,
-  reason: "het-gio" | "bo-cuoc",
+  reason: ForfeitReason,
 ): { state: State; events: GameEvent[] } | { error: string } {
   if (state.status !== "playing") return { error: "INVALID_MOVE" };
   if (!state.controller.includes(seatId)) return { error: "INVALID_MOVE" };
@@ -314,6 +314,30 @@ export function forfeit(
   const events: GameEvent[] = [];
   finish(s, reason, events, seatId);
   return { state: s, events };
+}
+
+/** Giá trị hợp lệ của từng tuỳ chọn (luật mục 12) */
+const OPTION_VALUES: { [K in keyof Options]: readonly Options[K][] } = {
+  giaTriQuan: [10, 5],
+  camAnQuanNon: [true, false],
+  latBan: [true, false],
+  thoiGianLuot: [15, 30, 60, null],
+};
+
+/**
+ * Đọc tuỳ chọn từ dữ liệu ngoài (chủ phòng gửi lên). Chỉ nhận khoá đã biết với giá trị hợp lệ;
+ * phần thiếu hoặc sai thì giữ theo `base`.
+ */
+export function parseOptions(raw: unknown, base: Options): Options {
+  const out: Options = { ...base };
+  if (typeof raw !== "object" || raw === null) return out;
+  const input = raw as Record<string, unknown>;
+  for (const key of Object.keys(OPTION_VALUES) as (keyof Options)[]) setOption(out, key, input[key]);
+  return out;
+}
+
+function setOption<K extends keyof Options>(out: Options, key: K, value: unknown): void {
+  if ((OPTION_VALUES[key] as readonly unknown[]).includes(value)) out[key] = value as Options[K];
 }
 
 export function result(state: State): GameResult | null {
@@ -331,4 +355,6 @@ export const oAnQuan: GameModule<State, Move, Options, GameEvent> = {
   // Ô ăn quan không có thông tin ẩn
   viewFor: (state) => state,
   result,
+  forfeit,
+  parseOptions,
 };

@@ -10,8 +10,12 @@ export interface ResultViewData {
   result: GameResult;
   giaTriQuan: number;
   identityOf: (seat: SeatId) => PlayerIdentity;
+  /** Ghế của người xem màn hình; null = người xem */
+  mySeat: SeatId | null;
   /** Người đi trước ván sau (người thua, hoặc đổi lượt nếu hoà — luật mục 2) */
-  nextFirst: SeatId;
+  nextFirst: SeatId | null;
+  /** Ghế những người đã bấm Ván nữa */
+  rematchSeats: readonly SeatId[];
 }
 
 const REASON_CHIP: Record<EndReason, string> = {
@@ -23,56 +27,93 @@ const REASON_CHIP: Record<EndReason, string> = {
 };
 
 /**
- * HTML của màn kết quả. Có các nút `[data-again]` (Ván nữa), `[data-setup]` (Đổi tuỳ chọn)
- * và link về trang chủ. Ván có đúng hai người chơi, ghế 0 và 1.
+ * HTML của màn kết quả. Có các nút `[data-again]` (Ván nữa), `[data-lobby]` (Về phòng chờ), `[data-leave]` (Rời phòng).
+ * Ván có đúng hai người chơi, ghế 0 và 1.
  */
-export function resultHtml({ result, giaTriQuan, identityOf, nextFirst }: ResultViewData): string {
+export function resultHtml(d: ResultViewData): string {
+  const { result, giaTriQuan } = d;
   const reason = result.reason as EndReason;
   const [d0, d1] = result.detail as [ScoreDetail, ScoreDetail];
-  const [p0, p1] = [identityOf(0), identityOf(1)];
-  const name = (seat: SeatId) => escapeHtml(identityOf(seat).name);
-  const draw = result.winner === null;
-  const title = result.winner === null ? "Hoà!" : `${name(result.winner)} thắng!`;
-  const why = explainReason(reason, result.winner, name);
+  // Người xem màn hình đứng bên trái (UX: "Bạn" trước)
+  const [left, right] = d.mySeat === 1 ? ([1, 0] as const) : ([0, 1] as const);
+  const detailOf = (seat: SeatId) => (seat === 0 ? d0 : d1);
+  const label = (seat: SeatId) => (seat === d.mySeat ? "Bạn" : escapeHtml(d.identityOf(seat).name));
   const win = (seat: SeatId) => (result.winner === seat ? ' class="win"' : "");
-  const row = (label: string, f: (d: ScoreDetail) => string, cls = "") =>
-    `<tr${cls ? ` class="${cls}"` : ""}><th>${label}</th><td>${f(d0)}</td><td>${f(d1)}</td></tr>`;
-  const vsPlayer = (seat: SeatId, who: PlayerIdentity, d: ScoreDetail) =>
-    `<div class="p${result.winner === seat ? " win" : ""}"><span class="avatar ${who.avatarClass}">${escapeHtml(who.initials)}</span><span class="small">${escapeHtml(who.name)}</span><b>${d.total}</b></div>`;
+  const row = (title: string, f: (x: ScoreDetail) => string, cls = "") =>
+    `<tr${cls ? ` class="${cls}"` : ""}><th>${title}</th><td>${f(detailOf(left))}</td><td>${f(detailOf(right))}</td></tr>`;
+  const vsPlayer = (seat: SeatId) => {
+    const who = d.identityOf(seat);
+    return `<div class="p${result.winner === seat ? " win" : ""}"><span class="avatar ${who.avatarClass}">${escapeHtml(who.initials)}</span><span class="small">${label(seat)}</span><b>${detailOf(seat).total}</b></div>`;
+  };
+  const why = explainReason(reason, result.winner, (seat) => label(seat));
 
   return `
     <div class="side-hero">
-      <div class="trophy">${draw ? "🤝" : "🏆"}</div>
-      <h1 id="result-title">${title}</h1>
+      <div class="trophy">${trophy(result.winner, d.mySeat)}</div>
+      <h1 id="result-title">${title(result.winner, d.mySeat, d.identityOf)}</h1>
       <span class="chip reason">${REASON_CHIP[reason]}</span>
       ${why ? `<p class="why">${why}</p>` : ""}
-      <div class="score"><b${win(0)}>${d0.total}</b><span>–</span><b${win(1)}>${d1.total}</b></div>
-      <span class="small muted desk-only">${name(0)} · ${name(1)}</span>
+      <div class="score"><b${win(left)}>${detailOf(left).total}</b><span>–</span><b${win(right)}>${detailOf(right).total}</b></div>
+      <span class="small muted desk-only">${label(left)} · ${label(right)}</span>
     </div>
     <div class="detail">
-      <div class="vs">${vsPlayer(0, p0, d0)}<span class="sep">–</span>${vsPlayer(1, p1, d1)}</div>
+      <div class="vs">${vsPlayer(left)}<span class="sep">–</span>${vsPlayer(right)}</div>
       <table>
-        <thead><tr><th></th><td>${name(0)}</td><td>${name(1)}</td></tr></thead>
+        <thead><tr><th></th><td>${label(left)}</td><td>${label(right)}</td></tr></thead>
         <tbody>
-          ${row("Dân đã ăn", (d) => String(d.dan))}
-          ${row(`Quan đã ăn (×${giaTriQuan})`, (d) => `${d.quan} · ${d.quan * giaTriQuan}`)}
-          ${row("Bù dân", (d) => (d.buDan ? `${d.buDan} lần` : "0"))}
-          ${row("Dân thu cuối ván", (d) => String(d.rowDan))}
-          ${row("Tổng", (d) => String(d.total), "total")}
+          ${row("Dân đã ăn", (x) => String(x.dan))}
+          ${row(`Quan đã ăn (×${giaTriQuan})`, (x) => `${x.quan} · ${x.quan * giaTriQuan}`)}
+          ${row("Bù dân", (x) => (x.buDan ? `${x.buDan} lần` : "0"))}
+          ${row("Dân thu cuối ván", (x) => String(x.rowDan))}
+          ${row("Tổng", (x) => String(x.total), "total")}
         </tbody>
       </table>
-      <button class="btn primary block" type="button" data-again>Ván nữa · ${name(nextFirst)} đi trước <kbd class="desk-only">Enter</kbd></button>
+      ${rematchHtml(d)}
       <div class="acts">
-        <button class="btn sm" type="button" data-setup>Đổi tuỳ chọn</button>
-        <a class="btn sm" href="/">Về trang chủ</a>
+        <button class="btn sm" type="button" data-lobby>Về phòng chờ</button>
+        <button class="btn sm" type="button" data-leave>Rời phòng</button>
       </div>
     </div>`;
 }
 
+/** Dòng "… muốn chơi ván nữa" và nút Ván nữa theo trạng thái bỏ phiếu */
+function rematchHtml(d: ResultViewData): string {
+  const others = d.rematchSeats.filter((s) => s !== d.mySeat);
+  const ready = others
+    .map((s) => {
+      const who = d.identityOf(s);
+      return `<div class="ready"><span class="avatar sm ${who.avatarClass}">${escapeHtml(who.initials)}</span>${escapeHtml(who.name)} muốn chơi ván nữa</div>`;
+    })
+    .join("");
+  if (d.mySeat === null) return ready;
+  const first =
+    d.nextFirst === null
+      ? ""
+      : ` · ${d.nextFirst === d.mySeat ? "Bạn" : escapeHtml(d.identityOf(d.nextFirst).name)} đi trước`;
+  const voted = d.rematchSeats.includes(d.mySeat);
+  return voted
+    ? `${ready}<button class="btn primary block" type="button" disabled data-again>Đang chờ đối thủ bấm Ván nữa…</button>`
+    : `${ready}<button class="btn primary block" type="button" data-again>Ván nữa${first} <kbd class="desk-only">Enter</kbd></button>`;
+}
+
+function title(winner: SeatId | null, mySeat: SeatId | null, identityOf: (s: SeatId) => PlayerIdentity): string {
+  if (winner === null) return "Hoà!";
+  if (mySeat === null) return `${escapeHtml(identityOf(winner).name)} thắng!`;
+  return winner === mySeat ? "Bạn thắng!" : "Bạn thua";
+}
+
+function trophy(winner: SeatId | null, mySeat: SeatId | null): string {
+  if (winner === null) return "🤝";
+  return mySeat !== null && winner !== mySeat ? "🙂" : "🏆";
+}
+
 /** Câu giải thích thêm cho những lý do kết thúc dễ gây thắc mắc */
-function explainReason(reason: EndReason, winner: SeatId | null, name: (seat: SeatId) => string): string {
+function explainReason(reason: EndReason, winner: SeatId | null, label: (seat: SeatId) => string): string {
   if (reason === "lap-nuoc") return "Quân còn trong ô quan không được tính.";
-  if (reason !== "khong-du-bu-dan" || winner === null) return "";
+  if (winner === null) return "";
+  const loser = label(winner === 0 ? 1 : 0);
   // Người thua "không đủ bù dân" có thể nhiều điểm hơn, nên cần nói rõ (luật mục 7)
-  return `${name(winner === 0 ? 1 : 0)} hết dân nhưng kho dưới 5 điểm nên thua.`;
+  if (reason === "khong-du-bu-dan") return `${loser} hết dân nhưng kho dưới 5 điểm nên thua.`;
+  if (reason === "bo-cuoc") return `${loser} đã rời phòng giữa ván.`;
+  return "";
 }

@@ -19,6 +19,8 @@ export interface CardState {
   you: boolean;
   /** Đang đến lượt: viền vàng */
   active: boolean;
+  /** Mất kết nối: avatar mờ, hiện "Mất kết nối" thay cho kho điểm (Q22e) */
+  offline?: boolean;
 }
 
 export class PlayerCard {
@@ -30,6 +32,8 @@ export class PlayerCard {
   private readonly quan: HTMLElement;
   private readonly delta: HTMLElement;
   private readonly score: HTMLElement;
+  private readonly kho: HTMLElement;
+  private readonly reconn: HTMLElement;
 
   constructor() {
     this.el = create("div", "player");
@@ -38,6 +42,7 @@ export class PlayerCard {
       <div class="info">
         <div class="name"><span data-name></span><span class="small muted" data-you> (bạn)</span></div>
         <div class="kho"><span class="ddot"></span><span data-dan></span> · <span class="qdot"></span><span data-quan></span><span class="delta" hidden></span></div>
+        <div class="reconn" hidden>Mất kết nối</div>
       </div>
       <div class="score"><b></b><span class="tiny muted">điểm</span></div>`;
     this.avatar = $(this.el, ".avatar");
@@ -47,6 +52,8 @@ export class PlayerCard {
     this.quan = $(this.el, "[data-quan]");
     this.delta = $(this.el, ".delta");
     this.score = $(this.el, ".score b");
+    this.kho = $(this.el, ".kho");
+    this.reconn = $(this.el, ".reconn");
   }
 
   render(who: PlayerIdentity, state: CardState): void {
@@ -58,6 +65,10 @@ export class PlayerCard {
     this.quan.textContent = `${state.pile.quan} quan`;
     this.score.textContent = String(state.points);
     this.el.classList.toggle("active", state.active);
+    const offline = state.offline ?? false;
+    this.el.classList.toggle("offline", offline);
+    this.kho.hidden = offline;
+    this.reconn.hidden = !offline;
   }
 
   /** "+N" khi ăn, "−5" khi bù dân, hiện thoáng qua cạnh kho điểm */

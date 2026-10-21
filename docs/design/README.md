@@ -62,6 +62,9 @@ Lấy từ `packages/client/style.css` (bản M2), cộng thêm vài token mới
 | `--live-bg` / `--live-ink` | `#e3f3e9` / `#23704a` | Nhãn "Chơi được ngay" |
 | `--gold-soft` | `#fbe9c4` | Nền cúp ở màn kết quả |
 | `--accent-soft` | `#fff6df` | Ô "Lật bàn" trong hộp hỏi |
+| `--host-ink` | `#7a5410` | Chữ nhãn "Chủ phòng" (nền `--gold-soft`) |
+| `--share` | `#0068ff` | Nút "Chia sẻ" ở phòng chờ |
+| `--av2` | `#2f6b5a` | Avatar người xem |
 
 Bóng đổ và lớp phủ trong suốt (`rgba`) được viết trực tiếp, không cần token (quy ước code mục 6).
 
@@ -70,8 +73,8 @@ Bóng đổ và lớp phủ trong suốt (`rgba`) được viết trực tiếp,
 | Màn hình | File | Mốc | Tài liệu UX | Trạng thái |
 |---|---|---|---|---|
 | Trang chủ + danh sách trò chơi | `nen-tang/trang-chu.html` | M3 | Ô ăn quan UX mục 2.1 | **Đã chốt** (Q20), đã làm |
-| Vào bằng link mời (nhập nickname) | `nen-tang/nhap-nickname.html` | M3 | mục 2.2 | Bản nháp 1 |
-| Phòng chờ (chủ phòng, chờ người thứ 2) | `nen-tang/phong-cho.html` | M3 | mục 2.3 | Bản nháp 1 |
+| Vào bằng link mời (nhập nickname) | `nen-tang/nhap-nickname.html` | M3 | mục 2.2 | **Đã chốt** (Q22b), đã làm |
+| Phòng chờ (chủ phòng, chờ người thứ 2) | `nen-tang/phong-cho.html` | M3 | mục 2.3 | **Đã chốt** (Q22b), đã làm |
 | Mất kết nối / đối thủ rời phòng | `nen-tang/mat-ket-noi.html` | M4 | mục 5 | Bản nháp 1 |
 | Bàn chơi: lượt của mình, đang chọn chiều | `o-an-quan/ban-choi.html` | M2 | mục 2.4, 3 | **Đã chốt** (Q20), đã làm |
 | Bàn chơi: đối thủ đi, hiệu ứng ăn quân, emoji | `o-an-quan/ban-choi-doi-thu.html` | M2/M5 | mục 4, 6 | **Đã chốt** (Q20), đã làm |
@@ -79,7 +82,7 @@ Bóng đổ và lớp phủ trong suốt (`rgba`) được viết trực tiếp,
 | Kết quả ván | `o-an-quan/ket-qua.html` | M2/M5 | mục 2.5 | **Đã chốt** (Q20), đã làm |
 | Hướng dẫn luật (thẻ 2/4) | `o-an-quan/huong-dan.html` | M5 | mục 6 | Bản nháp 1, mới có thẻ 2 |
 | **Desktop**: Trang chủ | `nen-tang/trang-chu-desktop.html` | M3 | mục 2.1 | **Đã chốt** (Q20), đã làm |
-| **Desktop**: Phòng chờ (đã đủ 2 người) | `nen-tang/phong-cho-desktop.html` | M3 | mục 2.3 | Bản nháp 1 |
+| **Desktop**: Phòng chờ (đã đủ 2 người) | `nen-tang/phong-cho-desktop.html` | M3 | mục 2.3 | **Đã chốt** (Q22b), đã làm |
 | **Desktop**: Bàn chơi + cột nhật ký | `o-an-quan/ban-choi-desktop.html` | M2/M3 | mục 2.4, 3, 4 | **Đã chốt** (Q20), đã làm |
 | **Desktop**: Hộp hỏi Lật bàn (modal) | `o-an-quan/lat-ban-desktop.html` | M2 | mục 3 | **Đã chốt** (Q20), đã làm |
 | **Desktop**: Kết quả (modal) | `o-an-quan/ket-qua-desktop.html` | M2/M5 | mục 2.5 | **Đã chốt** (Q20), đã làm |
@@ -88,14 +91,15 @@ Bóng đổ và lớp phủ trong suốt (`rgba`) được viết trực tiếp,
 
 Trạng thái: **Bản nháp 1** → chờ duyệt. Khi duyệt xong thì đổi thành **Đã chốt**, từ đó code UI phải theo đúng thiết kế.
 
-### Bản code tạm khác mockup (đến M3–M5)
+### Bản code tạm khác mockup (đến M4–M5)
 
-Theo Q19 và Q20, các màn hình đã chốt được làm cho chế độ chơi trên một máy (`/offline`). Những chỗ dưới đây cố ý khác mockup và sẽ làm đúng mockup khi tới mốc tương ứng:
+Những chỗ dưới đây cố ý khác mockup và sẽ làm đúng mockup khi tới mốc tương ứng (Q20, Q22):
 
-- **Trang chủ:** nút chính của Ô ăn quan ghi **Chơi ngay** (dẫn tới `/offline`) thay cho **Tạo phòng**. Ẩn chip nickname, ô "Có mã phòng", mục "Phòng gần đây", nút "Luật chơi", dòng ba bước trên desktop. Dòng mô tả dưới khẩu hiệu tạm ghi "Chọn trò rồi chơi ngay, không cần đăng ký."
-- **Bàn chơi:** "bạn" là người đang đến lượt. Thanh trên ghi "Chơi trên một máy · Lượt N". Ẩn đồng hồ, âm thanh, nút `?`, biểu cảm, người xem, tab Luật chơi. Cột phải trên desktop chỉ có Nhật ký ván và Phím tắt.
-- **Lật bàn:** ẩn dòng "Đồng hồ vẫn chạy".
-- **Kết quả:** tiêu đề "Người chơi A thắng!". Ẩn dòng "… muốn chơi ván nữa". Nút phụ là **Đổi tuỳ chọn** và **Về trang chủ**.
+- **Trang chủ:** chưa có nút "Luật chơi" (M5).
+- **Phòng chờ:** chưa có "Thời gian mỗi lượt" (M4), nút `?` (M5). Nút "Ngồi đây" ở ghế trống chỉ hiện cho người đang xem.
+- **Bàn chơi:** chưa có đồng hồ lượt (M4), âm thanh, nút `?`, biểu cảm, người xem và tab Luật chơi ở cột phải desktop (M5). Thanh trên ghi "Phòng ABCD · Lượt N"; nút "Về phòng chờ" trên desktop thay bằng "Về trang chủ" (vẫn giữ ghế).
+- **Lật bàn:** chưa có dòng "Đồng hồ vẫn chạy" (M4).
+- **Kết quả:** chưa có "Chia sẻ kết quả" (M5); thay bằng nút **Rời phòng**.
 
 ## Điểm mới so với tài liệu UX
 

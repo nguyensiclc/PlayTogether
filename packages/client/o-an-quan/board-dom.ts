@@ -3,7 +3,7 @@
 import type { Seat } from "@playtogether/engine/o-an-quan";
 import { isQuanSquare, owner } from "@playtogether/engine/o-an-quan";
 import { create, restartAnimation } from "../dom.ts";
-import { layoutFor } from "./layout.ts";
+import { type BoardRow, layoutFor } from "./layout.ts";
 import type { BoardView } from "./view-model.ts";
 
 export interface BoardCallbacks {
@@ -12,8 +12,10 @@ export interface BoardCallbacks {
 }
 
 export interface Interaction {
-  /** Bàn đang nhận thao tác của người ngồi dưới */
+  /** Bàn đang nhận thao tác của người đến lượt */
   active: boolean;
+  /** Bên đang đến lượt: hàng của bên này sáng, hàng còn lại tối đi */
+  turnSide: Seat;
   /** Các ô đi được */
   valid: ReadonlySet<number>;
   selected: number | null;
@@ -25,8 +27,6 @@ export type FlashKind = "pick" | "pick2" | "drop" | "collect" | "budan";
 const MAX_STONES = { dan: 14, quan: 10 };
 /** Khoảng cách giữa thanh ◀ ▶ và ô đang chọn (px) */
 const ARROWS_GAP = 10;
-/** Thời gian xoay bàn khi chuyền máy (ms) */
-const ROTATE_MS = 450;
 /** Nhãn "+N" trên ô bị ăn hiện ít nhất chừng này (ms), kể cả khi tua nhanh */
 const CAPTURE_MIN_MS = 400;
 
@@ -72,6 +72,9 @@ export class BoardDom {
     this.toastEl = create("div", "toast");
     this.toastEl.setAttribute("role", "status");
     this.el.append(this.hand, this.arrows, this.toastEl);
+    // Xếp ô ngay từ đầu: nếu chờ tới khi hướng nhìn đổi thì người ngồi bên A (hướng mặc định)
+    // sẽ không bao giờ được xếp, và trình duyệt tự dồn ô 7–11 xuống hàng 2 từ cột 1
+    this.setPerspective(this.bottomSeat);
   }
 
   /** Ô bàn theo chỉ số 0..11 */
@@ -139,17 +142,25 @@ export class BoardDom {
     for (let i = 0; i < 12; i++) {
       const c = this.cell(i);
       const side = owner(i);
-      const mine = it.active && side === this.bottomSeat;
+      const mine = it.active && side === it.turnSide;
       c.classList.toggle("valid", mine && it.valid.has(i) && it.selected !== i);
       c.classList.toggle("off", mine && !it.valid.has(i));
-      // Hàng đối thủ tối hơn hàng mình khi đến lượt mình
-      c.classList.toggle("dim", it.active && side !== null && side !== this.bottomSeat);
+      // Hàng của đối thủ tối hơn hàng của người đến lượt
+      c.classList.toggle("dim", it.active && side !== null && side !== it.turnSide);
       c.classList.toggle("selected", it.selected === i);
     }
     this.placeArrows(it.selected);
   }
 
-  /** Thanh ◀ ▶ nổi phía trên ô đang chọn, không tràn ra ngoài bàn. */
+  /** Ô dân thuộc hàng trên hay hàng dưới của bàn đang hiển thị */
+  rowOf(i: number): BoardRow {
+    return owner(i) === this.bottomSeat ? "bottom" : "top";
+  }
+
+  /**
+   * Thanh ◀ ▶ nổi cạnh ô đang chọn, không tràn ra ngoài bàn: phía trên với hàng dưới,
+   * phía dưới với hàng trên để không che hàng trên và thẻ người chơi phía trên (Q21).
+   */
   private placeArrows(selected: number | null): void {
     if (selected === null) {
       this.arrows.hidden = true;
@@ -160,8 +171,12 @@ export class BoardDom {
     const w = this.arrows.offsetWidth;
     const center = c.offsetLeft + c.offsetWidth / 2;
     const left = Math.min(Math.max(center - w / 2, 0), this.el.clientWidth - w);
+    const below = this.rowOf(selected) === "top";
+    this.arrows.classList.toggle("below", below);
     this.arrows.style.left = `${left}px`;
-    this.arrows.style.top = `${c.offsetTop - this.arrows.offsetHeight - ARROWS_GAP}px`;
+    this.arrows.style.top = below
+      ? `${c.offsetTop + c.offsetHeight + ARROWS_GAP}px`
+      : `${c.offsetTop - this.arrows.offsetHeight - ARROWS_GAP}px`;
     this.arrows.style.setProperty("--caret", `${center - left}px`);
   }
 
@@ -192,24 +207,6 @@ export class BoardDom {
   toast(text: string, ms: number): void {
     this.toastEl.textContent = text;
     restartAnimation(this.toastEl, "show", Math.max(ms, 700));
-  }
-
-  /** Xoay `stage` (phần bàn chơi) 180° rồi xếp lại theo bên ngồi dưới mới. */
-  async rotateTo(seat: Seat, stage: HTMLElement): Promise<void> {
-    if (seat === this.bottomSeat) return;
-    if (this.reducedMotion) {
-      this.setPerspective(seat);
-      return;
-    }
-    // Giữ góc 180° cho tới khi xếp lại xong, rồi bỏ xoay: vị trí các ô trùng khớp nên không bị nháy
-    const anim = stage.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(180deg)" }], {
-      duration: ROTATE_MS,
-      easing: "ease-in-out",
-      fill: "forwards",
-    });
-    await anim.finished;
-    this.setPerspective(seat);
-    anim.cancel();
   }
 }
 

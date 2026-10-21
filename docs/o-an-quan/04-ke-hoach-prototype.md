@@ -78,19 +78,21 @@ Kiểm chứng **luồng chính** của cả nền tảng qua một game thật:
 | Q5 | Bị đi thay mấy lượt liên tiếp thì xử thua? | **3** lượt | Đã chốt |
 | Q6 | Tên miền / tên thương hiệu | Tạm dùng **PlayTogether**. Không ảnh hưởng M1–M4, chốt trước khi deploy | Đã chốt (tạm) |
 | Q7 | Ván kết thúc theo mục 6.4 luật (hai bên cộng lại không đủ 5 dân để rải) trong khi ô quan vẫn còn quan và/hoặc dân: số quân còn trong 2 ô quan xử lý thế nào? | ~~Phương án C~~. Luật Bù dân mới: không đủ điểm thì thua ngay, nên tình huống này không còn xảy ra | Không còn áp dụng |
-| Q8 | M2: hai người chơi chung một máy thì bàn hiển thị theo hướng nào? | **A**: xoay bàn theo người đến lượt | Đã chốt |
+| Q8 | M2: hai người chơi chung một máy thì bàn hiển thị theo hướng nào? | ~~A: xoay bàn theo người đến lượt~~. Thay bởi Q21 | Thay thế bởi Q21 |
 | Q9 | M2: có màn hình chọn tuỳ chọn (`giaTriQuan`, `camAnQuanNon`) không? | **A**: có màn hình bắt đầu chọn hai tuỳ chọn | Đã chốt |
 | Q10 | M2: ván offline có đồng hồ lượt không? | **A**: không có đồng hồ ở M2 | Đã chốt |
 | Q11 | M2: sau khi hết ván có "Ván nữa" theo luật người thua đi trước không? Hai người được gọi tên là gì? | **A**: có bảng điểm + Ván nữa theo luật mục 2; tên "Người chơi A" / "Người chơi B" | Đã chốt |
-| Q12 | Chế độ chơi chung một máy chỉ dùng để phát triển, hay là tính năng chính thức của sản phẩm? | **A**: chỉ để phát triển, đường dẫn ẩn `/offline` (sửa bởi Q19: hiện ở trang chủ tạm thời đến M3) | Đã chốt |
+| Q12 | Chế độ chơi chung một máy chỉ dùng để phát triển, hay là tính năng chính thức của sản phẩm? | **A**: chỉ để phát triển, đường dẫn ẩn `/offline` (sửa bởi Q19: hiện ở trang chủ tạm thời đến M3) | Hết hiệu lực do Q22 (đã bỏ chế độ chơi một máy) |
 | Q13 | Bù dân: kho đủ 5 điểm nhưng không đủ 5 dân (chỉ có quan) thì sao? | Đổi 1 quan thành dân (10 hoặc 5 dân) rồi trừ 5 điểm | Đã chốt (theo đề xuất) |
 | Q14 | "Mốc 36/70" có phải luật dừng ván sớm khi một bên đạt 36 điểm? | **Không**, chỉ là ngưỡng quá nửa khi so điểm cuối ván | Đã chốt (theo đề xuất) |
 | Q15 | Luật lặp nước áp dụng cho chế độ nào? | **Mọi chế độ** | Đã chốt (theo đề xuất) |
 | Q16 | Mặc định của Quan Già và Lật bàn? | Cả hai **tắt** (luật Cơ bản như trang tham chiếu) | Đã chốt (theo đề xuất) |
 | Q17 | `setup(options, seats, firstPlayer)`: người đi trước điều khiển bên nào? | **A**: bên A luôn đi trước, `controller[0] = firstPlayer` | Đã chốt |
 | Q18 | `validMoves` có trả về nước `latBan` không? | **A**: có. Khi hết giờ, server chỉ chọn trong các nước `sow` | Đã chốt |
-| Q19 | Trang chủ có danh sách trò chơi: bấm Ô ăn quan thì vào đâu, khi chế độ online (M3) chưa có? | **A**: bấm Ô ăn quan → `/offline`, tạm thời đến M3 (sửa Q12) | Đã chốt |
+| Q19 | Trang chủ có danh sách trò chơi: bấm Ô ăn quan thì vào đâu, khi chế độ online (M3) chưa có? | **A**: bấm Ô ăn quan → `/offline`, tạm thời đến M3 (sửa Q12) | Hết hiệu lực do Q22 (đã bỏ chế độ chơi một máy) |
 | Q20 | Làm UI theo `docs/design/` (Bản nháp 1): làm những màn hình nào lúc này, và xử lý các thành phần của M3–M5 ra sao? | **A**: chốt và làm ngay Trang chủ, Bàn chơi, Lật bàn, Kết quả (điện thoại + desktop); thành phần M3–M5 ẩn đi | Đã chốt |
+| Q21 | Bỏ xoay bàn ở `/offline`: hai người chơi chung máy thì hiển thị đối thủ ở phía đối diện thế nào? (thay Q8) | **B**, cố định **theo người**: không xoay bàn; Người chơi A luôn ở dưới, B luôn ở trên | Hết hiệu lực do Q22 (đã bỏ chế độ chơi một máy) |
+| Q22 | Bỏ chế độ chơi chung một máy, chuyển sang làm M3 (mời qua link thật): phạm vi và các điểm kỹ thuật chưa rõ | Theo đề xuất cả 12 điểm, **riêng (e) bổ sung** tự kết nối lại đơn giản | Đã chốt |
 
 ### Q7 — Quân còn trong ô quan khi ván kết thúc theo mục 6.4
 
@@ -264,6 +266,66 @@ Ngoài ra thiết kế được vẽ theo góc nhìn "bạn" (mỗi người m�
 - Desktop làm theo bố cục riêng (≥ 1024px). Cột phải của bàn chơi chỉ gồm **Nhật ký ván** và **Phím tắt**; biểu cảm, người xem, tab Luật chơi để tới M5/M3.
 - Phím tắt làm ngay: `1–5`, `←` `→`, `Esc`, `L`, `Space`, `Enter`.
 - Cập nhật `02-thiet-ke-ux.md` cho khớp thiết kế đã chốt (bố cục desktop riêng, nhật ký ván, phím tắt) trong cùng thay đổi.
+
+### Q21 — Bỏ xoay bàn: hiển thị đối thủ ở phía đối diện (thay Q8)
+
+**Bối cảnh:** Có yêu cầu bỏ hiệu ứng xoay bàn 180° sau mỗi lượt ở `/offline` (Q8 phương án A). Thay vào đó, hai người chơi chung máy thì mỗi người tự động thấy đối thủ của mình ở phía đối diện. Có mấy chỗ chưa rõ:
+
+1. **Cách cầm máy.** Hai người ngồi đối diện, đặt máy nằm giữa bàn? Hay vẫn chuyền máy cho nhau, chỉ là không xoay nữa?
+2. **Ai ngồi dưới.** Cố định theo người (ghế), hay cố định theo bên bàn (A ở dưới)? Với Lật bàn, hai người đổi bên, nên hai cách này cho kết quả khác nhau.
+3. **Chữ và nút của người ngồi trên.** Khi máy nằm giữa, người ngồi trên nhìn màn hình ngược. Thẻ người chơi, trạng thái, thanh ◀ ▶, hộp hỏi Lật bàn của họ có cần lật ngược 180° để họ đọc xuôi không?
+
+**Ảnh hưởng:** UX mục 2.6 và 3, `board-dom.ts` (bỏ `rotateTo`), `offline.ts` (`passDevice`), CSS bàn chơi điện thoại, ý nghĩa mũi tên ◀ ▶ của người ngồi trên, thiết kế bàn chơi (mockup chỉ vẽ góc nhìn một người).
+
+| Phương án | Mô tả | Hệ quả |
+|---|---|---|
+| A | **Máy nằm giữa, mỗi người một nửa màn hình.** Người chơi A (ghế 0) luôn ở dưới, người chơi B (ghế 1) luôn ở trên. Nửa trên (thẻ người chơi, trạng thái, thanh ◀ ▶, hộp hỏi Lật bàn và nút Tua nhanh khi đến lượt người trên) **lật ngược 180°** để người ngồi đối diện đọc xuôi. Hàng của mỗi người luôn nằm phía họ, và với mỗi người ◀ ▶ vẫn là "trái / phải nhìn từ phía mình". Khi Lật bàn, hai người đổi bên nên bàn đổi hướng **một lần** để hàng mới của mỗi người vẫn ở phía họ. Màn kết quả hiện ở giữa, không lật | Giống cách chơi Ô ăn quan thật: hai người ngồi đối diện quanh bàn. Không phải chuyền máy. Bố cục nửa trên phức tạp hơn |
+| B | **Chuyền máy, không xoay.** Người chơi A luôn ở dưới, B luôn ở trên, không có gì lật ngược. Khi đến lượt B, B nhìn bàn ngược; mũi tên chỉ đúng hướng sỏi chạy **trên màn hình** (với B, ▶ là chiều `-1`) | Đơn giản nhất. B phải đọc ngược và nghĩ ngược hướng rải |
+| C | Như A nhưng **cố định theo bên bàn** (bên A luôn ở dưới). Khi Lật bàn, người ngồi dưới giờ điều khiển bên trên | Không cần đổi hướng bàn khi Lật bàn, nhưng hai người phải đổi chỗ ngồi (hoặc mỗi người phải với tay sang phía kia) |
+
+**Đề xuất:** A.
+
+**Trả lời: Phương án B**, ở `/offline` không xoay bàn nữa. Chi tiết:
+- Cố định **theo người** (đã sửa lại theo phản hồi, ban đầu làm theo bên bàn): **Người chơi A (ghế 0) luôn ở dưới, Người chơi B (ghế 1) luôn ở trên.** Hàng dưới là hàng của bên mà A đang điều khiển. Tên trên thẻ và nhãn hàng không bao giờ đổi chỗ.
+- Khi A đổi sang điều khiển bên kia (sau Lật bàn, hoặc ván mới mà B đi trước, vì bên A ô 1–5 luôn đi trước theo Q17), màn hình vẽ lại hai hàng cho đúng người **ngay lập tức, không có hiệu ứng xoay**.
+- Không lật ngược chữ hay nút nào. Hai người chuyền máy cho nhau như trước, chỉ là bàn đứng yên.
+- Mũi tên ◀ ▶ chỉ đúng hướng sỏi chạy **trên màn hình**: ▶ luôn rải sang ô bên phải mà người chơi nhìn thấy, dù ô nằm ở hàng trên hay hàng dưới.
+- Khi người đến lượt ở hàng trên, thanh ◀ ▶ hiện **dưới** ô đang chọn, để không che hàng trên và thẻ người chơi phía trên.
+- Không còn khái niệm "bạn" ở `/offline`: nhãn hàng ghi tên người chơi ở cả hai hàng, trạng thái ghi "Lượt của Người chơi A". Người đến lượt được đánh dấu bằng viền vàng trên thẻ người chơi, hàng của đối thủ tối đi.
+- Phím `1`–`5` chọn ô thứ n từ trái sang **trên màn hình** của hàng đang đến lượt.
+- Chế độ chơi qua link (M3) không đổi: mỗi máy luôn vẽ "mình ở dưới, đối thủ ở trên".
+
+### Q22 — Bỏ chơi một máy, làm M3: mời qua link thật
+
+**Bối cảnh:** Có yêu cầu bỏ chế độ chơi chung một máy (`/offline`) và làm mời qua link thật, tức mốc **M3 — Phòng & mạng** (server WebSocket, phòng chờ, link mời, đồng bộ nước đi). M2 chưa được chốt xong vì chưa thử trên điện thoại thật. Tài liệu kỹ thuật mục 6–7 và UX mục 2.1–2.3 đã có khung, nhưng còn các điểm dưới đây chưa rõ hoặc đang mâu thuẫn.
+
+**Ảnh hưởng:** phạm vi M3, `packages/server` (mới), giao thức WS (kỹ thuật mục 7), `packages/client` (trang chủ, nhập nickname, phòng chờ, bàn chơi online), Q12/Q19/Q21, trạng thái thiết kế.
+
+| # | Điểm cần chốt | Đề xuất |
+|---|---|---|
+| a | **Bỏ `/offline`** đến mức nào | Xoá hẳn route `/offline`, màn hình bắt đầu và bộ điều phối chơi một máy. Giữ và dùng lại các phần chung (bàn, thẻ người chơi, hộp Lật bàn, kết quả, hiệu ứng, nhật ký). Coi như M2 khép lại, bỏ qua tiêu chí "chơi trên điện thoại thật" của M2 (sẽ thử luôn ở M3). Q12, Q19, Q21 hết hiệu lực |
+| b | **Thiết kế** `nhap-nickname.html`, `phong-cho.html`, `phong-cho-desktop.html` đang là Bản nháp 1 | Chốt cả ba và làm theo. Thành phần của M4/M5 trong mockup thì ẩn, như Q20 |
+| c | **Chống gửi trùng / nước cũ:** giao thức dùng `moveNo`, nhưng Lật bàn không tăng `moveNo`. Ở nước thứ 2 có hai thao tác hợp lệ cùng `moveNo = 1` (lật bàn, rồi người mở đầu đi tiếp), nên server không phân biệt được gửi trùng | Thêm `actionNo` cấp **phòng** (server tăng sau **mỗi** thao tác được chấp nhận, kể cả lật bàn và tự đi khi hết giờ). Message `move` gửi `actionNo` thay cho `moveNo`; lệch thì trả `STALE_MOVE`. Không sửa engine. Cập nhật kỹ thuật mục 7 |
+| d | **Đồng hồ lượt** (kỹ thuật mục 8) thuộc M4 | M3 chưa có đồng hồ, chưa tự đi. Tuỳ chọn "Thời gian lượt" ẩn ở phòng chờ cho tới M4 |
+| e | **Kết nối lại** (kỹ thuật mục 9) thuộc M4 | M3 làm phần tối thiểu: tải lại trang hoặc mở lại link thì vào lại đúng ghế nhờ `clientId` trong `localStorage`. Tự kết nối lại có độ trễ tăng dần, giữ ghế 60 giây và xử thua khi mất kết nối để tới M4 |
+| f | **Rời phòng giữa ván** (`leaveRoom` khi đang chơi) | Xử thua `bo-cuoc` bằng `forfeit` của engine, phòng chuyển `finished` |
+| g | **Ván nữa** (`rematch`) | Làm ở M3: cả hai người ngồi ghế bấm thì bắt đầu ván mới ngay, người thua đi trước (luật mục 2). Hiện "… muốn chơi ván nữa" như mockup kết quả |
+| h | **Hướng bàn khi online** | Mỗi người luôn thấy hàng của mình ở dưới (UX mục 2.4). Khi Lật bàn thì vẽ lại hai hàng ngay, **không có hiệu ứng xoay** (cùng tinh thần Q21), thay cho câu "bàn xoay 180°" ở UX mục 3. Người xem thấy người ngồi ghế 1 ở dưới |
+| i | **Trang chủ** khi có M3 | Hiện chip nickname (tên ngẫu nhiên kiểu "Cò Trắng 42", sửa được), ô "Có mã phòng", mục "Phòng gần đây" (lưu `localStorage`), nút **Tạo phòng**. "Luật chơi" vẫn để M5 |
+| j | **Mã QR, Web Share** ở phòng chờ | Có ở M3. Web Share dùng API sẵn của trình duyệt (chỉ hiện khi máy hỗ trợ). QR dùng một thư viện nhỏ phía client (`qrcode-generator`, không phụ thuộc gì thêm) |
+| k | **Chạy và thử** | Dev: `npm run dev` chạy song song server (`node --watch`, cổng 3000) và Vite (proxy `/ws` sang server). Bản build: server Node phục vụ luôn `dist` và đường dẫn `/r/:code`. Thử giữa hai máy bằng Cloudflare Tunnel hoặc ngrok như kỹ thuật mục 11 |
+| l | **Người xem, biểu cảm** | Người xem: có ở M3 (hết ghế thì vào xem, bấm ghế trống để ngồi, như UX mục 2.3). Biểu cảm emoji để M5 |
+
+**Đề xuất:** làm theo cột "Đề xuất" cho cả 12 điểm.
+
+**Trả lời:** làm theo đề xuất cho **cả 12 điểm**. Riêng điểm **(e)** có bổ sung:
+- **(e) Kết nối lại, bổ sung:** M3 có luôn **tự kết nối lại đơn giản**. Khi WebSocket đóng, client tự thử lại mỗi 2 giây, đồng thời thử lại ngay khi tab hiện lên lại (`visibilitychange`). Mỗi lần nối lại đều gửi `hello` + `joinRoom`. Lý do: trên điện thoại, chuyển sang Zalo rồi quay lại rất hay làm rớt kết nối. Nếu chỉ dựa vào tải lại trang thì người chơi sẽ tưởng game bị treo, mà đây lại đúng là luồng chính cần kiểm chứng ở M3.
+- Ở M3, server **giữ ghế không giới hạn thời gian** khi mất kết nối: chưa đếm 60 giây và chưa xử thua. Thẻ người chơi chỉ hiện trạng thái "Mất kết nối" cho đối thủ thấy. Độ trễ tăng dần, giữ ghế 60 giây và xử thua để tới M4 như kế hoạch.
+- **(a)** Chế độ một máy bị xoá thì phần test giao diện từng dùng `/offline` chuyển sang test với server thật chạy local: mở hai tab vào cùng một phòng.
+- **(b)** Đổi trạng thái ba thiết kế `nhap-nickname`, `phong-cho`, `phong-cho-desktop` trong `docs/design/README.md` thành **Đã chốt**.
+- **(c)** Cập nhật kỹ thuật mục 7 (`actionNo`) trong cùng thay đổi.
+- **(h)** Sửa UX mục 3 (bỏ câu "bàn xoay 180°") trong cùng thay đổi.
+- Q12, Q19, Q21 ghi chú "hết hiệu lực do Q22" trong bảng câu hỏi.
 
 ## 7. Luật bổ sung từ oanquan.online (ngày 2026-10-20)
 

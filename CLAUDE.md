@@ -35,7 +35,7 @@ packages/client   ← UI
 
 ## Cách làm việc
 
-- Làm theo thứ tự các mốc trong kế hoạch. **Mốc hiện tại: M2 — Bàn chơi offline.** (M1 — Engine: xong.)
+- Làm theo thứ tự các mốc trong kế hoạch. **Mốc hiện tại: M3 — Phòng & mạng.** (M1, M1.1: xong. M2 khép lại theo Q22a, chế độ chơi một máy đã bỏ.)
 - Với engine: viết test trước (T1–T16), sau đó mới viết luật. Test fuzz (T16) phải kiểm tra bất biến: tổng dân = 50, tổng quan = 2.
 - Làm cho điện thoại trước. Vùng chạm tối thiểu 44px. Thử ở chiều rộng 360px.
 - Giao diện người dùng viết bằng tiếng Việt. Tên biến và hàm viết bằng tiếng Anh, riêng thuật ngữ luật giữ tiếng Việt không dấu như trong tài liệu (`dan`, `quan`, `camAnQuanNon`, `giaTriQuan`...).
@@ -47,8 +47,9 @@ Monorepo npm workspaces (`packages/*`). Chạy ở thư mục gốc:
 
 ```
 npm install          # cài phụ thuộc
-npm run dev          # Vite dev server cho client (trang chủ /, ván chơi /offline); --host để điện thoại cùng Wi-Fi vào được
+npm run dev          # server Node (cổng 3000) + Vite (cổng 5173, --host để điện thoại cùng Wi-Fi vào được); mở http://localhost:5173
 npm run build        # build client ra packages/client/dist
+npm start            # chạy bản build: server phục vụ luôn client (PORT, mặc định 3000)
 npm test             # Vitest, chạy toàn bộ test (gồm fuzz T16)
 npm run test:watch   # Vitest chế độ theo dõi
 npm run typecheck    # tsc cho mọi workspace có script typecheck
@@ -58,6 +59,6 @@ npm run check        # lint → typecheck → test; phải xanh trước khi com
 npx vitest run -t T5 # chạy riêng các test có tên chứa "T5"
 ```
 
-Server (M3) chưa có, nên `dev` hiện mới chạy client.
+Server (`packages/server`) chạy thẳng file `.ts` bằng Node 24 (tự bỏ kiểu), nên server và engine chỉ dùng cú pháp TypeScript "bỏ được" (`erasableSyntaxOnly`: không `enum`, không parameter property). Thử giữa hai máy qua Internet: Cloudflare Tunnel hoặc ngrok trỏ vào cổng của `npm start` (kỹ thuật mục 11).
 
 Import trong TS dùng đuôi `.ts` (`allowImportingTsExtensions`), để sau này Node 24 chạy trực tiếp được.

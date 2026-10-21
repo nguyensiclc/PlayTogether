@@ -1,7 +1,7 @@
 // Test T1–T20 (mục 4 tài liệu kế hoạch). Các thế cờ được tính tay theo 01-luat-choi.md.
 import { describe, expect, it } from "vitest";
 import { createRng, pickRandom } from "../game-module.ts";
-import { applyMove, defaultOptions, forfeit, result, setup, validMoves } from "./rules.ts";
+import { applyMove, defaultOptions, forfeit, parseOptions, result, setup, validMoves } from "./rules.ts";
 import type { Dir, GameEvent, Move, Options, ScoreDetail, SowMove, State } from "./types.ts";
 
 type Overrides = Partial<Omit<State, "options">> & { options?: Partial<Options> };
@@ -715,4 +715,22 @@ describe("T16 — fuzz", () => {
     expect(reasons["khong-du-bu-dan"], JSON.stringify(reasons)).toBeGreaterThan(0);
     expect(flips).toBeGreaterThan(0);
   }, 120_000);
+});
+
+describe("parseOptions — kiểm tra tuỳ chọn chủ phòng gửi lên", () => {
+  it("nhận giá trị hợp lệ, giữ nguyên phần không gửi", () => {
+    expect(parseOptions({ giaTriQuan: 5, latBan: true }, defaultOptions)).toEqual({
+      ...defaultOptions,
+      giaTriQuan: 5,
+      latBan: true,
+    });
+    expect(parseOptions({ thoiGianLuot: null }, defaultOptions).thoiGianLuot).toBeNull();
+  });
+
+  it("bỏ qua giá trị sai kiểu, sai miền, và khoá lạ", () => {
+    const raw = { giaTriQuan: 7, camAnQuanNon: "có", latBan: 1, thoiGianLuot: 45, hack: true };
+    expect(parseOptions(raw, defaultOptions)).toEqual(defaultOptions);
+    expect(parseOptions("rác", defaultOptions)).toEqual(defaultOptions);
+    expect(parseOptions(null, defaultOptions)).toEqual(defaultOptions);
+  });
 });

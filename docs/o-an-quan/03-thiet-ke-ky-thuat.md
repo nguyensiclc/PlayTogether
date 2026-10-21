@@ -30,31 +30,43 @@
 | Lưu trữ | Bộ nhớ RAM trên server | Prototype chưa cần lưu bền. Bản sau dùng Redis |
 | Test | Vitest | Chủ yếu test engine |
 
-### Cấu trúc thư mục dự kiến
+### Cấu trúc thư mục
 
 ```
 /packages
   /engine            ← dùng chung, KHÔNG phụ thuộc DOM hay Node
-    game-module.ts   ← interface GameModule
+    game-module.ts   ← interface GameModule, RNG
     /o-an-quan
-      rules.ts       ← setup, validMoves, applyMove, result
+      rules.ts       ← setup, validMoves, applyMove, result, forfeit, parseOptions
       types.ts
       rules.test.ts
-  /server
-    index.ts         ← http + ws
-    room-manager.ts
-    room.ts
+  /protocol          ← kiểu message WebSocket, phòng công khai, chuẩn hoá mã phòng / nickname (dùng chung)
+  /server            ← Node 24 chạy thẳng file .ts (tự bỏ kiểu), `ws`
+    index.ts         ← HTTP + WebSocket tại /ws, dọn phòng định kỳ
+    http.ts          ← GET /api/rooms/:code (xem trước phòng), phục vụ client/dist khi chạy bản build
+    gateway.ts       ← nhận / kiểm tra / phân phối message, giới hạn tần suất và kích thước
+    parse.ts         ← kiểm tra định dạng message client gửi lên
+    room-manager.ts  ← tạo phòng (mã không trùng), tìm phòng, dọn phòng bỏ trống
+    room.ts          ← một phòng: thành viên, ghế, chủ phòng, tuỳ chọn, ván, actionNo, Ván nữa, rời phòng
   /client
     index.html
-    main.ts          ← định tuyến: / (trang chủ), /offline
+    main.ts          ← định tuyến: / (trang chủ), /r/:code (phòng); đường dẫn khác về trang chủ
+    vite.config.ts   ← khi dev, chuyển /ws và /api sang server
     dom.ts           ← $() có kiểm tra, create(), escapeHtml(), restartAnimation()
     icons.ts         ← SVG dùng chung
+    identity.ts      ← clientId bí mật, nickname, phòng gần đây (localStorage)
+    qr.ts            ← mã QR của link mời
+    net/socket.ts    ← WebSocket tự kết nối lại
     style.css        ← token và bố cục theo docs/design (desktop ≥ 1024px bằng media query)
     /screens
-      home.ts            ← trang chủ, danh sách trò chơi, lọc theo nhóm
-      offline-setup.ts   ← màn hình bắt đầu /offline
-      offline-page.ts    ← khung HTML trang ván chơi
-      offline.ts         ← điều phối ván chơi chung một máy: thao tác, hiệu ứng, xoay bàn, phím tắt
+      home.ts        ← trang chủ: nickname, vào bằng mã, phòng gần đây, tạo phòng, danh sách trò chơi
+      room.ts        ← trang phòng: hỏi nickname, vào phòng, chuyển phòng chờ / bàn chơi / kết quả, thanh mất kết nối
+      nickname.ts    ← nhập nickname khi vào bằng link lần đầu
+      lobby.ts       ← phòng chờ
+      game.ts        ← bàn chơi online
+      game-page.ts   ← khung HTML bàn chơi
+      game-keys.ts   ← phím tắt
+      room-players.ts← tên, chữ trong avatar, màu avatar theo ghế
     /o-an-quan
       layout.ts          ← xếp 12 ô lên bàn 7 cột theo bên ngồi dưới
       view-model.ts      ← phát lại events trên state cũ (BoardView)
@@ -64,9 +76,11 @@
       lat-ban-sheet.ts   ← nội dung hộp hỏi Lật bàn
       result-view.ts     ← nội dung màn kết quả
       move-log.ts        ← nhật ký ván: mô tả từng nước từ events
+      move-effects.ts    ← hiệu ứng cho từng event
+      log-view.ts        ← HTML nhật ký ván
 ```
 
-Engine có hai đường import: `@playtogether/engine` (GameModule, RNG) và `@playtogether/engine/o-an-quan` (luật và kiểu dữ liệu Ô ăn quan).
+Engine có hai đường import: `@playtogether/engine` (GameModule, RNG) và `@playtogether/engine/o-an-quan` (luật và kiểu dữ liệu Ô ăn quan). Server và engine chỉ dùng cú pháp TypeScript "bỏ được" (`erasableSyntaxOnly`: không `enum`, không parameter property) để Node 24 chạy thẳng file `.ts`.
 
 ## 3. Giao diện `GameModule`
 
@@ -90,9 +104,12 @@ interface GameModule<S, M, O, E> {
   applyMove(state: S, seat: SeatId, move: M): { state: S; events: E[] } | { error: string };
   viewFor(state: S, seat: SeatId | null): unknown;   // Ô ăn quan không có thông tin ẩn → trả về nguyên state
   result(state: S): GameResult | null;
+  forfeit(state: S, seat: SeatId, reason: "het-gio" | "bo-cuoc"): { state: S; events: E[] } | { error: string };
+  parseOptions(raw: unknown, base: O): O;            // đọc tuỳ chọn từ ngoài: chỉ nhận giá trị hợp lệ
 }
 ```
 
+- `forfeit` để lớp phòng xử thua người rời ván (Q22f). `parseOptions` để lớp phòng kiểm tra tuỳ chọn chủ phòng gửi lên mà không phải biết luật của game.
 - `E` là kiểu event riêng của từng game (của Ô ăn quan là `GameEvent` ở mục 5). Nhờ vậy lớp phòng không phụ thuộc event của game cụ thể.
 - `applyMove` không sửa state đầu vào. Lỗi trả về dùng mã của giao thức (mục 7): `NOT_YOUR_TURN` khi sai lượt hoặc ghế không hợp lệ, `INVALID_MOVE` cho mọi trường hợp còn lại (ván đã kết thúc, ô không thuộc mình, ô trống, ô quan, chiều sai).
 - `game-module.ts` có thêm `type Rng = () => number`, `createRng(seed)` (RNG có seed, dùng cho test/replay) và `pickRandom(items, rng)` (chọn nước ngẫu nhiên khi hết giờ). Luật Ô ăn quan không cần ngẫu nhiên, vì người đi trước được truyền vào `setup`.
@@ -239,58 +256,75 @@ Client nhận `events` cùng `state` cuối. Client **phát lại** các events 
 
 ## 6. Phòng chơi (dùng chung cho mọi game)
 
+Lớp `Room` (`packages/server/room.ts`) làm việc với game chỉ qua `GameModule`. Không I/O: thời gian và RNG được truyền vào.
+
 ```ts
-interface Room {
-  code: string;                  // 4 ký tự, bỏ các ký tự dễ nhầm: 0 O 1 I L
+// Dạng công khai gửi cho mọi người trong phòng (packages/protocol)
+interface PublicRoom {
+  code: string;                    // 4 ký tự, bỏ các ký tự dễ nhầm: 0 O 1 I L
   gameId: "o-an-quan";
-  hostId: ClientId;
-  seats: (ClientId | null)[];    // độ dài = maxPlayers
-  members: Map<ClientId, Member>;// gồm cả người xem
+  hostId: string;                  // id công khai của chủ phòng
+  seats: (PublicMember | null)[];  // độ dài = maxPlayers
+  spectators: PublicMember[];
   status: "lobby" | "playing" | "finished";
   options: Options;
   game: State | null;
-  moves: Move[];                 // để replay/debug
-  turnDeadline: number | null;   // epoch ms
-  rematchVotes: Set<ClientId>;
-  lastActivity: number;
+  actionNo: number;                // tăng sau mỗi thao tác được chấp nhận, kể cả Lật bàn (Q22c)
+  rematchVotes: string[];          // id công khai của người đã bấm Ván nữa
+  nextFirst: SeatId | null;        // ghế đi trước ván sau (người thua; hoà thì đổi lượt — luật mục 2)
 }
 
-interface Member { id: ClientId; name: string; connected: boolean; disconnectedAt?: number; }
+interface PublicMember { id: string; name: string; connected: boolean; }
 ```
 
-- **Danh tính:** client tự sinh `clientId` (UUID) và lưu trong `localStorage`, gửi kèm khi kết nối. Prototype chấp nhận rủi ro mạo danh. Bản sau server sẽ cấp token ký số.
+- **Danh tính:** client tự sinh `clientId` (16 byte ngẫu nhiên bằng `crypto.getRandomValues`, vì `randomUUID` không có khi mở bằng http qua LAN) và lưu trong `localStorage`, gửi kèm khi kết nối. `clientId` là **bí mật**: server không bao giờ gửi `clientId` của người khác, mà cấp cho mỗi thành viên một `id` công khai. Prototype vẫn chấp nhận rủi ro mạo danh nếu lộ `clientId`. Bản sau server sẽ cấp token ký số.
 - **Mã phòng:** 4 ký tự từ bảng 31 ký tự, cho khoảng 920 nghìn tổ hợp. Mỗi lần sinh thì kiểm tra trùng.
-- **Dọn phòng:** phòng không còn ai kết nối trong 10 phút thì bị xoá.
+- **Ghế:** người vào phòng tự ngồi ghế trống nếu chưa vào ván, hết ghế thì xem. Chủ phòng rời đi thì người ngồi ghế còn lại làm chủ phòng.
+- **Bắt đầu:** ván đầu chọn ngẫu nhiên người đi trước (server dùng `Math.random`, server không phải engine); các ván sau theo `nextFirst`. Trạng thái `finished` cũng là phòng chờ: chủ phòng chỉnh tuỳ chọn và bắt đầu ván mới được.
+- **Ván nữa:** mọi người ngồi ghế đều bấm thì bắt đầu ngay.
+- **Rời phòng giữa ván:** xử thua `bo-cuoc` bằng `forfeit`, ghế trống (Q22f).
+- **Dọn phòng:** phòng rỗng, hoặc không còn ai kết nối trong 10 phút, thì bị xoá.
 
 ## 7. Giao thức WebSocket
 
-Mọi message là JSON có dạng `{ type, ...payload }`. Kết nối tại `wss://<host>/ws`.
+Mọi message là JSON có dạng `{ type, ...payload }`. Kết nối tại `wss://<host>/ws`. Kiểu dữ liệu nằm ở `packages/protocol`.
 
 ### Client → Server
 
 | type | payload | Ghi chú |
 |---|---|---|
-| `hello` | `clientId, name` | Gửi đầu tiên sau khi kết nối |
+| `hello` | `clientId, name` | Gửi đầu tiên sau mỗi lần (nối lại) kết nối. Gửi lại khi đang ở phòng thì đổi tên |
 | `createRoom` | `gameId, options?` | Trả về `roomJoined` |
-| `joinRoom` | `code` | Tự ngồi ghế trống nếu có |
-| `takeSeat` / `leaveSeat` | `seat?` | Chỉ dùng khi ở phòng chờ |
-| `setOptions` | `options` | Chỉ chủ phòng, chỉ khi ở phòng chờ |
+| `joinRoom` | `code` | Vào phòng hoặc vào lại đúng ghế. Tự ngồi ghế trống nếu có |
+| `takeSeat` / `leaveSeat` | `seat` / — | Chỉ khi không đang chơi |
+| `setOptions` | `options` | Chỉ chủ phòng, chỉ khi không đang chơi. Server kiểm tra bằng `parseOptions` |
 | `start` | — | Chỉ chủ phòng, cần đủ người |
-| `move` | `move, moveNo` | `moveNo` dùng để chống gửi trùng hoặc gửi nước cũ |
-| `rematch` | — | Bỏ phiếu chơi lại |
-| `emote` | `emoji` | Giới hạn 1 lần / giây |
-| `leaveRoom` | — | |
+| `move` | `move, actionNo` | `actionNo` phải bằng `actionNo` hiện tại của phòng, lệch thì `STALE_MOVE` (chống gửi trùng / gửi nước cũ — Q22c) |
+| `rematch` | — | Bỏ phiếu Ván nữa |
+| `leaveRoom` | — | Đang chơi thì bị xử thua |
+| `emote` | `emoji` | M5. Giới hạn 1 lần / giây |
 
 ### Server → Client
 
+Mọi message có `room` đều kèm `you: { memberId, seat }` của người nhận, và `room` là toàn bộ phòng ở dạng công khai (client chỉ cần một cách cập nhật).
+
 | type | payload |
 |---|---|
-| `roomJoined` | `room` (bản công khai), `you: { clientId, seat }` |
-| `roomUpdated` | `room` (thành viên, ghế, tuỳ chọn, trạng thái) |
-| `gameStarted` | `state, turnDeadline` |
-| `moveApplied` | `seat, move, events, state, turnDeadline` |
-| `emote` | `from, emoji` |
-| `error` | `code, message` (vd: `ROOM_NOT_FOUND`, `NOT_YOUR_TURN`, `INVALID_MOVE`, `STALE_MOVE`) |
+| `roomJoined` | `room, you` (gửi cho người vừa vào) |
+| `roomUpdated` | `room, you` (thành viên, ghế, tuỳ chọn, kết nối, phiếu Ván nữa, xử thua khi rời) |
+| `gameStarted` | `room, you` |
+| `moveApplied` | `seat, move, events, room, you` |
+| `leftRoom` | — (gửi cho các tab của người vừa rời) |
+| `emote` | `from, emoji` (M5) |
+| `error` | `code, message`: `BAD_MESSAGE`, `HELLO_FIRST`, `ROOM_NOT_FOUND`, `NOT_IN_ROOM`, `NOT_HOST`, `SEAT_TAKEN`, `NOT_SEATED`, `NOT_ENOUGH_PLAYERS`, `WRONG_STATUS`, `NOT_YOUR_TURN`, `INVALID_MOVE`, `STALE_MOVE`, `RATE_LIMITED` |
+
+`turnDeadline` sẽ thêm vào `room` ở M4 cùng đồng hồ lượt.
+
+### HTTP
+
+- `GET /api/rooms/:code` → `{ code, gameId, hostName, players, freeSeats, status }`, không có thì 404. Dùng cho màn nhập nickname khi vào bằng link lần đầu (UX mục 2.2), trước khi kết nối WebSocket.
+- `GET /healthz` → `ok`.
+- Bản build: server phục vụ luôn `packages/client/dist`; đường dẫn không có đuôi file (vd `/r/ABCD`) trả về `index.html`.
 
 ## 8. Đồng hồ lượt
 
@@ -299,6 +333,9 @@ Mọi message là JSON có dạng `{ type, ...payload }`. Kết nối tại `wss
 - Client chỉ hiển thị đếm ngược dựa trên `turnDeadline`. Client không tự quyết định hết giờ.
 
 ## 9. Mất kết nối và kết nối lại
+
+**M3 (Q22e):** client thử kết nối lại **mỗi 2 giây**, và thử ngay khi tab hiện lên lại (`visibilitychange`). Mỗi lần nối lại đều gửi `hello` + `joinRoom`. Server **giữ ghế không giới hạn thời gian**; người khác thấy thẻ người đó ghi "Mất kết nối". Mình mất kết nối thì có thanh đỏ trên cùng và bàn bị khoá. Phần dưới đây là bản đầy đủ, làm ở M4.
+
 
 - Khi WS bị ngắt: client tự kết nối lại với độ trễ tăng dần (1s, 2s, 4s, tối đa 10s), rồi gửi lại `hello` và `joinRoom`. Server khôi phục đúng ghế nhờ `clientId`.
 - Server đánh dấu `connected = false` và **vẫn giữ ghế 60 giây**. Trong thời gian này đồng hồ lượt vẫn chạy bình thường.
@@ -314,6 +351,6 @@ Mọi message là JSON có dạng `{ type, ...payload }`. Kết nối tại `wss
 
 ## 11. Triển khai thử
 
-- Chạy local: `npm run dev` (server và Vite chạy cùng lúc).
+- Chạy local: `npm run dev` (server Node ở cổng 3000 và Vite ở cổng 5173 chạy cùng lúc; Vite chuyển `/ws`, `/api` sang server). Bản build: `npm run build` rồi `npm start` (server phục vụ luôn client).
 - Mời bạn chơi thử từ xa: dùng **Cloudflare Tunnel** hoặc **ngrok** để có link HTTPS công khai.
 - Khi cần cố định: deploy lên một VPS nhỏ hoặc Fly.io/Render. Cần dịch vụ hỗ trợ WebSocket, tức là **không dùng được** môi trường serverless thuần như Vercel Functions.

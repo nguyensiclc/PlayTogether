@@ -1,4 +1,4 @@
-// Phím tắt của ván chơi (UX mục 3): đổi phím thành hành động theo ngữ cảnh đang hiện trên màn hình.
+// Phím tắt của bàn chơi (UX mục 3): đổi phím thành hành động theo ngữ cảnh đang hiện trên màn hình.
 
 /** Màn hình đang ở đâu: kết quả, hộp hỏi Lật bàn, hay bàn chơi */
 export type KeyContext = "result" | "latBan" | "board";

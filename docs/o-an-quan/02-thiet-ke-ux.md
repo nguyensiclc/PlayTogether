@@ -21,13 +21,20 @@ Giao diện: `docs/design/nen-tang/trang-chu.html` và `trang-chu-desktop.html` 
 - Phần đầu (hero) có khẩu hiệu "Rủ bạn chơi, chỉ cần một đường link.". Trên desktop, hero chia đôi: chữ bên trái, thẻ trò chơi nổi bật bên phải.
 - Thẻ **nổi bật** Ô ăn quan: hình bàn, nhãn "Chơi được ngay", số người, thời lượng, nhóm.
 - **Lưới tất cả trò chơi** (2 cột trên điện thoại, 4 cột trên desktop), lọc theo nhóm **Tất cả / Dân gian / Cờ / Bài**. Trò chưa làm có nhãn **Sắp có** và không bấm được.
-- **Tạm thời đến M3** (Q19): nút chính của Ô ăn quan ghi **Chơi ngay** và dẫn tới `/offline` (chơi trên một máy). Dòng mô tả dưới khẩu hiệu tạm ghi "Chọn trò rồi chơi ngay, không cần đăng ký." thay cho câu về tạo phòng và gửi link. Trên desktop, dòng ba bước "Chọn trò · Gửi link · Chơi ngay" tạm ẩn.
-- **Làm cùng M3:** chip **nickname** trên thanh trên cùng (điền sẵn tên ngẫu nhiên, vd "Cò Trắng 42", lưu `localStorage`), ô **Có mã phòng** + nút **Vào phòng**, mục **Phòng gần đây** (vào lại phòng cũ), nút **Tạo phòng** (khi đó "Chơi trên một máy" thành lựa chọn phụ). **M5:** nút **Luật chơi**.
+- **Thanh trên cùng:** chip **nickname** (lần đầu điền sẵn tên ngẫu nhiên kiểu "Cò Trắng 42", lưu `localStorage`). Bấm vào chip để sửa tên tại chỗ. Trên desktop có thêm ô **Mã phòng** + nút **Vào**.
+- **Điện thoại:** dưới khẩu hiệu có ô **Có mã phòng?** + nút **Vào phòng**. Mã sai định dạng thì báo "Mã phòng gồm 4 ký tự".
+- **Phòng gần đây:** tối đa 5 phòng đã vào trên máy này (mã phòng, đã chơi với ai, bao lâu trước), nút **Vào lại**. Chưa vào phòng nào thì ẩn mục này.
+- Nút **Tạo phòng** (thẻ nổi bật, thẻ Ô ăn quan trong lưới, nút chính trên desktop) tạo phòng rồi chuyển thẳng sang `/r/MÃ`.
+- **M5:** nút **Luật chơi**.
 
 ### 2.2 Nhập nickname (khi vào bằng link)
 
-- Chỉ hiện khi trình duyệt chưa có nickname. Có 1 ô nhập và 1 nút **Vào phòng**.
-- Đã có nickname thì vào thẳng phòng chờ.
+Giao diện: `docs/design/nen-tang/nhap-nickname.html` (Đã chốt, Q22b).
+
+- Chỉ hiện khi trình duyệt chưa có nickname. Đã có nickname thì vào thẳng phòng.
+- Hiện "**Cò Trắng 42** mời bạn chơi Ô ăn quan", thẻ phòng (mã phòng, avatar người đang ngồi, số ghế trống). Thông tin lấy từ `GET /api/rooms/:code` trước khi kết nối. Phòng đã đủ người thì ghi "bạn sẽ vào xem".
+- Ô nhập tên (tối đa 20 ký tự, có bộ đếm), điền sẵn một tên gợi ý; chip **🎲 Ngẫu nhiên** và hai tên gợi ý. Nút **Vào phòng**.
+- Mã phòng không có thì hiện "Không tìm thấy phòng …" và nút **Về trang chủ**.
 
 ### 2.3 Phòng chờ `/r/:code`
 
@@ -51,8 +58,15 @@ Giao diện: `docs/design/nen-tang/trang-chu.html` và `trang-chu-desktop.html` 
 └──────────────────────────────────┘
 ```
 
+Giao diện: `docs/design/nen-tang/phong-cho.html`, `phong-cho-desktop.html` (Đã chốt, Q22b). Sơ đồ trên chỉ để hình dung.
+
+- Thẻ **Mời bạn bè vào chơi**: link, nút **Sao chép** (đổi thành "Đã chép"), **Chia sẻ** (Web Share API, chỉ hiện khi máy hỗ trợ), **Mã QR** (điện thoại bấm để mở; desktop hiện sẵn bên cột phải). Điện thoại đặt thẻ này ngay dưới tên phòng.
+- Danh sách ghế: avatar, tên, "(bạn)", nhãn **Chủ phòng** / **● Đã vào** / **Mất kết nối**. Ghế trống ghi "Đang chờ bạn bè…". Desktop hiện hai thẻ ghế kiểu VS.
+- **Tuỳ chọn:** Giá trị quan, Quan Già, Lật bàn. Chỉ chủ phòng chỉnh được, người khác thấy nhưng không bấm được. "Thời gian mỗi lượt" ẩn cho tới M4 (Q22d).
+- Nút cuối: chủ phòng đủ người thì **Bắt đầu ván** (kèm "Người đi trước được chọn ngẫu nhiên" hoặc "… đi trước (thua ván trước)"); chưa đủ người thì "Cần thêm 1 người để bắt đầu"; khách thì "Chờ chủ phòng bắt đầu".
+- Nút quay lại / **Rời phòng**: rời phòng thật (đang chơi thì bị xử thua — Q22f), về trang chủ.
 - Người vào phòng tự động ngồi ghế trống. Hết ghế thì vào làm **người xem**.
-- Người xem có thể bấm vào ghế trống để ngồi.
+- Người xem có thể bấm **Ngồi đây** ở ghế trống để ngồi.
 - Chủ phòng rời đi thì người ngồi ghế còn lại trở thành chủ phòng.
 
 ### 2.4 Bàn chơi
@@ -72,14 +86,17 @@ Bố cục màn hình dọc trên điện thoại (chiều rộng ~360px):
 
 Giao diện: `docs/design/o-an-quan/ban-choi.html`, `ban-choi-doi-thu.html`, `ban-choi-desktop.html` (Đã chốt, Q20). Sơ đồ trên chỉ để hình dung bố cục.
 
-- **Mình luôn ở hàng dưới.** Màn hình của người chơi B xoay bàn 180°.
+- **Mình luôn ở hàng dưới.** Khi mình đổi bên (Lật bàn) thì hai hàng được vẽ lại ngay, **không có hiệu ứng xoay** (Q22h). Người xem thấy người ngồi ghế 1 ở dưới.
+- Thanh trên cùng ghi "Phòng ABCD · Lượt N"; nút quay lại về trang chủ (vẫn giữ ghế, vào lại bằng link hoặc Phòng gần đây).
+- Đối thủ mất kết nối thì thẻ của họ mờ đi và ghi **Mất kết nối**. Mình mất kết nối thì có thanh đỏ "Mất kết nối, đang thử lại…" trên cùng và bàn bị khoá (Q22e).
 - Hai **thẻ người chơi** ở trên và dưới bàn: avatar, tên, kho điểm (`N dân · M quan`), điểm lớn bên phải. Thẻ của người đến lượt có viền vàng. Khi ăn quân, kho hiện "+N" thoáng qua; khi bù dân hiện "−5".
 - Nhãn **"Hàng của …"** phía trên bàn và **"Hàng của bạn"** phía dưới. Khi đến lượt mình, hàng đối thủ tối hơn hàng mình.
 - Mỗi ô hiển thị **hình viên sỏi** (tối đa 14 viên ở ô dân, 10 viên ở ô quan) kèm **con số** ở góc. Ô quan vẽ viên quan to hơn.
+- **Hai đầu bàn bo tròn theo nửa elip** (`border-radius: 13.5% / 50%`), ôm sát hai ô quan; mỗi ô quan là một nửa elip trọn vẹn. Cả điện thoại và desktop dùng cùng tỉ lệ.
 - Bàn rộng 7 cột (hai ô quan hẹp hơn). Trên màn 360px, mỗi ô dân rộng khoảng 46px, đạt chuẩn vùng chạm tối thiểu 44px.
 - Dưới bàn là **viên trạng thái** ("Lượt của bạn · chọn một ô", "… đang rải…") và một dòng **mô tả nước vừa đi** (vd "Mèo Mun rải ô 9 → ăn ô 2 +4").
 - **Desktop (≥ 1024px) có bố cục riêng**, không còn là "cùng bố cục, chỉ phóng to": thanh trên cùng hiện tuỳ chọn ván, bàn to hơn (mỗi hàng cao 124px), **cột phải** gồm **Nhật ký ván** (mỗi nước một dòng, lấy từ `events`) và **Phím tắt**. Từ 420px đến 1023px dùng bố cục điện thoại, căn giữa.
-- Làm sau: đồng hồ lượt trong thẻ người chơi (M4), biểu cảm, âm thanh, nút `?` / tab Luật chơi (M5), người xem và "Phòng ABCD" trên thanh trên cùng (M3).
+- Làm sau: đồng hồ lượt trong thẻ người chơi (M4), biểu cảm, âm thanh, nút `?` / tab Luật chơi (M5), danh sách người xem ở cột phải desktop (M5).
 
 ### 2.5 Kết quả
 
@@ -87,18 +104,13 @@ Giao diện: `docs/design/o-an-quan/ket-qua.html`, `ket-qua-desktop.html` (Đã 
 
 - Hiện đè lên bàn (overlay; desktop là modal chia hai cột): cúp, **Thắng / Thua / Hoà**, chip **lý do kết thúc** ("Hết quan · thu dân về", "Không đủ điểm bù dân", "Lặp nước 3 lần", "Hết giờ" hoặc "Bỏ cuộc"), điểm hai bên, và bảng điểm chi tiết gồm dân đã ăn, quan đã ăn, số lần bù dân, dân thu cuối ván, tổng.
 - Nút chính ghi rõ ai đi trước ván sau: **Ván nữa · Mèo Mun đi trước** (cả hai bấm thì bắt đầu ngay). Desktop: phím `Enter`.
-- Nút phụ: **Về phòng chờ** (M3), **Chia sẻ kết quả** (M5). Dòng "Mèo Mun muốn chơi ván nữa" làm cùng M3.
+- Tiêu đề: **Bạn thắng!** / **Bạn thua** / **Hoà!**; người xem thấy "Mèo Mun thắng!" và không có nút Ván nữa.
+- Đã bấm Ván nữa thì nút chuyển thành "Đang chờ đối thủ bấm Ván nữa…". Người kia thấy dòng "Mèo Mun muốn chơi ván nữa".
+- Nút phụ: **Về phòng chờ** (về phòng chờ, chủ phòng chỉnh tuỳ chọn rồi bắt đầu lại được), **Rời phòng**. **Chia sẻ kết quả** để M5.
 
-### 2.6 Chơi chung một máy (`/offline`, M2)
+### 2.6 ~~Chơi chung một máy~~ (đã bỏ)
 
-Chế độ để phát triển và thử. **Tạm thời đến M3** được mở từ trang chủ (nút "Chơi ngay" của Ô ăn quan), xem Q12 và Q19. Bàn chơi, hộp hỏi Lật bàn và kết quả dùng giao diện đã chốt ở mục 2.4, 2.5 và 3.
-
-- **Màn hình bắt đầu** (Q9): chọn Giá trị quan (10/5), Quan Già (tắt/bật), Lật bàn (tắt/bật), rồi bấm **Bắt đầu**. Có dòng nhỏ "Chơi hai người trên cùng một máy. Chơi qua link mời: sắp có." Không có đồng hồ lượt (Q10). Màn này không có thiết kế riêng, dùng token chung.
-- **"Bạn" là người đang đến lượt** (Q8, Q20). Người đến lượt luôn thấy bên mình ở dưới. Sau khi hiệu ứng nước đi kết thúc, phần bàn chơi xoay 180° (450ms) kèm trạng thái "Chuyền máy cho …".
-- **Tên** (Q11): "Người chơi A" / "Người chơi B" theo người, không theo bên bàn. Thẻ người chơi của mỗi bên hiện người đang điều khiển bên đó.
-- Thanh trên cùng ghi "Chơi trên một máy · Lượt N" thay cho "Phòng ABCD". Nút quay lại về trang chủ. Desktop có thêm nút **Đổi tuỳ chọn**.
-- **Lật bàn:** khi lật, bên đến lượt không đổi nên bàn **không** xoay. Hai thẻ người chơi đổi tên (có hiệu ứng), kèm thông báo "… đã lật bàn — đến lượt …".
-- **Kết quả:** "Người chơi A thắng!" thay cho "Bạn thắng!". Nút phụ là **Đổi tuỳ chọn** và **Về trang chủ** (thay cho Về phòng chờ, Chia sẻ kết quả).
+Chế độ chơi chung một máy (`/offline`, M2, Q8–Q12, Q19, Q21) đã bị xoá theo Q22a. Đường dẫn `/offline` cũ chuyển về trang chủ.
 
 ## 3. Tương tác đi một nước
 
@@ -125,7 +137,7 @@ Giao diện: `docs/design/o-an-quan/lat-ban.html`, `lat-ban-desktop.html` (Đã 
 - Sau nước mở đầu, khi hiệu ứng đã chạy xong, người đi sau thấy hộp hỏi **"Đổi bên với đối thủ?"**: trên điện thoại là bottom sheet, trên desktop là modal giữa màn hình. Hộp có một câu giải thích, hai ô so sánh **Giữ bên** (điểm bên mình, "bạn đi tiếp") ⇄ **Lật bàn** (điểm bên đối thủ, "đối thủ đi tiếp"), và hai nút **Giữ bên** / **Lật bàn**.
 - Đồng hồ lượt vẫn chạy trong lúc hộp hỏi đang mở (M4).
 - Đóng hộp hỏi (chạm ra lớp phủ, `Esc`) nghĩa là giữ bên. Hộp hỏi phủ lên bàn nên muốn đi quân thì đóng hộp hỏi trước.
-- Khi lật: bàn xoay 180° cho cả hai người (mỗi người vẫn thấy bên mình ở dưới), tên và kho điểm đổi chỗ, kèm thông báo "Mèo Mun đã lật bàn — đến lượt bạn".
+- Khi lật: hai người đổi bên, mỗi người vẫn thấy bên mình ở dưới nên hai hàng được vẽ lại ngay, **không có hiệu ứng xoay** (Q22h). Kèm thông báo "Mèo Mun đã lật bàn — đến lượt bạn".
 
 ## 4. Hiệu ứng rải quân
 
@@ -139,7 +151,7 @@ Hiệu ứng là phần giúp người chơi **hiểu luật**, không chỉ đ�
 | Ăn (c) | Ô bị ăn chuyển xanh với nhãn "+N" phía trên ô; kho của người ăn hiện "+N" | 400ms |
 | Mất lượt (b)/(d) | Hiện chữ "Hết lượt" nhỏ | 300ms |
 | Bù dân (mục 6 luật) | 5 viên bay từ kho điểm xuống 5 ô, kèm thông báo "Bù dân −5 điểm". Nếu phải đổi quan thì thêm "(đổi 1 quan)" | 600ms |
-| Lật bàn | Bàn xoay 180°, tên và kho điểm đổi chỗ | 600ms |
+| Lật bàn | Hai thẻ người chơi nháy, hai hàng và hai kho đổi chỗ (không xoay bàn), thông báo nhỏ | 600ms |
 
 - Một nước đi dài có thể mất 5–10 giây. Cả hai người đều có nút **⏩ Tua nhanh ×4** và **Bỏ qua hiệu ứng** (desktop: `Space` để tua nhanh).
 - Đồng hồ của người chơi kế tiếp **chỉ chạy sau khi hiệu ứng kết thúc** (server cộng thêm thời gian hiệu ứng ước tính, xem tài liệu kỹ thuật).
