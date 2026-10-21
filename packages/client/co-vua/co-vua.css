@@ -1,0 +1,281 @@
+/* CSS riêng của Cờ vua (docs/co-vua/02-thiet-ke-ux.md) */
+
+.chess-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  gap: 8px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Thẻ người chơi cờ vua */
+.chess-player {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-sizing: border-box;
+}
+
+.chess-player.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(181, 70, 47, 0.2);
+}
+
+.chess-player-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chess-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.chess-badge.w {
+  background: #fffaf0;
+  color: #2b2118;
+  border: 1px solid #b9ad94;
+}
+
+.chess-badge.b {
+  background: #2b2118;
+  color: #fffaf0;
+  border: 1px solid #4a3b32;
+}
+
+.chess-captured {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.chess-captured-list {
+  display: flex;
+  gap: 1px;
+}
+
+.chess-diff {
+  font-weight: 700;
+  color: var(--primary);
+  margin-left: 4px;
+}
+
+/* Khung bàn cờ */
+.chess-board-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 384px;
+  max-height: 384px;
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.chess-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Hiệu ứng chớp đỏ khi bị chiếu */
+@keyframes checkPulse {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.check-flash {
+  animation: checkPulse 1.2s infinite ease-in-out;
+}
+
+/* Popup phong cấp Tốt */
+.promo-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.promo-modal {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  padding: 8px;
+  gap: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.promo-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text);
+}
+
+.promo-pieces {
+  display: flex;
+  gap: 8px;
+}
+
+.promo-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fffaf0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  transition:
+    transform 0.1s,
+    border-color 0.1s;
+}
+
+.promo-btn:hover,
+.promo-btn:active {
+  transform: scale(1.08);
+  border-color: var(--primary);
+}
+
+.promo-btn svg {
+  width: 44px;
+  height: 44px;
+}
+
+/* Nút thao tác dưới bàn cờ */
+.chess-bottom-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.chess-sub-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.chess-sub-btn:hover {
+  background: var(--bg-card-hover);
+}
+
+.chess-sub-btn.danger {
+  color: var(--danger);
+}
+
+/* Hộp thoại xác nhận (Đề nghị hoà / Đầu hàng) */
+.chess-dialog-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+
+.chess-dialog {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 320px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.chess-dialog h4 {
+  margin: 0 0 8px 0;
+  font-size: 17px;
+}
+
+.chess-dialog p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.chess-dialog-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Desktop layout */
+@media (min-width: 1024px) {
+  .chess-page {
+    max-width: 900px;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 32px;
+    padding: 24px;
+  }
+
+  .chess-board-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 480px;
+  }
+
+  .chess-board-wrap {
+    max-width: 480px;
+    max-height: 480px;
+  }
+
+  .chess-sidebar {
+    flex: 1;
+    min-width: 280px;
+    max-width: 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
