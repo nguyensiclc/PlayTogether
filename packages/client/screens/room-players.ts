@@ -23,8 +23,10 @@ export function avatarClassOf(seat: SeatId | null): string {
 
 /** Người ngồi ghế `seat` trong phòng; ghế trống thì hiện "Ghế n" */
 export function identityInRoom(room: PublicRoom, seat: SeatId): PlayerIdentity {
-  const name = room.seats[seat]?.name ?? `Ghế ${seat + 1}`;
-  return { name, initials: initialsOf(name), avatarClass: avatarClassOf(seat) };
+  const m = room.seats[seat];
+  const name = m?.name ?? `Ghế ${seat + 1}`;
+  const initials = m?.isBot ? "🤖" : initialsOf(name);
+  return { name, initials, avatarClass: avatarClassOf(seat) };
 }
 
 /** Ghế của thành viên có `id` công khai; null nếu đang xem hoặc không có */

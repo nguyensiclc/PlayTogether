@@ -163,3 +163,43 @@ Test ngẫu nhiên (Fuzz testing với 5.000–10.000 ván) kiểm tra các bấ
 4. Hai Vua không bao giờ đứng ở hai ô kề sát nhau.
 5. Ván đấu luôn dừng lại và cho ra kết quả hợp lệ (`GameResult`).
 
+---
+
+## 5. Thiết kế thuật toán Bot (`bot.ts`)
+
+Bot được triển khai dưới dạng hàm thuần `chooseBotMove(state: State, level: BotLevel, rng: Rng): StandardMove | null` đặt tại `packages/engine/co-vua/bot.ts`.
+
+### 5.1 Các cấp độ Bot (`BotLevel`)
+1. **`easy` (Dễ):**
+   - Đánh giá nhanh: Lọc danh sách `validStandardMoves`.
+   - Khoảng 65% lượt đi chọn ngẫu nhiên qua `rng()`.
+   - Khoảng 35% ưu tiên nước ăn quân giá trị cao hoặc nước chiếu. Thỉnh thoảng đi sót quân để người mới dễ thở.
+2. **`medium` (Trung bình):**
+   - Tìm kiếm Minimax độ sâu 2.
+   - Hàm lượng giá (Evaluation):
+     - Vật chất: Tốt=100, Mã=320, Tượng=330, Xe=500, Hậu=900, Vua=20000.
+     - Vị trí cơ bản: Thưởng điểm kiểm soát 4 ô trung tâm (d4, e4, d5, e5) và các ô mở rộng (c4, c5, f4, f5), phát triển Mã/Tượng ra trung tâm.
+   - Thêm nhiễu ngẫu nhiên nhỏ (±5 điểm) để đa dạng hoá ván cờ.
+3. **`hard` (Khó):**
+   - Minimax với cắt tỉa Alpha-Beta độ sâu 3.
+   - Sắp xếp nước đi (Move Ordering) bằng kỹ thuật MVV-LVA (Most Valuable Victim - Least Valuable Attacker) và nước chiếu để tỉa nhánh tối đa (giảm từ chục ngàn node xuống chỉ còn vài trăm đến 1-2 ngàn node, tốc độ < 50ms).
+   - Hàm lượng giá đầy đủ:
+     - Giá trị quân cờ chuẩn.
+     - Bảng vị trí quân (Piece-Square Tables - PST) chuẩn: Tốt tiến lên và kiểm soát trung tâm, Mã hướng vào trung tâm (tránh mép bàn), Tượng mở đường chéo dài, Xe chiếm cột mở/bán mở hoặc hàng 7, Vua an toàn ở góc (khai cuộc/trung cuộc) và tiến ra trung tâm (tàn cuộc).
+     - Điểm an toàn Vua và khả năng cơ động (số nước đi hợp lệ).
+     - Phát hiện chiếu bí (điểm thưởng/phạt ±100000 theo độ sâu).
+
+### 5.2 Mở rộng `GameModule` và Tích hợp Server
+- `GameModule` thêm trường tuỳ chọn:
+  ```ts
+  bot?: {
+    levels: { id: "easy" | "medium" | "hard"; name: string }[];
+    chooseMove: (state: S, seat: SeatId, level: string, rng: Rng) => M | null;
+  };
+  ```
+- Server `Room`:
+  - Cho phép chủ phòng gửi `{ type: "addBot", seat: SeatId, level: BotLevel }` và `{ type: "removeBot", seat: SeatId }`.
+  - Nếu ghế có Bot và đến lượt của ghế đó, Server thiết lập hẹn giờ (delay 400ms – 600ms), sau đó tự động gọi `module.bot.chooseMove` và gọi `this.move(...)`.
+  - Khi ván kết thúc, Bot tự động vote `rematch`.
+
+

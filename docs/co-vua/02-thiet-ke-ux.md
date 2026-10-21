@@ -95,3 +95,20 @@ Khi Tốt đi đến hàng cuối cùng:
 - **Đầu hàng (Xin thua)**: Nút nằm ở cạnh dưới bàn cờ. Bấm vào sẽ hiện một hộp xác nhận ngắn ("Bạn có chắc chắn muốn đầu hàng không?"). Nếu đồng ý, ván cờ kết thúc, đối thủ thắng cuộc.
 - **Đề nghị hoà**: Nút "Xin hoà" gửi một đề nghị tới đối thủ. Màn hình đối thủ xuất hiện một thông báo popup ("Đối thủ đề nghị hoà, bạn có đồng ý không?") gồm 2 nút: "Đồng ý" và "Từ chối". Mỗi người chơi chỉ được gửi tối đa 1 đề nghị hoà mỗi 5 lượt đi để tránh làm phiền.
 
+---
+
+## 6. Chế độ Đánh với máy (Bot)
+
+Nhằm phục vụ người chơi một mình khi không có bạn bè cùng chơi:
+1. **Thêm máy trong phòng chờ (Lobby):**
+   - Khi ghế số 2 còn trống, chủ phòng thấy nút **"🤖 Thêm máy"** với thanh chọn cấp độ: **Dễ** (Xanh), **Trung bình** (Vàng cam), **Khó** (Đỏ).
+   - Khi chọn mức độ, ghế số 2 được điền bởi Bot: hiển thị avatar máy 🤖, tên `Máy (Dễ)` / `Máy (Trung bình)` / `Máy (Khó)`.
+   - Chủ phòng có thể bấm đổi mức độ hoặc bấm gỡ máy để chờ bạn bè.
+2. **Nút "Chơi với máy" ngoài Trang chủ:**
+   - Trên thẻ trò chơi Cờ vua và phần nổi bật ngoài trang chủ, có thêm nút phụ **"Chơi với máy"**.
+   - Bấm vào sẽ tự động tạo phòng với Bot được thêm sẵn (mặc định Trung bình), cho phép vào bàn cờ ngay chỉ sau 1 click.
+3. **Trải nghiệm trong ván với Bot:**
+   - Khi đến lượt Bot, giao diện hiển thị trạng thái "Máy đang suy nghĩ..." kèm độ trễ tự nhiên 400ms – 700ms (không đánh lập tức trong 1ms để tạo cảm giác tự nhiên).
+   - Khi kết thúc ván, nếu người chơi bấm **"Ván nữa"**, Bot tự động đồng ý và đổi bên (hoặc người thua cầm Trắng đi trước theo luật chung).
+   - Nếu người chơi gửi đề nghị hoà: Bot cấp Dễ có tỷ lệ đồng ý nếu điểm ngang bằng; Bot cấp Khó chỉ đồng ý nếu thế cờ hoàn toàn cân bằng hoặc bất lợi cho Bot.
+

@@ -10,14 +10,16 @@ Mở rộng nền tảng PlayTogether với trò chơi thứ ba: **Cờ vua (Che
 
 | Có trong prototype | Chưa làm / Để giai đoạn sau |
 |---|---|
-| Engine Cờ vua đầy đủ luật chuẩn FIDE: 6 loại quân, đi và ăn | Đánh với máy (bot cờ vua Stockfish) |
-| Các nước đặc biệt: Nhập thành, Bắt tốt qua đường, Phong cấp | Đấu giải (Tournament / Swiss) |
-| Chiếu, Chiếu bí, Thế bí (Stalemate), Hoà 50 nước, Lặp 3 lần | Phân tích ván cờ (Eval bar, phân tích sai lầm) |
-| Thiếu lực lượng chiếu bí (Insufficient material) | Chế độ tính giờ Fischer (+giây mỗi nước) |
-| Đầu hàng (Resign) và Đề nghị hoà | Lưu trữ PGN lịch sử vào tài khoản cá nhân |
-| Bàn cờ SVG sắc nét, lật bàn theo góc nhìn người chơi | Âm thanh gõ cờ khi đi/ăn quân |
+| Engine Cờ vua đầy đủ luật chuẩn FIDE: 6 loại quân, đi và ăn | Đấu giải (Tournament / Swiss) |
+| Đánh với máy (bot) 3 cấp độ: Dễ, Trung bình, Khó | Phân tích ván cờ (Eval bar, phân tích sai lầm) |
+| Các nước đặc biệt: Nhập thành, Bắt tốt qua đường, Phong cấp | Chế độ tính giờ Fischer (+giây mỗi nước) |
+| Chiếu, Chiếu bí, Thế bí (Stalemate), Hoà 50 nước, Lặp 3 lần | Lưu trữ PGN lịch sử vào tài khoản cá nhân |
+| Thiếu lực lượng chiếu bí (Insufficient material) | Âm thanh gõ cờ khi đi/ăn quân |
+| Đầu hàng (Resign) và Đề nghị hoà | |
+| Bàn cờ SVG sắc nét, lật bàn theo góc nhìn người chơi | |
 | Chọn quân, highlight ô hợp lệ, popup phong cấp trên di động | |
 | Kết quả ván, Ván nữa (người thua cầm Trắng đi trước) | |
+| Chơi solo với Bot: nút "🤖 Thêm máy" ở phòng chờ và "Chơi với máy" ở trang chủ | |
 
 ---
 
@@ -28,7 +30,8 @@ Mở rộng nền tảng PlayTogether với trò chơi thứ ba: **Cờ vua (Che
 | **V1 — Engine** | `engine/co-vua`: types, rules, fen, kiểm tra chiếu, test cases V01–V25 | Mọi test xanh 100%, fuzz 200 ván bất biến luôn đúng | **Đã xong** |
 | **V2 — Tích hợp Protocol & Server** | Khai báo GameId `co-vua`, Protocol, Server registry, test WS | Server tạo phòng, nhận move cờ vua, test server qua ws xanh | **Đã xong** |
 | **V3 — Giao diện Cờ vua** | Bàn cờ SVG, tap-to-move, phong cấp, highlight, di động 360px & desktop | Chơi hết ván mượt mà giữa 2 tab trình duyệt | **Đã xong** |
-| **V4 — Hoàn thiện** | Thử nghiệm thực tế 2 người chơi trên nhiều thiết bị | Chơi thử mượt mà không có lỗi | Đang tiến hành |
+| **V4 — Hoàn thiện** | Thử nghiệm thực tế 2 người chơi trên nhiều thiết bị | Chơi thử mượt mà không có lỗi | **Đã xong** |
+| **V5 — Đánh với máy (Bot)** | Engine Bot 3 cấp độ (Dễ, Trung bình, Khó), hỗ trợ thêm bot trong phòng chờ, chơi với máy từ trang chủ | Test bot xanh, bot chơi mượt mà với 3 độ khó | **Đang tiến hành** |
 
 ---
 

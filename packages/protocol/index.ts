@@ -40,6 +40,8 @@ export interface PublicMember {
   id: string;
   name: string;
   connected: boolean;
+  isBot?: boolean;
+  botLevel?: string;
 }
 
 export interface MatchScore {
@@ -73,6 +75,9 @@ export interface PublicRoomOf<S, O, G extends GameId = GameId> {
   wins: number[];
   /** Thông tin trận đấu nhiều ván khi options.targetScore !== null; null khi options.targetScore === null */
   match: MatchScore | null;
+  /** Game này có hỗ trợ đánh với máy không */
+  botSupported?: boolean;
+  botLevels?: readonly { id: string; name: string }[];
 }
 
 export type OAnQuanRoom = PublicRoomOf<OAnQuanState, OAnQuanOptions, "o-an-quan">;
@@ -106,6 +111,8 @@ export type ClientMessage =
   | { type: "joinRoom"; code: string }
   | { type: "takeSeat"; seat: SeatId }
   | { type: "leaveSeat" }
+  | { type: "addBot"; seat: SeatId; level: string }
+  | { type: "removeBot"; seat: SeatId }
   | { type: "setOptions"; options: object }
   | { type: "start" }
   | { type: "move"; move: object; actionNo: number }
@@ -148,7 +155,8 @@ export type ErrorCode =
   | "NOT_YOUR_TURN"
   | "INVALID_MOVE"
   | "STALE_MOVE"
-  | "RATE_LIMITED";
+  | "RATE_LIMITED"
+  | "BOT_NOT_SUPPORTED";
 
 /** Mã phòng: 4 ký tự, bỏ các ký tự dễ nhầm 0 O 1 I L (kỹ thuật mục 6) */
 export const ROOM_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
