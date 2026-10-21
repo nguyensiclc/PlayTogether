@@ -37,6 +37,9 @@ export function caroPageHtml(options: Options): string {
             <p class="notice" data-notice hidden></p>
           </div>
           <p class="hint mobile-only" data-hint>Chạm một ô để chọn, chạm lại để đặt quân</p>
+          <div class="yield-row" data-yield-row hidden>
+            <button class="btn sm" type="button" data-yield>Nhường lượt đi trước</button>
+          </div>
           <div class="pick-acts mobile-only" data-pick hidden>
             <button class="btn" type="button" data-unpick>Bỏ chọn</button>
             <button class="btn primary place-btn" type="button" data-place>Đặt quân</button>

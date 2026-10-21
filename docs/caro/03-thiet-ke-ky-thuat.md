@@ -105,6 +105,10 @@ Hiện `protocol`, `server` và `client` mới chỉ biết Ô ăn quan. Để t
 - Lớp phòng **không bao giờ** kiểm tra luật của game. Tuỳ chọn kiểm bằng `parseOptions`, nước đi kiểm bằng `parseMove` rồi `applyMove`.
 - Việc này sửa nhiều **file dùng chung** với Ô ăn quan (`protocol/index.ts`, `server/*`, `client/screens/room.ts`, `lobby.ts`, `home.ts`). Xem mục "Phối hợp" trong `04-ke-hoach-prototype.md`.
 
+### 4.0 Nhường lượt (C14)
+
+`Move = PlaceMove | YieldMove` (`{ nhuong: true }`), `State.nhuong` đánh dấu đã nhường, event `{ t: "nhuong", from, to }`. `applyMove` đổi chỗ `players` và giữ `turn = 0`, `moveNo = 0`. `validMoves` ở nước đầu có thêm nước nhường. Server không cần biết gì thêm: nước đi vẫn qua `parseMove` và `applyMove`.
+
 ### 4.1 Client (mốc C3)
 
 ```

@@ -54,6 +54,7 @@ Thế cờ trong test được dựng thẳng (không đi từng nước), trừ
 | K11 | Chuỗi sát mép bàn (x = 0, y = 0, x = size − 1, y = size − 1), cả bàn 15 và 19 | Thắng đúng; không lỗi chỉ số |
 | K12 | `chanHaiDau` bật: 5 quân bị chặn cả hai đầu bằng quân đối thủ | Chưa thắng |
 | K13 | `chanHaiDau` bật: 5 quân, một đầu bị chặn, một đầu trống | Thắng |
+| K24–K27 | Nhường lượt: đổi quân và lượt, chỉ một lần, hết quyền khi đã có quân, người đi sau không nhường được, kết quả ghi đúng ghế | Đúng như luật mục 3.1 |
 | K14 | `chanHaiDau` bật: 5 quân sát mép bàn, đầu kia bị đối thủ chặn (C3) | Chưa thắng |
 | K15 | `chanHaiDau` bật: chuỗi 6 quân bị chặn một đầu (C4) | Thắng |
 | K16 | Bàn đầy, không ai thắng | Hoà; `scores = [0,5; 0,5]`; event `draw` |
@@ -94,6 +95,7 @@ Ngoài engine: test server/protocol cho C2 (tạo phòng Caro qua gateway, nư�
 | C10 | Phối hợp sửa **file dùng chung** với Antigravity (Ô ăn quan) | Caro sửa file chung **trên nhánh `caro`**, gộp thành vài commit nhỏ, gộp vào `main` **sau khi** Antigravity commit xong phần Ô ăn quan. Hoặc: bạn chọn người sửa file chung trước | **Theo đề xuất** | Đã chốt |
 | C11 | Đồng hồ lượt và giữ ghế 60 giây | Làm **chung ở M4 của nền tảng**, không riêng cho Caro. Tuỳ chọn "Thời gian mỗi lượt" **ẩn** tới khi có | **Theo đề xuất** | Đã chốt |
 | C12 | Hết giờ ở Caro tự đặt quân ngẫu nhiên có hợp lý không? | Dùng chung cơ chế: tự đặt vào ô trống ngẫu nhiên, 3 lần liên tiếp thì xử thua (M4). Phương án khác: hết giờ là **thua ngay** | **Theo đề xuất** | Đã chốt |
+| C14 | Người đi trước có quyền **nhường lượt** (yêu cầu của chủ dự án) | Chỉ trước khi đặt quân đầu tiên, một lần mỗi ván; hai người **đổi quân** (đối thủ cầm X và đi trước); người nhận không nhường lại | **Theo yêu cầu**; chi tiết do Claude tự quyết theo lời "tự quyết định, tôi duyệt hết" | Đã chốt |
 | C13 | **Thiết kế mockup do ai làm và theo quy trình nào?** (đã đổi: xem ghi chú bên dưới) | Như Ô ăn quan: mình viết **bản yêu cầu thiết kế** (`docs/design/caro/README.md`), bạn nhờ **canvas design** tạo mockup HTML vào `docs/design/caro/`, báo lại thì mình làm giao diện. Mockup ở "Bản nháp 1", **Đã chốt** khi bạn duyệt | **Theo đề xuất** | Đã chốt |
 
 ### Ghi chú cho các câu trả lời

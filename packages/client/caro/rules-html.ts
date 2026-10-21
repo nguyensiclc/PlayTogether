@@ -72,6 +72,9 @@ export function caroRulesHtml(): string {
     ${BLOCKED}
     <p class="cap">Bật Chặn 2 đầu: 5 quân ✕ này bị ◯ chặn hai đầu nên chưa thắng.</p>
 
+    <h3>Nhường lượt</h3>
+    <p>Người được đi trước có quyền <b>nhường</b>: trước khi đặt quân đầu tiên, bấm <b>Nhường lượt đi trước</b>. Khi đó đối thủ cầm ✕ và đi nước đầu tiên, còn bạn cầm ◯. Chỉ nhường được một lần mỗi ván, và người nhận không nhường lại được.</p>
+
     <h3>Hoà</h3>
     <p>Bàn đầy mà chưa ai có 5 quân liền thì hoà.</p>
 

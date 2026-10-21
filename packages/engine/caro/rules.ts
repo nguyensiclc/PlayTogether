@@ -2,7 +2,10 @@
 // Hàm thuần: không sửa state đầu vào, không I/O, không ngẫu nhiên.
 
 import type { ForfeitReason, GameModule, GameResult, SeatId } from "../game-module.ts";
-import type { EndReason, GameEvent, Mark, Move, Options, ScoreDetail, State } from "./types.ts";
+import type { EndReason, GameEvent, Mark, Move, Options, ScoreDetail, State, YieldMove } from "./types.ts";
+
+/** Nước nhường lượt (luật mục 3.1) hay nước đặt quân */
+export const isYield = (move: Move): move is YieldMove => "nhuong" in move;
 
 export const defaultOptions: Options = { kichThuoc: 15, chanHaiDau: false, thoiGianLuot: 30 };
 
@@ -56,6 +59,7 @@ export function setup(options: Options, seats: SeatId[], firstPlayer: SeatId): S
     players: [firstPlayer, second],
     turn: 0,
     moveNo: 0,
+    nhuong: false,
     last: null,
     winLine: null,
     options: { ...options },
@@ -67,6 +71,7 @@ export function setup(options: Options, seats: SeatId[], firstPlayer: SeatId): S
 export function validMoves(state: State, seat: SeatId): Move[] {
   if (state.status !== "playing" || state.players[state.turn] !== seat) return [];
   const moves: Move[] = [];
+  if (canYield(state)) moves.push({ nhuong: true });
   state.cells.forEach((cell, i) => {
     if (cell === null) moves.push({ x: i % state.size, y: Math.floor(i / state.size) });
   });
@@ -80,6 +85,7 @@ export function applyMove(
 ): { state: State; events: GameEvent[] } | { error: string } {
   if (state.status !== "playing") return { error: "INVALID_MOVE" };
   if (state.players[state.turn] !== seat) return { error: "NOT_YOUR_TURN" };
+  if (isYield(move)) return yieldFirst(state, seat);
   const { x, y } = move;
   if (!Number.isInteger(x) || !Number.isInteger(y) || !inBoard(state.size, x, y)) return { error: "INVALID_MOVE" };
   const i = y * state.size + x;
@@ -104,6 +110,18 @@ export function applyMove(
     s.turn = other(mark);
   }
   return { state: s, events };
+}
+
+/** Được nhường lượt khi chưa có quân nào trên bàn và chưa ai nhường (luật mục 3.1) */
+const canYield = (s: State): boolean => s.status === "playing" && s.moveNo === 0 && !s.nhuong;
+
+/** Người đi trước nhường: hai người đổi quân, đối thủ cầm X và đến lượt họ; không có quân nào được đặt */
+function yieldFirst(state: State, seat: SeatId): { state: State; events: GameEvent[] } | { error: string } {
+  if (!canYield(state)) return { error: "INVALID_MOVE" };
+  const s = clone(state);
+  s.players = [state.players[1], state.players[0]];
+  s.nhuong = true;
+  return { state: s, events: [{ t: "nhuong", from: seat, to: s.players[0] }] };
 }
 
 /**
@@ -228,7 +246,8 @@ function setOption<K extends keyof Options>(out: Options, key: K, value: unknown
 /** Đọc nước đi từ dữ liệu ngoài: chỉ kiểm tra hình dạng; có nằm trong bàn và còn trống hay không do `applyMove` quyết định */
 export function parseMove(raw: unknown): Move | null {
   if (typeof raw !== "object" || raw === null) return null;
-  const { x, y } = raw as Record<string, unknown>;
+  const { x, y, nhuong } = raw as Record<string, unknown>;
+  if (nhuong === true) return { nhuong: true };
   return typeof x === "number" && typeof y === "number" && Number.isInteger(x) && Number.isInteger(y) ? { x, y } : null;
 }
 

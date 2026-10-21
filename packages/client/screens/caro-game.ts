@@ -3,19 +3,20 @@
 // Bàn không xoay: mình luôn ở dưới, đối thủ ở trên; người xem thấy người ngồi ghế 1 ở dưới.
 
 import type { SeatId } from "@playtogether/engine";
-import type { GameEvent, Mark, Move, State } from "@playtogether/engine/caro";
-import { hasBlockedLine } from "@playtogether/engine/caro";
+import type { GameEvent, Mark, Move, PlaceMove, State } from "@playtogether/engine/caro";
+import { hasBlockedLine, isYield } from "@playtogether/engine/caro";
 import type { CaroRoom, ErrorCode, PublicRoom, You } from "@playtogether/protocol";
 import "../caro/caro.css";
 import { CaroBoard } from "../caro/board-dom.ts";
 import { xOf, yOf } from "../caro/board-svg.ts";
 import { caroPageHtml } from "../caro/game-page.ts";
-import { type CaroLogEntry, describePlace } from "../caro/move-log.ts";
+import { type CaroLogEntry, describePlace, describeYield } from "../caro/move-log.ts";
 import { type CaroCardState, CaroPlayerCard, MARK_CHAR } from "../caro/player-card.ts";
 import { resultHtml } from "../caro/result-view.ts";
 import { $, escapeHtml } from "../dom.ts";
 import { logListHtml } from "../o-an-quan/log-view.ts";
 import { showRules } from "../rules/rules-dialog.ts";
+import { confirmBox } from "./confirm-leave.ts";
 import type { GameActions, GameScreen, RoomMessage } from "./game-screen.ts";
 import { identityInRoom, seatOfMember } from "./room-players.ts";
 
@@ -68,6 +69,7 @@ export class CaroGameView implements GameScreen {
     this.q("[data-card-bottom]").replaceWith(this.cards.bottom.el);
     this.q("[data-board]").replaceWith(this.board.el);
     for (const b of this.page.querySelectorAll("[data-rules]")) b.addEventListener("click", () => showRules("caro"));
+    this.q("[data-yield]").addEventListener("click", () => void this.askYield());
     this.q("[data-unpick]").addEventListener("click", () => this.board.clearSelection());
     this.q("[data-place]").addEventListener("click", () => this.board.confirm());
     document.addEventListener("keydown", this.onKey);
@@ -148,15 +150,28 @@ export class CaroGameView implements GameScreen {
 
   private afterMove(seat: SeatId, move: Move, events: GameEvent[], before: State): void {
     const mark = this.state.players.indexOf(seat) === 1 ? 1 : 0;
+    if (isYield(move)) {
+      this.afterYield(seat);
+      return;
+    }
     this.log.push(describePlace(before.moveNo + 1, this.nameOf(seat), mark, move.x, move.y));
     this.setNotice(this.blockedNotice(move, events));
     this.refresh(true);
   }
 
   /** Chuỗi 5 bị chặn hai đầu thì ván vẫn tiếp tục: nói rõ để người chơi không thắc mắc (UX mục 6) */
-  private blockedNotice(move: Move, events: GameEvent[]): string | null {
+  private blockedNotice(move: PlaceMove, events: GameEvent[]): string | null {
     const won = events.some((e) => e.t === "win");
     return !won && hasBlockedLine(this.state, move.x, move.y) ? "Chuỗi 5 bị chặn 2 đầu — chưa thắng" : null;
+  }
+
+  /** Người đi trước nhường: đối thủ cầm ✕ và đi trước */
+  private afterYield(seat: SeatId): void {
+    const to = this.state.players[0];
+    this.log.push(describeYield(this.nameOf(seat), this.nameOf(to)));
+    const who = to === this.you.seat ? "Bạn cầm ✕ và đi trước" : `${this.nameOf(to)} cầm ✕ và đi trước`;
+    this.setNotice(`${this.nameOf(seat)} đã nhường lượt. ${who}`);
+    this.refresh();
   }
 
   private setNotice(text: string | null): void {
@@ -206,6 +221,7 @@ export class CaroGameView implements GameScreen {
     const mark = this.myMark() ?? 0;
     this.q("[data-pick]").hidden = !picking;
     this.q("[data-hint]").hidden = picking || !this.isMyTurn();
+    this.q("[data-yield-row]").hidden = !(this.canAct() && this.canYield());
     this.q("[data-place]").textContent = `Đặt quân ${MARK_CHAR[mark]}`;
     this.setStatus(this.statusText(picking), !this.canAct());
   }
@@ -231,10 +247,30 @@ export class CaroGameView implements GameScreen {
 
   // ---------- Thao tác ----------
 
+  /** Còn quyền nhường: chưa có quân nào và chưa ai nhường (luật mục 3.1) */
+  private canYield(): boolean {
+    return this.state.moveNo === 0 && !this.state.nhuong;
+  }
+
+  private async askYield(): Promise<void> {
+    if (!this.canAct() || !this.canYield()) return;
+    const ok = await confirmBox({
+      title: "Nhường lượt đi trước?",
+      body: "Đối thủ sẽ cầm ✕ và đi nước đầu tiên, bạn cầm ◯. Chỉ nhường được một lần trước khi có quân nào được đặt.",
+      cancel: "Không nhường",
+      ok: "Nhường lượt",
+    });
+    if (!ok || !this.canAct() || !this.canYield()) return;
+    if (!this.actions.move({ nhuong: true }, this.actionNo)) return;
+    this.pending = true;
+    this.board.setInteractive(false, this.myMark() ?? 0);
+    this.updateUi();
+  }
+
   private place(index: number): void {
     if (!this.canAct() || this.state.cells[index] !== null) return;
     const size = this.state.size;
-    const move: Move = { x: xOf(size, index), y: yOf(size, index) };
+    const move: PlaceMove = { x: xOf(size, index), y: yOf(size, index) };
     if (!this.actions.move(move, this.actionNo)) return;
     this.pending = true;
     this.board.setInteractive(false, this.myMark() ?? 0);

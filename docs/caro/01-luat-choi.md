@@ -35,6 +35,15 @@ Cờ caro (gomoku) có nhiều biến thể. Tài liệu này chốt **một b�
 
 Không có nước "bỏ lượt". Không có đi lại nước.
 
+### 3.1 Nhường lượt
+
+Người được đi trước (cầm **X**) có quyền **nhường lượt** **(yêu cầu của chủ dự án, C14)**:
+
+- Chỉ được nhường **trước khi có quân nào được đặt** (`moveNo = 0`), và chỉ **một lần mỗi ván**.
+- Khi nhường, hai người **đổi quân cho nhau**: đối thủ cầm **X** và đi nước đầu tiên, người nhường cầm **O**. Không có quân nào được đặt, nên tính là một nước đi của ván (`actionNo` tăng) nhưng **không** tăng `moveNo`.
+- Người nhận (giờ cầm X) **không** nhường lại được.
+- Nhường lượt không thay đổi quy tắc "ai đi trước ván sau": người **thua** ván này vẫn được đề nghị đi trước ở ván sau (hoà thì đổi lượt so với ván trước), người đó lại được quyền nhường.
+
 ## 4. Thắng
 
 Sau mỗi nước, xét 4 hướng đi qua **quân vừa đặt**: ngang, dọc, chéo `\`, chéo `/`.

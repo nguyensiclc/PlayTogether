@@ -243,6 +243,15 @@
   }
 }
 
+/* Nhường lượt */
+.yield-row {
+  display: flex;
+  justify-content: center;
+}
+.yield-row[hidden] {
+  display: none;
+}
+
 /* Tỉ số */
 .caro-page .player .score {
   text-align: center;

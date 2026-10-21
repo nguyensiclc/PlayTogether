@@ -40,6 +40,7 @@ function makeState(l: Layout = {}): State {
     players: l.players ?? [0, 1],
     turn: nx > no ? 1 : 0,
     moveNo: nx + no,
+    nhuong: false,
     last: null,
     winLine: null,
     options: { ...defaultOptions, kichThuoc: size, ...l.options },
@@ -165,7 +166,8 @@ describe("K2 — đặt quân", () => {
     expect(validMoves(s, 0)).toHaveLength(225 - 2);
     expect(validMoves(s, 0)).not.toContainEqual({ x: 3, y: 3 });
     expect(validMoves(s, 1)).toEqual([]);
-    expect(validMoves(setup(defaultOptions, [0, 1], 0), 0)).toHaveLength(225);
+    // 225 ô trống và nước nhường lượt (còn quyền nhường ở nước đầu)
+    expect(validMoves(setup(defaultOptions, [0, 1], 0), 0)).toHaveLength(226);
   });
 });
 
@@ -389,6 +391,59 @@ describe("K12–K15 — Chặn 2 đầu", () => {
 
 /** Màu theo hoa văn (⌊x/2⌋ + y) mod 2: không có chỗ nào quá 2 quân liền theo 4 hướng, nên không ai thắng */
 const patternMark = (x: number, y: number): Mark => ((Math.floor(x / 2) + y) % 2 === 0 ? 0 : 1);
+
+describe("K24–K27 — nhường lượt (luật mục 3.1)", () => {
+  const fresh = (): State => setup(defaultOptions, [0, 1], 0);
+
+  it("K24 người đi trước nhường: đối thủ cầm X và đi trước, bàn vẫn trống", () => {
+    const s = fresh();
+    const r = applyMove(s, 0, { nhuong: true });
+    if ("error" in r) throw new Error(r.error);
+    expect(r.state.players).toEqual([1, 0]);
+    expect(r.state.turn).toBe(0);
+    expect(r.state.moveNo).toBe(0);
+    expect(r.state.nhuong).toBe(true);
+    expect(r.state.cells.every((c) => c === null)).toBe(true);
+    expect(r.events).toEqual([{ t: "nhuong", from: 0, to: 1 }]);
+    // Ghế 0 giờ cầm O: ghế 1 mới được đặt quân, ghế 0 không
+    expect(applyMove(r.state, 0, { x: 7, y: 7 })).toEqual({ error: "NOT_YOUR_TURN" });
+    const next = play(r.state, 7, 7);
+    expect(next.state.cells[idx(7, 7)]).toBe(0);
+    expect(next.state.players[0]).toBe(1);
+  });
+
+  it("K25 chỉ được nhường một lần: người nhận không nhường lại được", () => {
+    const first = applyMove(fresh(), 0, { nhuong: true });
+    if ("error" in first) throw new Error(first.error);
+    expect(applyMove(first.state, 1, { nhuong: true })).toEqual({ error: "INVALID_MOVE" });
+    expect(validMoves(first.state, 1).some((m) => "nhuong" in m)).toBe(false);
+  });
+
+  it("K26 hết quyền nhường khi đã có quân trên bàn; người đi sau không nhường được", () => {
+    const s = fresh();
+    expect(applyMove(s, 1, { nhuong: true })).toEqual({ error: "NOT_YOUR_TURN" });
+    expect(validMoves(s, 0).some((m) => "nhuong" in m)).toBe(true);
+    const after = play(s, 7, 7).state;
+    expect(applyMove(after, 1, { nhuong: true })).toEqual({ error: "INVALID_MOVE" });
+    expect(validMoves(after, 1).some((m) => "nhuong" in m)).toBe(false);
+  });
+
+  it("K27 parseMove nhận {nhuong:true}; kết quả ván sau nhường ghi đúng ghế cầm quân", () => {
+    expect(parseMove({ nhuong: true })).toEqual({ nhuong: true });
+    expect(parseMove({ nhuong: false })).toBeNull();
+    const yielded = applyMove(fresh(), 0, { nhuong: true });
+    if ("error" in yielded) throw new Error(yielded.error);
+    // Ghế 1 (X) thắng 5 quân ngang, ghế 0 (O) đi xen kẽ ở hàng khác
+    let s = yielded.state;
+    const xs = [3, 4, 5, 6, 7];
+    for (let k = 0; k < 5; k++) {
+      s = play(s, xs[k] ?? 0, 7).state;
+      if (k < 4) s = play(s, xs[k] ?? 0, 9).state;
+    }
+    expect(s.result?.winner).toBe(1);
+    expect(s.result?.detail).toMatchObject({ marks: [1, 0] });
+  });
+});
 
 describe("K16–K18 — bàn đầy và kết thúc ván", () => {
   it("K16 bàn đầy mà không ai thắng: hoà, mỗi người 0,5 điểm", () => {

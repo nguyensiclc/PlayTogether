@@ -63,6 +63,10 @@ Chỉ ô **trống** mới chọn được. Chạm vào ô đã có quân thì �
 - **Click một lần** để đặt quân.
 - Phím tắt: các phím **mũi tên** di chuyển ô đang chọn, **Enter** hoặc **Space** để đặt, **Esc** để bỏ chọn.
 
+### 3.3b Nhường lượt
+
+Khi đến lượt mình, chưa có quân nào trên bàn và chưa ai nhường, dưới viên trạng thái hiện nút phụ **Nhường lượt đi trước**. Bấm thì hiện hộp xác nhận ("Đối thủ sẽ cầm ✕ và đi nước đầu tiên, bạn cầm ◯"), đồng ý thì gửi nước `{ nhuong: true }`. Cả hai bên thấy thông báo "… đã nhường lượt. … cầm ✕ và đi trước", thẻ người chơi đổi quân, nhật ký ghi một dòng. Nút biến mất từ lúc có quân đầu tiên hoặc sau khi đã nhường.
+
 ### 3.4 Luật chơi
 
 Mọi người đọc được luật **trước khi tạo phòng** (nút "📖 Cờ caro" ở hàng "Đọc luật trước khi chơi" trên trang chủ), trong **phòng chờ** (nút "📖 Luật chơi") và **khi đang chơi** (nút "?" trên điện thoại, "📖 Luật chơi" trên desktop). Là một hộp phủ lên màn hình (bottom sheet / modal), Esc hoặc "Đã hiểu" để đóng; hộp luật không làm mất thế cờ đang chơi. Nội dung nằm ở `packages/client/caro/rules-html.ts`, phải khớp `01-luat-choi.md`.
