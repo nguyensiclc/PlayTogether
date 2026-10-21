@@ -80,3 +80,15 @@ Như Ô ăn quan (kỹ thuật mục 10). Mọi nước đi qua `parseMove` rồ
 ## 7. Test
 
 Danh sách ở `04-ke-hoach-prototype.md` mục 4. Viết **trước**, thấy fail, rồi mới cài luật. Fuzz dùng `createRng(seed)` cố định.
+
+## 8. Bot (chơi một mình)
+
+Chốt với chủ dự án: bot **chỉ cho Cờ tướng** lần này, vào bằng **ghế 2 trong phòng chờ**, ba mức khó, AI chạy **trên server**.
+
+- **Hạ tầng bot dùng chung** (đã có trên main, do Cờ vua thêm trước): `GameModule.bot?: BotSupport` (`levels`, `chooseMove`), message `addBot { seat, level }` / `removeBot { seat }`, `PublicMember.isBot`, `room.botSupported`, `ClientGame.botSupported`. Máy là thành viên của phòng, tự đồng ý Ván nữa, Gateway hẹn máy đi sau một khoảng ngắn. Cờ tướng chỉ cung cấp `coTuongBot` (`engine/co-tuong/ai.ts`) và đặt `botSupported: true`; không thêm gì vào phần dùng chung.
+- **AI (`engine/co-tuong/ai.ts`)**: hàm thuần, giới hạn việc bằng **số nút tìm kiếm** (không dùng đồng hồ), ngẫu nhiên chỉ qua `rng`.
+  - **Dễ:** một nửa số lần chọn nước ăn quân giá trị nhất nếu có, còn lại đi ngẫu nhiên.
+  - **Vừa:** tìm 2 nước (negamax alpha-beta, kèm tìm thêm các nước ăn quân ở cuối nhánh), chọn ngẫu nhiên trong các nước kém nước tốt nhất không quá 0,8 Tốt. Thấy chiếu bí trong 1 nước.
+  - **Khó:** tìm sâu dần tới 4 nước, ngân sách 90.000 nút (khoảng 0,8 giây mỗi nước, tối đa chừng 3 giây), chọn ngẫu nhiên giữa các nước ngang điểm tốt nhất.
+  - Điểm thế cờ: giá trị quân (Xe 9, Pháo 4,5, Mã 4, Sĩ và Tượng 2, Tốt 1) cộng Tốt qua sông/tiến sâu và Xe, Mã, Pháo gần giữa bàn. Hết nước đi tính là thua, như luật.
+- **Hạn chế đã biết:** AI chạy đồng bộ trên luồng của server (mức Khó có thể chặn vài giây khi nhiều phòng cùng chơi với máy); chưa biết tránh lặp thế cờ; test độ mạnh chỉ so các mức với nhau qua vài ván giới hạn số nước.

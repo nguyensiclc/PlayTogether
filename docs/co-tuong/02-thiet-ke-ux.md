@@ -42,6 +42,10 @@ Nút **Xin thua** (góc phải thanh trên, có hộp xác nhận, người chơ
 
 `Esc` bỏ chọn quân; `Enter` Ván nữa khi hết ván.
 
-## 7. Luật chơi và Lịch sử
+## 7. Chơi với máy
+
+Ở phòng chờ, chủ phòng thấy dòng "Đấu với máy: 🤖 Dễ / Vừa / Khó" ngay dưới ghế 2 còn trống (giao diện chung của phòng chờ, cũng có nút "Chơi với máy" ở trang chủ). Bấm một mức thì máy ngồi ghế 2 (avatar 🤖, tên "Máy (Vừa)"); nút "Gỡ" trả lại ghế để mời bạn bè. Bắt đầu ván như thường; máy đi sau chừng 0,7 giây, tự đồng ý Ván nữa. Rời phòng giữa chừng là bỏ cuộc như mọi ván. Máy không giữ phòng: khi người cuối cùng rời, phòng bị xoá.
+
+## 8. Luật chơi và Lịch sử
 
 Mỗi game có hộp **Luật chơi / Lịch sử** do chính game cung cấp (`rules-html.ts`, `history-html.ts`). Luật hiện là chữ, chưa có hình minh hoạ cách đi từng quân.

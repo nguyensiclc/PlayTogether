@@ -2,7 +2,8 @@
 // Hàm thuần: không sửa state đầu vào, không I/O, không ngẫu nhiên.
 
 import type { ForfeitReason, GameModule, GameResult, SeatId } from "../game-module.ts";
-import { CELL_COUNT, indexOf, isInCheck, pseudoMoves } from "./moves.ts";
+import { coTuongBot } from "./ai.ts";
+import { CELL_COUNT, indexOf, isInCheck, legalTargets, simulate } from "./moves.ts";
 import type { EndReason, GameEvent, Kind, Move, Options, Piece, ScoreDetail, Side, State } from "./types.ts";
 
 export { isInCheck } from "./moves.ts";
@@ -84,19 +85,6 @@ export function setup(options: Options, seats: SeatId[], firstPlayer: SeatId): S
     status: "playing",
     result: null,
   };
-}
-
-/** Bàn sau khi đi quân từ `from` đến `to` (ăn quân nếu có) */
-function simulate(cells: readonly (Piece | null)[], from: number, to: number): (Piece | null)[] {
-  const next = [...cells];
-  next[to] = next[from] ?? null;
-  next[from] = null;
-  return next;
-}
-
-/** Các ô đến hợp lệ của quân tại `from`: đúng cách đi và không để tướng mình bị chiếu (luật mục 5) */
-function legalTargets(cells: readonly (Piece | null)[], from: number, side: Side): number[] {
-  return pseudoMoves(cells, from).filter((to) => !isInCheck(simulate(cells, from, to), side));
 }
 
 function hasLegalMove(cells: readonly (Piece | null)[], side: Side): boolean {
@@ -232,4 +220,5 @@ export const coTuong: GameModule<State, Move, Options, GameEvent> = {
   forfeit,
   parseOptions,
   parseMove,
+  bot: coTuongBot,
 };

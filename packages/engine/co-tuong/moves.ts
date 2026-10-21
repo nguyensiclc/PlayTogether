@@ -207,3 +207,16 @@ export function isInCheck(cells: Cells, side: Side): boolean {
   const general = findGeneral(cells, side);
   return general >= 0 && isAttacked(cells, side, xOf(general), yOf(general));
 }
+
+/** Bàn sau khi đi quân từ `from` đến `to` (ăn quân nếu có) */
+export function simulate(cells: Cells, from: number, to: number): (Piece | null)[] {
+  const next = [...cells];
+  next[to] = next[from] ?? null;
+  next[from] = null;
+  return next;
+}
+
+/** Các ô đến hợp lệ của quân tại `from`: đúng cách đi và không để tướng mình bị chiếu (luật mục 5) */
+export function legalTargets(cells: Cells, from: number, side: Side): number[] {
+  return pseudoMoves(cells, from).filter((to) => !isInCheck(simulate(cells, from, to), side));
+}

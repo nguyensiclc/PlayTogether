@@ -21,4 +21,5 @@ export const coTuongGame: ClientGame = {
   rulesHtml: coTuongRulesHtml,
   historyHtml: coTuongHistoryHtml,
   createScreen: (root, room, you, actions) => new CoTuongGameView(root, room, you, actions),
+  botSupported: true,
 };
