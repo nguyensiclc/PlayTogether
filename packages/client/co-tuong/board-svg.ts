@@ -100,7 +100,7 @@ function markersPath(): string {
 
 const GRID = gridPath();
 const MARKERS = markersPath();
-const RIVER = `<g class="river"><text x="2" y="4.5">楚 河</text><text x="6" y="4.5">漢 界</text></g>`;
+const RIVER = `<g class="river"><text x="2" y="4.5" dy="0.36em">楚 河</text><text x="6" y="4.5" dy="0.36em">漢 界</text></g>`;
 
 function pieceSvg(piece: Piece, i: number, p: BoardPaint): string {
   const [x, y] = place(i, p.flipped);
@@ -109,7 +109,7 @@ function pieceSvg(piece: Piece, i: number, p: BoardPaint): string {
   return `<g class="${classes.filter(Boolean).join(" ")}" data-cell="${i}">
     <circle class="disc" cx="${x}" cy="${y}" r="${PIECE_RADIUS}"/>
     <circle class="ring" cx="${x}" cy="${y}" r="${PIECE_RADIUS - 0.07}"/>
-    <text x="${x}" y="${y}" font-size="${GLYPH_SIZE}">${PIECE_GLYPH[piece.side][piece.kind]}</text>
+    <text x="${x}" y="${y}" dy="0.36em" font-size="${GLYPH_SIZE}">${PIECE_GLYPH[piece.side][piece.kind]}</text>
   </g>`;
 }
 

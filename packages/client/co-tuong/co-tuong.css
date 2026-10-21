@@ -33,7 +33,6 @@
   font-size: 0.42px;
   font-weight: 700;
   text-anchor: middle;
-  dominant-baseline: central;
   font-family: inherit;
   pointer-events: none;
 }
@@ -55,7 +54,6 @@
 .ct-svg .pc text {
   font-weight: 700;
   text-anchor: middle;
-  dominant-baseline: central;
   font-family: inherit;
   pointer-events: none;
 }
