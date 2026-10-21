@@ -1,0 +1,244 @@
+/* Bàn chơi Cờ caro (docs/design/caro/*.html, docs/design/shared/caro.css).
+   Dùng lại khung .game-page, .player, .status-pill, .result của bàn Ô ăn quan trong style.css. */
+
+.caro-board {
+  position: relative;
+  border: 3px solid var(--board-edge);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.5),
+    0 8px 20px rgba(60, 35, 10, 0.22);
+  line-height: 0;
+  /* Chạm vào bàn để chọn ô, không cuộn trang */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.caro-board > div:first-child {
+  overflow: hidden;
+  border-radius: 13px;
+}
+.caro-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.caro-svg .grid {
+  stroke: var(--stone-edge);
+  stroke-width: 0.045;
+  fill: none;
+}
+.caro-svg .star {
+  fill: var(--board-edge);
+  opacity: 0.5;
+}
+.caro-svg .mx {
+  stroke: var(--primary);
+  stroke-width: 0.13;
+  stroke-linecap: round;
+  fill: none;
+}
+.caro-svg .mo {
+  stroke: var(--cat-bai);
+  stroke-width: 0.13;
+  fill: none;
+}
+.caro-svg .last {
+  fill: rgba(242, 179, 61, 0.34);
+  stroke: var(--accent);
+  stroke-width: 0.07;
+}
+.caro-svg .win {
+  fill: rgba(63, 163, 107, 0.26);
+  stroke: var(--capture);
+  stroke-width: 0.06;
+}
+.caro-svg .winline {
+  stroke: var(--capture);
+  stroke-width: 0.16;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+.caro-svg .dim {
+  opacity: 0.38;
+}
+.caro-svg .band {
+  fill: rgba(242, 179, 61, 0.13);
+}
+.caro-svg .sel {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 0.09;
+}
+.caro-svg .ghost {
+  opacity: 0.55;
+}
+
+/* Kính lúp: nổi phía trên ngón tay, hiện vùng 5 × 5 ô quanh ô đang chạm */
+.caro-loupe {
+  position: absolute;
+  z-index: 6;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  line-height: 0;
+  pointer-events: none;
+}
+.caro-loupe[hidden] {
+  display: none;
+}
+
+/* ---------- Hiệu ứng (UX mục 4) ---------- */
+.caro-svg .fresh,
+.caro-svg .wstone {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.caro-svg .fresh {
+  animation: stone-in 150ms ease-out;
+}
+.caro-svg .wstone {
+  animation: stone-win 600ms ease-in-out both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.caro-svg .winline {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: draw-line 450ms ease-out 450ms forwards;
+}
+.caro-board.fx-shake {
+  animation: caro-shake 320ms ease-in-out;
+}
+@keyframes stone-in {
+  from {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes stone-win {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+}
+@keyframes draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes caro-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .caro-svg .fresh,
+  .caro-svg .wstone,
+  .caro-board.fx-shake {
+    animation: none;
+  }
+  .caro-svg .winline {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------- Bố cục bàn chơi ---------- */
+.caro-page .board-wrap {
+  position: relative;
+  width: 100%;
+  margin: 0;
+}
+.caro-page .locked {
+  border-radius: 16px;
+}
+.player .mark {
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+.caro-page .status-row {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.caro-page .notice {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--host-ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+.pick-acts {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 10px;
+}
+.place-btn {
+  min-height: 52px;
+  font-size: 17px;
+}
+
+/* ---------- Kết quả ---------- */
+.result .mini {
+  width: 168px;
+  margin: 14px auto 6px;
+}
+.result .mini .caro-board {
+  border-width: 2px;
+  border-radius: 10px;
+  box-shadow: none;
+  overflow: hidden;
+}
+.result .facts {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.result .facts b {
+  color: var(--ink);
+}
+
+@media (min-width: 1024px) {
+  /* Bàn vuông: cạnh vừa chiều cao còn lại sau hai thẻ người chơi, viên trạng thái và lề; hai thẻ rộng bằng bàn */
+  .caro-page .stage {
+    --board: min(560px, 100%, max(320px, calc(100dvh - 330px)));
+    justify-content: center;
+  }
+  .caro-page .stage .player,
+  .caro-page .board-wrap {
+    width: var(--board);
+    max-width: none;
+  }
+  .result .mini {
+    width: 200px;
+    margin-top: 0;
+  }
+  .result .facts {
+    gap: 4px 14px;
+  }
+}

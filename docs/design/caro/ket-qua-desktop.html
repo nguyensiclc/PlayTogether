@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cờ caro · Kết quả desktop</title>
+<!-- Mockup desktop 1280 × 800: Cờ caro, kết quả ván, modal giữa màn hình trên nền bàn chơi · Mốc C3/C4 · UX mục 5 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/desktop.css">
+<link rel="stylesheet" href="../shared/caro.css">
+<script src="../shared/caro-board.js"></script>
+<style>
+  body { overflow: hidden; height: 100vh; min-height: 800px; position: relative; }
+  .bg { position: absolute; inset: 0; display: grid; place-items: center; }
+  .bg .caro-board { width: 560px; }
+  .modal { width: 640px; padding: 0; overflow: hidden; display: grid; grid-template-columns: 250px 1fr; }
+  .hero { background: linear-gradient(160deg, var(--gold-soft), var(--cat-dangian-soft)); padding: 30px 22px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+  .hero .trophy { font-size: 56px; line-height: 1; }
+  .hero h1 { font-size: 30px; }
+  .detail { padding: 24px 26px 22px; }
+  .mini { width: 200px; margin: 0 auto 12px; }
+  .mini .caro-board { border-width: 2px; border-radius: 10px; }
+  .facts { display: flex; justify-content: center; gap: 18px; font-size: 13px; color: var(--muted); }
+  .facts b { color: var(--ink); }
+  .ready { display: flex; align-items: center; gap: 6px; margin: 14px 0 10px; font-size: 13px; color: var(--live-ink); font-weight: 600; }
+  .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+</style>
+</head>
+<body class="desk">
+<div class="bg"><div id="bg"></div></div>
+<div class="scrim"></div>
+<section class="modal">
+  <div class="hero">
+    <span class="trophy">🏆</span>
+    <h1>Bạn thắng!</h1>
+    <span class="chip">5 quân liên tiếp</span>
+    <span class="small muted">Cò Trắng 42 · Mèo Mun</span>
+  </div>
+  <div class="detail">
+    <div class="mini"><div id="mini"></div></div>
+    <div class="facts"><span>Số nước <b>11</b></span><span>Bạn đi <b>6</b> · Mèo Mun đi <b>5</b></span></div>
+    <div class="ready"><span class="avatar sm av3" style="width:20px;height:20px;font-size:9px">MM</span>Mèo Mun muốn chơi ván nữa</div>
+    <a class="btn primary block">Ván nữa · Mèo Mun đi trước <kbd style="margin-left:6px">Enter</kbd></a>
+    <div class="acts"><a class="btn sm">Về phòng chờ</a><a class="btn sm">Rời phòng</a></div>
+  </div>
+</section>
+<script>
+  const game = {
+    size: 15,
+    x: [[10, 4], [9, 5], [8, 6], [7, 7], [6, 8]],
+    o: [[7, 6], [8, 8], [6, 7], [7, 8], [10, 8]],
+    last: [10, 4],
+    win: [[10, 4], [9, 5], [8, 6], [7, 7], [6, 8]],
+  };
+  renderCaroBoard(document.getElementById("bg"), game);
+  renderCaroBoard(document.getElementById("mini"), game);
+</script>
+</body>
+</html>

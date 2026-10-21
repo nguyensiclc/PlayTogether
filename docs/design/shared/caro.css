@@ -1,0 +1,38 @@
+/* PlayTogether — bàn Cờ caro cho mockup. Dùng chung với tokens.css.
+   Tên class và hình học khớp packages/client/caro/ (1 đơn vị = 1 ô). */
+
+.caro-board {
+  position: relative;
+  border: 3px solid var(--board-edge);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .5), 0 8px 20px rgba(60, 35, 10, .22);
+  overflow: hidden;
+  line-height: 0;
+  touch-action: none;
+}
+.caro-svg { display: block; width: 100%; height: auto; }
+.caro-svg .grid { stroke: var(--stone-edge); stroke-width: .045; fill: none; }
+.caro-svg .star { fill: var(--board-edge); opacity: .5; }
+.caro-svg .mx { stroke: var(--primary); stroke-width: .13; stroke-linecap: round; fill: none; }
+.caro-svg .mo { stroke: var(--cat-bai); stroke-width: .13; fill: none; }
+.caro-svg .last { fill: rgba(242, 179, 61, .34); stroke: var(--accent); stroke-width: .07; }
+.caro-svg .win { fill: rgba(63, 163, 107, .26); stroke: var(--capture); stroke-width: .06; }
+.caro-svg .winline { stroke: var(--capture); stroke-width: .16; stroke-linecap: round; opacity: .9; }
+.caro-svg .dim { opacity: .38; }
+.caro-svg .band { fill: rgba(242, 179, 61, .13); }
+.caro-svg .sel { fill: var(--accent-soft); stroke: var(--accent); stroke-width: .09; }
+.caro-svg .ghost { opacity: .55; }
+
+/* Kính lúp: nổi phía trên ngón tay, hiện vùng 5 × 5 ô quanh ô đang chạm */
+.caro-loupe {
+  position: absolute; z-index: 6; width: 130px; height: 130px; border-radius: 50%;
+  border: 3px solid var(--ink); background: var(--surface); overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .35); line-height: 0; pointer-events: none;
+}
+
+/* Thẻ người chơi có ký hiệu quân */
+.player .mark { width: 30px; height: 30px; flex: none; }
+.player .turn { font-size: 12px; font-weight: 700; color: var(--host-ink); background: var(--gold-soft); padding: 2px 8px; border-radius: 999px; }
+
+.place-btn { min-height: 52px; font-size: 17px; }

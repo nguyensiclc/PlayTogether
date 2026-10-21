@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cờ caro · Kết quả</title>
+<!-- Mockup: Cờ caro, kết quả ván, mình thắng bằng 5 quân liền, đối thủ đã bấm Ván nữa · Mốc C3/C4 · UX mục 5 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/caro.css">
+<script src="../shared/caro-board.js"></script>
+<style>
+  .screen { gap: 12px; }
+  .bg { opacity: .55; filter: blur(1px); }
+  .result { position: absolute; left: 12px; right: 12px; top: 72px; z-index: 21; background: var(--surface); border-radius: 22px; padding: 22px 18px 18px; box-shadow: 0 18px 50px rgba(0,0,0,.3); text-align: center; }
+  .trophy { width: 64px; height: 64px; border-radius: 50%; background: var(--gold-soft); margin: -54px auto 10px; display: grid; place-items: center; font-size: 32px; box-shadow: 0 0 0 6px var(--surface); }
+  .result h1 { font-size: 28px; }
+  .reason { display: inline-flex; margin-top: 8px; }
+  .mini { width: 168px; margin: 14px auto 6px; }
+  .mini .caro-board { border-width: 2px; border-radius: 10px; }
+  .facts { display: flex; justify-content: center; gap: 18px; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .facts b { color: var(--ink); }
+  .ready { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 12px 0 10px; font-size: 13px; color: var(--live-ink); font-weight: 600; }
+  .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="topbar"><a class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a><div class="title">Cờ caro</div><span class="icon-btn"></span></div>
+  <div class="bg"><div id="bg"></div></div>
+
+  <div class="scrim"></div>
+  <section class="result">
+    <div class="trophy">🏆</div>
+    <h1>Bạn thắng!</h1>
+    <span class="chip reason">5 quân liên tiếp</span>
+    <div class="mini"><div id="mini"></div></div>
+    <div class="facts"><span>Số nước <b>11</b></span><span>Bạn đi <b>6</b> · Mèo Mun đi <b>5</b></span></div>
+    <div class="ready"><span class="avatar sm av3" style="width:20px;height:20px;font-size:9px">MM</span>Mèo Mun muốn chơi ván nữa</div>
+    <a class="btn primary block">Ván nữa · Mèo Mun đi trước</a>
+    <div class="acts"><a class="btn sm">Về phòng chờ</a><a class="btn sm">Rời phòng</a></div>
+  </section>
+</div>
+<script>
+  const game = {
+    size: 15,
+    x: [[10, 4], [9, 5], [8, 6], [7, 7], [6, 8]],
+    o: [[7, 6], [8, 8], [6, 7], [7, 8], [10, 8]],
+    last: [10, 4],
+    win: [[10, 4], [9, 5], [8, 6], [7, 7], [6, 8]],
+  };
+  renderCaroBoard(document.getElementById("bg"), game);
+  renderCaroBoard(document.getElementById("mini"), game);
+</script>
+</body>
+</html>

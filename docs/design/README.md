@@ -11,6 +11,7 @@ docs/design/
   shared/          ← tokens.css (màu, component), desktop.css (bố cục ≥ 1024px), board.js (vẽ bàn Ô ăn quan cho mockup)
   nen-tang/        ← màn hình dùng chung mọi game: trang chủ, nickname, phòng chờ, mất kết nối
   o-an-quan/       ← màn hình riêng của Ô ăn quan: bàn chơi, kết quả, lật bàn, hướng dẫn luật
+  caro/            ← màn hình riêng của Cờ caro; README trong thư mục là bản yêu cầu để nhờ canvas design
   <game-khac>/     ← thêm khi làm Tiến lên, Cờ tướng, Caro
 ```
 
@@ -86,6 +87,7 @@ Bóng đổ và lớp phủ trong suốt (`rgba`) được viết trực tiếp,
 | **Desktop**: Bàn chơi + cột nhật ký | `o-an-quan/ban-choi-desktop.html` | M2/M3 | mục 2.4, 3, 4 | **Đã chốt** (Q20), đã làm |
 | **Desktop**: Hộp hỏi Lật bàn (modal) | `o-an-quan/lat-ban-desktop.html` | M2 | mục 3 | **Đã chốt** (Q20), đã làm |
 | **Desktop**: Kết quả (modal) | `o-an-quan/ket-qua-desktop.html` | M2/M5 | mục 2.5 | **Đã chốt** (Q20), đã làm |
+| Cờ caro: phòng chờ (tuỳ chọn), bàn chơi (chưa chọn, đang chọn ô, đối thủ vừa đi, chuỗi thắng), kết quả, cả điện thoại lẫn desktop | `caro/` | C3 | `docs/caro/02-thiet-ke-ux.md` | **Đã chốt** (Claude tự thiết kế, bạn duyệt). Yêu cầu gốc ở `caro/README.md` |
 | Desktop: nhập nickname, mất kết nối, hướng dẫn | — | — | — | Dùng bố cục điện thoại căn giữa (nickname), modal (hướng dẫn = tab "Luật chơi" ở cột phải bàn chơi) |
 | Màn hình bắt đầu `/offline` | — | M2 | mục 2.6 | Chỉ để phát triển, không cần thiết kế |
 

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cờ caro · Có chuỗi thắng</title>
+<!-- Mockup: Cờ caro, vừa có 5 quân liền (chéo /): các quân của chuỗi nổi bật, vạch nối, phần còn lại mờ đi · Mốc C3 · UX mục 3.1, 4 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/caro.css">
+<script src="../shared/caro-board.js"></script>
+<style>
+  .screen { gap: 12px; }
+  .topbar .title small { display: block; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .banner-win { align-self: center; display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; background: var(--capture); color: var(--on-dark); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="topbar">
+    <a class="icon-btn" aria-label="Về trang chủ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="title">Cờ caro<small>Phòng ABCD · Lượt 11</small></div>
+    <span class="icon-btn" aria-hidden="true"></span>
+  </div>
+
+  <div class="player">
+    <span class="avatar av3">MM</span>
+    <div class="info"><div class="name">Mèo Mun</div><div class="small muted">Quân ◯ · đã đặt 5</div></div>
+    <svg class="mark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="var(--cat-bai)" stroke-width="3"/></svg>
+  </div>
+
+  <div id="b"></div>
+
+  <div class="banner-win">🏆 5 quân liên tiếp — Bạn thắng!</div>
+
+  <div class="player">
+    <span class="avatar av1">CT</span>
+    <div class="info"><div class="name">Cò Trắng 42 <span class="small muted">(bạn)</span></div><div class="small muted">Quân ✕ · đi trước</div></div>
+    <svg class="mark" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/></svg>
+  </div>
+</div>
+<script>
+  renderCaroBoard(document.getElementById("b"), {
+    size: 15,
+    x: [[10, 4], [9, 5], [8, 6], [7, 7], [6, 8]],
+    o: [[7, 6], [8, 8], [6, 7], [7, 8], [10, 8]],
+    last: [10, 4],
+    win: [[10, 4], [9, 5], [8, 6], [7, 7], [6, 8]],
+  });
+</script>
+</body>
+</html>

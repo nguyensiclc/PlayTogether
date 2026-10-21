@@ -12,6 +12,7 @@ Game đầu tiên: **Ô ăn quan**. Sau đó sẽ có Tiến lên, Cờ tướng
 - Kỹ thuật (kiến trúc, kiểu dữ liệu, thuật toán, giao thức WS): `docs/o-an-quan/03-thiet-ke-ky-thuat.md`
 - Kế hoạch, các mốc M1–M5 (gồm M1.1), test case T1–T20, câu hỏi mở: `docs/o-an-quan/04-ke-hoach-prototype.md`
 - Thiết kế màn hình (mockup, hệ màu): `docs/design/`. Màn hình đã có thiết kế thì code UI phải theo thiết kế đó.
+- Cờ caro: `docs/caro/` (luật, UX, kỹ thuật, kế hoạch). Câu hỏi mở của Caro đánh số `C1…` ở `docs/caro/04-ke-hoach-prototype.md` mục 6. Mockup đã chốt trong `docs/design/caro/` (Claude tự thiết kế), bản yêu cầu gốc ở `docs/design/caro/README.md`. Code UI Caro ở `packages/client/caro/` và `packages/client/screens/caro-game.ts`.
 - Quy ước code, clean code: `docs/quy-uoc-code.md`. Code mới và code sửa phải theo quy ước này. Trước khi commit chạy `npm run check`.
 
 Nếu code cần làm khác tài liệu thì **cập nhật tài liệu trong cùng thay đổi** và nêu rõ lý do. Câu hỏi mở Q1–Q6 chưa chốt thì dùng phương án "Đề xuất hiện tại" trong bảng.

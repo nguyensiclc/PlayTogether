@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cờ caro · Bàn chơi desktop</title>
+<!-- Mockup desktop 1280 × 800: Cờ caro, lượt mình, đang rê chuột vào một ô (xem trước); cột phải: nhật ký ván và phím tắt · Mốc C3 · UX mục 3.3 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/desktop.css">
+<link rel="stylesheet" href="../shared/caro.css">
+<script src="../shared/caro-board.js"></script>
+<style>
+  body { overflow: hidden; }
+  .dk-nav .room { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .dk-nav .room small { font-weight: 600; color: var(--muted); }
+  .layout { display: grid; grid-template-columns: 1fr 340px; height: calc(100vh - 68px); min-height: 732px; }
+  .stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 20px 48px; }
+  .stage .player { width: 100%; max-width: 560px; }
+  .board-col { width: 100%; max-width: 560px; }
+  .player .score b { font-size: 24px; }
+  .side { border-left: 1px solid var(--line); background: rgba(255,250,240,.55); display: flex; flex-direction: column; min-height: 0; }
+  .tabs { display: flex; gap: 4px; padding: 14px 16px 0; }
+  .tabs span { padding: 8px 14px; border-radius: 10px 10px 0 0; font-weight: 600; font-size: 14px; color: var(--ink); background: var(--surface); }
+  .log { flex: 1; overflow: auto; background: var(--surface); margin: 0 16px; border-radius: 0 12px 12px 12px; padding: 6px 14px; }
+  .log ul { margin: 0; padding: 0; }
+  .log li { list-style: none; display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .log li:last-child { border: 0; }
+  .log .n { color: var(--muted); width: 22px; flex: none; font-weight: 600; }
+  .log .who { font-weight: 700; }
+  .block { padding: 14px 16px 0; }
+  .block h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }
+  .keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; font-size: 13px; color: var(--muted); padding-bottom: 16px; align-items: center; }
+</style>
+</head>
+<body class="desk">
+<nav class="dk-nav">
+  <div class="logo"><span class="logo-mark"><i></i></span></div>
+  <div class="room">Cờ caro <small>· Phòng ABCD · Lượt 10</small></div>
+  <div class="spacer"></div>
+  <span class="chip">Bàn 15 × 15</span><span class="chip">Chặn 2 đầu: tắt</span>
+  <a class="btn sm">Về trang chủ</a>
+</nav>
+
+<div class="layout">
+  <main class="stage">
+    <div class="player">
+      <span class="avatar av3">MM</span>
+      <div class="info"><div class="name">Mèo Mun</div><div class="small muted">Quân ◯ · đã đặt 4</div></div>
+      <svg class="mark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="var(--cat-bai)" stroke-width="3"/></svg>
+    </div>
+    <div class="board-col"><div id="b"></div></div>
+    <div class="status-pill"><span class="pulse"></span>Lượt của bạn · click một ô trống</div>
+    <div class="player active">
+      <span class="avatar av1">CT</span>
+      <div class="info"><div class="name">Cò Trắng 42 <span class="small muted">(bạn)</span></div><div class="small muted">Quân ✕ · đi trước</div></div>
+      <svg class="mark" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/></svg>
+    </div>
+  </main>
+
+  <aside class="side">
+    <div class="tabs"><span>Nhật ký ván</span></div>
+    <div class="log">
+      <ul>
+        <li><span class="n">9</span><div><span class="who">Mèo Mun</span> đặt ◯ vào cột 8, hàng 9</div></li>
+        <li><span class="n">8</span><div><span class="who">Bạn</span> đặt ✕ vào cột 11, hàng 6</div></li>
+        <li><span class="n">7</span><div><span class="who">Mèo Mun</span> đặt ◯ vào cột 9, hàng 9</div></li>
+        <li><span class="n">6</span><div><span class="who">Bạn</span> đặt ✕ vào cột 7, hàng 9</div></li>
+        <li><span class="n">5</span><div><span class="who">Mèo Mun</span> đặt ◯ vào cột 7, hàng 8</div></li>
+        <li><span class="n">4</span><div><span class="who">Bạn</span> đặt ✕ vào cột 9, hàng 7</div></li>
+        <li><span class="n">3</span><div><span class="who">Mèo Mun</span> đặt ◯ vào cột 8, hàng 8</div></li>
+        <li><span class="n">2</span><div><span class="who">Bạn</span> đặt ✕ vào cột 8, hàng 7</div></li>
+        <li><span class="n">1</span><div><span class="who">Mèo Mun</span> đặt ◯ vào cột 7, hàng 7</div></li>
+      </ul>
+    </div>
+    <div class="block">
+      <h3>Phím tắt</h3>
+      <div class="keys">
+        <span><kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd></span><span>Di chuyển ô đang chọn</span>
+        <span><kbd>Enter</kbd> <kbd>Space</kbd></span><span>Đặt quân</span>
+        <span><kbd>Esc</kbd></span><span>Bỏ chọn</span>
+      </div>
+    </div>
+  </aside>
+</div>
+<script>
+  renderCaroBoard(document.getElementById("b"), {
+    size: 15,
+    x: [[7, 7], [8, 6], [6, 8], [9, 5], [10, 9]],
+    o: [[7, 6], [8, 8], [6, 7], [7, 8]],
+    last: [7, 8],
+    selected: [10, 4],
+    me: "x",
+  });
+</script>
+</body>
+</html>

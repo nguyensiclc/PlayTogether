@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cờ caro · Đang chọn ô</title>
+<!-- Mockup: Cờ caro, đã chạm một ô: quân xem trước, kính lúp, nút Đặt quân (chỉ điện thoại) · Mốc C3 · UX mục 3.2 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/caro.css">
+<script src="../shared/caro-board.js"></script>
+<style>
+  .screen { gap: 12px; }
+  .topbar .title small { display: block; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .wrap { position: relative; }
+  /* Kính lúp nổi phía trên ô đang chọn, căn giữa theo ô nhưng không tràn ra ngoài màn hình */
+  /* Ô được chọn là (10, 4): giữa ô nằm ở 10,5/15 bề ngang bàn; kính lúp rộng 130px nên lùi nửa chiều rộng, nổi lên trên ô */
+  #loupe { left: calc(10.5 / 15 * 100% - 65px); top: -50px; }
+  .acts { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="topbar">
+    <a class="icon-btn" aria-label="Về trang chủ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="title">Cờ caro<small>Phòng ABCD · Lượt 10</small></div>
+    <span class="icon-btn" aria-hidden="true"></span>
+  </div>
+
+  <div class="player">
+    <span class="avatar av3">MM</span>
+    <div class="info"><div class="name">Mèo Mun</div><div class="small muted">Quân ◯ · đã đặt 4</div></div>
+    <svg class="mark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="var(--cat-bai)" stroke-width="3"/></svg>
+  </div>
+
+  <div class="wrap">
+    <div id="b"></div>
+    <div id="loupe"></div>
+  </div>
+
+  <div class="status-pill" style="align-self:center"><span class="pulse"></span>Chạm lại ô đó hoặc bấm Đặt quân</div>
+  <div class="acts">
+    <a class="btn">Bỏ chọn</a>
+    <a class="btn primary place-btn">Đặt quân ✕</a>
+  </div>
+
+  <div class="player active">
+    <span class="avatar av1">CT</span>
+    <div class="info"><div class="name">Cò Trắng 42 <span class="small muted">(bạn)</span></div><div class="small muted">Quân ✕ · đi trước</div></div>
+    <svg class="mark" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/></svg>
+  </div>
+</div>
+<script>
+  const state = {
+    size: 15,
+    x: [[7, 7], [8, 6], [6, 8], [9, 5]],
+    o: [[7, 6], [8, 8], [6, 7], [7, 8]],
+    last: [7, 8],
+    selected: [10, 4],
+    me: "x",
+  };
+  renderCaroBoard(document.getElementById("b"), state);
+  renderCaroLoupe(document.getElementById("loupe"), state);
+</script>
+</body>
+</html>

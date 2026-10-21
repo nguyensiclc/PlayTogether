@@ -21,6 +21,16 @@
   --surface: #fffaf0;
   --surface-2: #fbf2e2;       /* NEW: nền phụ trong thẻ */
   --danger: #c2412d;          /* NEW: mất kết nối, hết giờ */
+  /* NEW: token thêm khi làm UI (khớp packages/client/style.css) */
+  --on-dark: #fff;
+  --accent-soft: #fff6df;
+  --gold-soft: #fbe9c4;
+  --host-ink: #7a5410;
+  --live-bg: #e3f3e9;
+  --live-ink: #23704a;
+  --cat-dangian-soft: #f3d9cf;
+  --cat-co-soft: #d3e6dd;
+  --cat-bai-soft: #d7deef;
 
   /* NEW: màu nhận diện nhóm game */
   --cat-dangian: #b5462f;

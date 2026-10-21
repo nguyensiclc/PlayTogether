@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cờ caro · Đối thủ vừa đi</title>
+<!-- Mockup: Cờ caro, đối thủ vừa đặt quân: vòng đánh dấu nước vừa đi, chưa đến lượt mình · Mốc C3 · UX mục 3.1, 6 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/caro.css">
+<script src="../shared/caro-board.js"></script>
+<style>
+  .screen { gap: 12px; }
+  .topbar .title small { display: block; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .log-line { text-align: center; font-size: 13px; color: var(--muted); }
+  .log-line b { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="topbar">
+    <a class="icon-btn" aria-label="Về trang chủ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="title">Cờ caro<small>Phòng ABCD · Lượt 9</small></div>
+    <span class="icon-btn" aria-hidden="true"></span>
+  </div>
+
+  <div class="player active">
+    <span class="avatar av3">MM</span>
+    <div class="info"><div class="name">Mèo Mun</div><div class="small muted">Quân ◯ · đã đặt 4</div></div>
+    <svg class="mark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="var(--cat-bai)" stroke-width="3"/></svg>
+  </div>
+
+  <div id="b"></div>
+
+  <p class="log-line"><b>Mèo Mun</b> đặt quân ◯ vào cột 8, hàng 9</p>
+  <div class="status-pill wait" style="align-self:center"><span class="pulse"></span>Lượt của Mèo Mun…</div>
+
+  <div class="player">
+    <span class="avatar av1">CT</span>
+    <div class="info"><div class="name">Cò Trắng 42 <span class="small muted">(bạn)</span></div><div class="small muted">Quân ✕ · đi trước</div></div>
+    <svg class="mark" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/></svg>
+  </div>
+</div>
+<script>
+  renderCaroBoard(document.getElementById("b"), {
+    size: 15,
+    x: [[7, 7], [8, 6], [6, 8], [9, 5]],
+    o: [[7, 6], [8, 8], [6, 7], [7, 8]],
+    last: [7, 8],
+  });
+</script>
+</body>
+</html>

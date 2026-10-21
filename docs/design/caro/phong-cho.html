@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cờ caro · Phòng chờ</title>
+<!-- Mockup: Phòng chờ của Cờ caro (góc nhìn chủ phòng, đủ 2 người): phần Tuỳ chọn riêng của Caro; phần còn lại dùng lại nen-tang/phong-cho.html · Mốc C3 · UX mục 2 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .screen { padding-bottom: 96px; }
+  .game-head { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+  .game-head .mini { width: 52px; height: 52px; border-radius: 12px; background: var(--cat-co-soft); display: grid; place-items: center; flex: none; }
+  .code-big { font-size: 13px; color: var(--muted); }
+  .code-big b { color: var(--ink); font-size: 16px; letter-spacing: .15em; }
+  .seat { display: flex; align-items: center; gap: 12px; min-height: 60px; }
+  .seat + .seat { border-top: 1px solid var(--line); }
+  .seat .who { flex: 1; min-width: 0; }
+  .seat .who b { display: block; }
+  .cta { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px 18px; background: linear-gradient(180deg, rgba(244,234,216,0), var(--bg) 30%); }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="topbar">
+    <a class="icon-btn" aria-label="Rời phòng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="title">Phòng chờ</div>
+    <span class="icon-btn" aria-hidden="true"></span>
+  </div>
+
+  <div class="game-head">
+    <span class="mini"><svg width="38" height="38" viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="6" fill="#fffaf0"/><path d="M4 14.7h32M4 25.3h32M14.7 4v32M25.3 4v32" stroke="#b9ad94" stroke-width="1"/><path d="M7.5 7.5l5 5M12.5 7.5l-5 5" stroke="#b5462f" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="20" r="3.4" fill="none" stroke="#3a4f8f" stroke-width="2.4"/><path d="M27.5 27.5l5 5M32.5 27.5l-5 5" stroke="#b5462f" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+    <div><h2 style="font-size:20px">Cờ caro</h2><div class="code-big">Mã phòng <b>ABCD</b></div></div>
+  </div>
+
+  <div class="section-head"><h2>Người chơi</h2><span class="small muted">2/2 · đủ người</span></div>
+  <section class="card" style="padding:4px 14px">
+    <div class="seat"><span class="avatar av1">CT</span><div class="who"><b>Cò Trắng 42 <span class="small muted">(bạn)</span></b><span class="small muted">Ghế 1</span></div><span class="badge host">Chủ phòng</span></div>
+    <div class="seat"><span class="avatar av3">MM</span><div class="who"><b>Mèo Mun</b><span class="small muted">Ghế 2</span></div><span class="badge live">● Đã vào</span></div>
+  </section>
+
+  <div class="section-head"><h2>Tuỳ chọn</h2><span class="small muted">Bạn là chủ phòng</span></div>
+  <section class="card" style="padding:2px 14px">
+    <div class="opt-row stack">
+      <div><b>Cỡ bàn</b></div>
+      <div class="seg"><span class="on">15 × 15</span><span>19 × 19</span></div>
+    </div>
+    <div class="opt-row">
+      <div><b>Chặn 2 đầu</b><div class="small muted">5 quân bị chặn cả hai đầu thì chưa thắng</div></div>
+      <span class="toggle"></span>
+    </div>
+  </section>
+
+  <div class="cta">
+    <a class="btn primary block">Bắt đầu ván</a>
+    <p class="small muted" style="text-align:center;margin-top:6px">Người đi trước được chọn ngẫu nhiên khi bắt đầu</p>
+  </div>
+</div>
+</body>
+</html>
