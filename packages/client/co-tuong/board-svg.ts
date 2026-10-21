@@ -1,9 +1,10 @@
 // Vẽ bàn Cờ tướng thành SVG (docs/design/co-tuong/mockup-*.jpg): 1 đơn vị = 1 ô, quân đặt trên giao điểm.
-// Thuần chuỗi, không đụng DOM: dùng cho bàn chính và bàn thu nhỏ ở màn kết quả.
+// Dựng chuỗi SVG, không sửa DOM (chỉ `glyph-offset.ts` đọc số đo phông): dùng cho bàn chính và bàn thu nhỏ ở màn kết quả.
 // Lưới đối xứng khi xoay 180°, nên người cầm Đen chỉ cần đổi vị trí quân (chữ trên quân luôn thẳng).
 
 import type { Kind, Piece, Side } from "@playtogether/engine/co-tuong";
 import { COLS, indexOf, ROWS, xOf, yOf } from "@playtogether/engine/co-tuong";
+import { glyphOffset } from "./glyph-offset.ts";
 
 /** Tên quân bằng tiếng Việt, dùng cho nhật ký, chú thích và đọc màn hình */
 export const KIND_LABEL: Record<Kind, string> = {
@@ -106,10 +107,12 @@ function pieceSvg(piece: Piece, i: number, p: BoardPaint): string {
   const [x, y] = place(i, p.flipped);
   const side = piece.side === 0 ? "red" : "black";
   const classes = ["pc", side, i === p.selected ? "sel" : "", p.fresh && i === p.last?.to ? "fresh" : ""];
+  const glyph = PIECE_GLYPH[piece.side][piece.kind];
+  const { dx, dy } = glyphOffset(glyph);
   return `<g class="${classes.filter(Boolean).join(" ")}" data-cell="${i}">
     <circle class="disc" cx="${x}" cy="${y}" r="${PIECE_RADIUS}"/>
     <circle class="ring" cx="${x}" cy="${y}" r="${PIECE_RADIUS - 0.07}"/>
-    <text x="${x}" y="${y}" dy="0.36em" font-size="${GLYPH_SIZE}">${PIECE_GLYPH[piece.side][piece.kind]}</text>
+    <text x="${x}" y="${y}" dx="${dx.toFixed(3)}em" dy="${dy.toFixed(3)}em" font-size="${GLYPH_SIZE}">${glyph}</text>
   </g>`;
 }
 
