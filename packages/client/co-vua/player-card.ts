@@ -55,4 +55,3 @@ export class CoVuaPlayerCard extends PlayerCardBase {
     this.badge.textContent = s.color === "w" ? "♔" : "♚";
   }
 }
-

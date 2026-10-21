@@ -27,4 +27,3 @@ export const ICON_CARD = `<svg viewBox="0 0 56 56" aria-hidden="true">
   <rect x="18" y="38" width="20" height="5" rx="2" fill="#2b2118"/>
   <path d="M20 38c0-4 3-7 8-7s8 3 8 7z" fill="#2b2118"/>
 </svg>`;
-

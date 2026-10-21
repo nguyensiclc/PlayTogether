@@ -22,4 +22,3 @@ export const coVuaGame: ClientGame = {
   historyHtml: coVuaHistoryHtml,
   createScreen: (root, room, you, actions) => new CoVuaGameView(root, room, you, actions),
 };
-

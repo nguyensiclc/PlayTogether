@@ -29,4 +29,3 @@ export function coVuaHistoryHtml(): string {
 </section>
 `;
 }
-

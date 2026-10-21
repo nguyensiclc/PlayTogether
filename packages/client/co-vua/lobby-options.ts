@@ -25,4 +25,3 @@ export const lobbyOptions: LobbyOptions = {
     return {};
   },
 };
-

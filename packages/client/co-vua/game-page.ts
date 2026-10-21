@@ -78,4 +78,3 @@ export function coVuaPageHtml(options: Options): string {
     </div>
   `;
 }
-

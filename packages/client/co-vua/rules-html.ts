@@ -45,4 +45,3 @@ export function coVuaRulesHtml(): string {
 </section>
 `;
 }
-
