@@ -30,7 +30,7 @@ Hoàn toàn dùng chung. `room.ts`, `gateway.ts`, `parse.ts`, `http.ts`… khôn
 | `main.ts`, `dom.ts`, `identity.ts`, `qr.ts`, `net/` | Nền tảng: khởi động, tiện ích DOM, danh tính, mã QR, WebSocket |
 | `screens/` | Nền tảng: trang chủ, phòng chờ, phòng, nhập nickname, hộp xác nhận rời phòng |
 | `rules/` | Nền tảng: hộp "Luật chơi / Lịch sử" (nội dung do từng game cung cấp) |
-| `games/` | Hợp đồng và danh sách game: `types.ts` (`ClientGame`, `GameScreen`, `LobbyOptions`), `registry.ts` (**nơi duy nhất nền tảng được import thư mục game**), `catalog.ts` (game "sắp có"), `option-controls.ts` (nút tuỳ chọn dùng chung) |
+| `games/` | Hợp đồng và danh sách game: `types.ts` (`ClientGame`, `GameScreen`, `GameActions` gồm `move`, `rematch`, `resign`…, `LobbyOptions`), `registry.ts` (**nơi duy nhất nền tảng được import thư mục game**), `catalog.ts` (game "sắp có"), `option-controls.ts` (nút tuỳ chọn dùng chung) |
 | `game-ui/` | Mảnh giao diện dùng chung **bên trong màn chơi** của mọi game: nhật ký ván (`log-view.ts`), phần chung của màn kết quả (`result-parts.ts`), thẻ người chơi (`player-card-base.ts`), hộp xác nhận (`confirm-box.ts`) |
 | `style.css` | CSS của nền tảng và các lớp dùng chung (`.player`, `.status-pill`, `.result`, `.sheet`, `.scrim`, `.seg-btn`…) |
 | `<game>/` | Mọi thứ riêng của game: `client-game.ts` (mô tả cho nền tảng), `game-view.ts` (màn chơi), `game-page.ts`, bàn chơi, luật (`rules-html.ts`), lịch sử (`history-html.ts`), tuỳ chọn phòng (`lobby-options.ts`), hình (`art.ts`), CSS riêng (`<game>.css`), test |
