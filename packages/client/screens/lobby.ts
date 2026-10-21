@@ -6,6 +6,7 @@ import { roomPath } from "@playtogether/protocol";
 import { escapeHtml } from "../dom.ts";
 import { GAME_INFO } from "../games.ts";
 import { BACK_ICON } from "../icons.ts";
+import { inviteOrigin } from "../invite-origin.ts";
 import { qrSvg } from "../qr.ts";
 import { LOBBY_OPTIONS } from "./lobby-options.ts";
 import { avatarClassOf, initialsOf } from "./room-players.ts";
@@ -43,7 +44,7 @@ export class LobbyView {
     this.you = you;
     const isHost = room.hostId === you.memberId;
     const game = GAME_INFO[room.gameId];
-    const link = `${location.origin}${roomPath(room.code)}`;
+    const link = `${inviteOrigin()}${roomPath(room.code)}`;
     const seated = room.seats.filter((m) => m !== null).length;
     this.root.innerHTML = `
       <div class="screen lobby">
@@ -137,7 +138,7 @@ export class LobbyView {
 
   private async copyLink(): Promise<void> {
     if (!this.room || !this.you) return;
-    await copyText(`${location.origin}${roomPath(this.room.code)}`);
+    await copyText(`${inviteOrigin()}${roomPath(this.room.code)}`);
     this.copied = true;
     this.render(this.room, this.you);
   }
@@ -149,7 +150,7 @@ export class LobbyView {
       await navigator.share({
         title: `Chơi ${GAME_INFO[this.room.gameId].name}`,
         text: `Vào chơi ${GAME_INFO[this.room.gameId].name} với mình, phòng ${this.room.code}`,
-        url: `${location.origin}${roomPath(this.room.code)}`,
+        url: `${inviteOrigin()}${roomPath(this.room.code)}`,
       });
     } catch {
       // Người dùng đóng bảng chia sẻ: không cần làm gì
