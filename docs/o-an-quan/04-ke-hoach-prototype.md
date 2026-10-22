@@ -31,6 +31,8 @@ Kiểm chứng **luồng chính** của cả nền tảng qua một game thật:
 | **M4 — Chịu lỗi** | Đồng hồ, tự đi khi hết giờ, kết nối lại, rời phòng | Tắt Wi-Fi 20 giây rồi bật lại, ván vẫn tiếp tục |
 | **M5 — Hoàn thiện** | Kết quả, Ván nữa, emoji, hướng dẫn luật, âm thanh | Cho 3–5 người chơi thử và ghi nhận phản hồi |
 
+**Tiến độ:** M1, M1.1, M2, M3 xong. **M4 chưa làm** (server chưa có đồng hồ lượt, vẫn giữ ghế không giới hạn). **M5** đã có kết quả, Ván nữa, hướng dẫn luật; còn emoji và âm thanh.
+
 ## 4. Test case cho engine
 
 | # | Tình huống | Kỳ vọng |

@@ -31,7 +31,7 @@ Mở rộng nền tảng PlayTogether với trò chơi thứ ba: **Cờ vua (Che
 | **V2 — Tích hợp Protocol & Server** | Khai báo GameId `co-vua`, Protocol, Server registry, test WS | Server tạo phòng, nhận move cờ vua, test server qua ws xanh | **Đã xong** |
 | **V3 — Giao diện Cờ vua** | Bàn cờ SVG, tap-to-move, phong cấp, highlight, di động 360px & desktop | Chơi hết ván mượt mà giữa 2 tab trình duyệt | **Đã xong** |
 | **V4 — Hoàn thiện** | Thử nghiệm thực tế 2 người chơi trên nhiều thiết bị | Chơi thử mượt mà không có lỗi | **Đã xong** |
-| **V5 — Đánh với máy (Bot)** | Engine Bot 3 cấp độ (Dễ, Trung bình, Khó), hỗ trợ thêm bot trong phòng chờ, chơi với máy từ trang chủ | Test bot xanh, bot chơi mượt mà với 3 độ khó | **Đang tiến hành** |
+| **V5 — Đánh với máy (Bot)** | Engine Bot 3 cấp độ (Dễ, Trung bình, Khó), hỗ trợ thêm bot trong phòng chờ, chơi với máy từ trang chủ | Test bot xanh, bot chơi mượt mà với 3 độ khó | **Đã xong** |
 
 ---
 

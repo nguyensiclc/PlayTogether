@@ -56,7 +56,7 @@ Mục tiêu: có hàng trăm game vẫn không lặp code. Thêm game = thêm th
 
 ## Cách làm việc
 
-- Làm theo thứ tự các mốc trong kế hoạch. **Mốc hiện tại: M3 — Phòng & mạng.** (M1, M1.1: xong. M2 khép lại theo Q22a, chế độ chơi một máy đã bỏ.)
+- Làm theo thứ tự các mốc trong kế hoạch. **Mốc hiện tại: M4 — Chịu lỗi** (đồng hồ lượt, tự đi khi hết giờ, giữ ghế 60 giây). (M1, M1.1, M3: xong. M2 khép lại theo Q22a, chế độ chơi một máy đã bỏ. Caro, Cờ tướng, Cờ vua đã có giao diện; còn thử trên điện thoại thật.)
 - Với engine: viết test trước (T1–T16), sau đó mới viết luật. Test fuzz (T16) phải kiểm tra bất biến: tổng dân = 50, tổng quan = 2.
 - Làm cho điện thoại trước. Vùng chạm tối thiểu 44px. Thử ở chiều rộng 360px.
 - Giao diện người dùng viết bằng tiếng Việt. Tên biến và hàm viết bằng tiếng Anh, riêng thuật ngữ luật giữ tiếng Việt không dấu như trong tài liệu (`dan`, `quan`, `camAnQuanNon`, `giaTriQuan`...).

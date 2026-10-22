@@ -34,8 +34,9 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 
 | Hạng mục | Trạng thái |
 |---|---|
-| Ô ăn quan (game thử nghiệm đầu tiên) | Engine xong (M1, M1.1). Đang làm M3: chơi qua link mời |
-| Nền tảng phòng chơi (room, link mời) | M3: server WebSocket, phòng chờ, link mời, QR, tự kết nối lại |
+| Ô ăn quan (game thử nghiệm đầu tiên) | M1, M1.1, M2, M3 xong (engine, giao diện, chơi qua link mời). Còn M4 (đồng hồ lượt, giữ ghế 60 giây) và M5 (emoji, âm thanh) |
+| Nền tảng phòng chơi (room, link mời) | M3 xong: server WebSocket, phòng chờ, link mời, QR, tự kết nối lại (giữ ghế không giới hạn), Ván nữa, xin thua, bot dùng chung. Chưa có đồng hồ lượt |
 | Cờ caro | Engine, nền tảng đa game và giao diện đã xong (C1–C3). Còn thử trên điện thoại thật (C4) |
-| Cờ vua | Engine (V1), Protocol & Server (V2), Giao diện bàn cờ (V3) đã xong |
-| Tiến lên, Cờ tướng | Chưa bắt đầu |
+| Cờ tướng | Engine, đăng ký game và giao diện đã xong (T0, T-E, T-P, T-U), có bot Dễ, Vừa, Khó. Còn thử trên điện thoại thật (T-H) |
+| Cờ vua | Engine (V1), Protocol & Server (V2), Giao diện (V3), thử nghiệm (V4) và bot 3 cấp (V5) đã xong |
+| Tiến lên | Chưa bắt đầu |
