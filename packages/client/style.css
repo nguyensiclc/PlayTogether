@@ -1542,6 +1542,14 @@ kbd {
   font-size: 12px;
 }
 
+/* Avatar con vật 3D: ảnh phủ kín vòng tròn, nền kem để ảnh thiếu vẫn hợp màu */
+.avatar.pic {
+  background-color: var(--cream);
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
 .avatar.empty {
   background: transparent;
   border: 2px dashed var(--stone-edge);

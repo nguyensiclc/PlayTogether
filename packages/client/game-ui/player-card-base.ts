@@ -43,8 +43,10 @@ export abstract class PlayerCardBase {
   }
 
   protected renderBase(who: PlayerIdentity, state: BaseCardState): void {
-    this.avatar.className = `avatar ${who.avatarClass}`;
-    this.avatar.textContent = who.initials;
+    this.avatar.className = `avatar ${who.avatarClass}${who.avatarUrl ? " pic" : ""}`;
+    this.avatar.textContent = who.avatarUrl ? "" : who.initials;
+    this.avatar.style.backgroundImage = who.avatarUrl ? `url(${who.avatarUrl})` : "";
+    if (who.avatarUrl) this.avatar.setAttribute("aria-label", who.name);
     this.name.textContent = who.name;
     this.you.hidden = !state.you;
     this.el.classList.toggle("active", state.active);

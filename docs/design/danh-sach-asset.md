@@ -18,7 +18,7 @@ Dùng để giao cho người vẽ hoặc để tạo ảnh. Nguồn tham chiế
 | A1 | `texture-giay-kem` | Giấy kem có vân rất nhẹ, lát liền được | 512 × 512 | WebP | Nền trang, màu gần `#F3EADB` |
 | A2 | `texture-go-sang` | Vân gỗ sáng (mặt bàn, khung) | 1024 × 1024 | WebP | Lát liền, dùng làm nền khối "gỗ" |
 | A3 | `texture-go-toi` | Vân gỗ nâu sẫm | 1024 × 1024 | WebP | Nền chơi tối, cột phải khối tối (`#2A1F1A`) |
-| A4 | `avatar-*` | Bộ 16 con vật vẽ minh hoạ: thỏ, shiba, sóc, mèo, cáo, gấu, ếch, vịt, nai, cú, chim cánh cụt, hổ, heo, hải ly, gà, cá | 256 × 256 | SVG | Cùng một nét vẽ, nền trong suốt hoặc tròn. Client gán theo băm của tên |
+| A4 | `avatar-*` (**đã có**, xem `ban-quyen-asset.md`) | Bộ 16 con vật vẽ minh hoạ: thỏ, shiba, sóc, mèo, cáo, gấu, ếch, vịt, nai, cú, chim cánh cụt, hổ, heo, hải ly, gà, cá | 256 × 256 | SVG | Cùng một nét vẽ, nền trong suốt hoặc tròn. Client gán theo băm của tên |
 | A5 | `avatar-trong` | Ghế trống (cái ghế) | 256 × 256 | SVG | Thay cho số ghế nét đứt |
 | A6 | `logo` | Logo PlayTogether (ba chấm trong ô đỏ) và bản chữ ngang | vector | SVG | Có bản trắng cho nền tối |
 | A7 | `qr-khung` | Khung trang trí quanh mã QR | 320 × 320 | SVG | Mã QR vẫn sinh bằng code (`qr.ts`) |

@@ -11,6 +11,15 @@ export interface PlayerIdentity {
   initials: string;
   /** Class màu avatar trong style.css (av1, av3…) */
   avatarClass: string;
+  /** Ảnh con vật; thiếu (vd Máy) thì avatar hiện `initials` trên nền màu */
+  avatarUrl?: string | undefined;
+}
+
+/** HTML avatar của một người chơi: ảnh con vật nếu có, không thì chữ cái trên nền màu. `extra` là class thêm (sm…) */
+export function avatarHtml(who: PlayerIdentity, extra = ""): string {
+  const cls = `avatar ${extra} ${who.avatarClass}`.replace(/\s+/g, " ");
+  if (!who.avatarUrl) return `<span class="${cls}">${escapeHtml(who.initials)}</span>`;
+  return `<span class="${cls} pic" role="img" aria-label="${escapeHtml(who.name)}" style="background-image:url(${who.avatarUrl})"></span>`;
 }
 
 /** Trận nhiều ván (Đấu trận), nếu game có */
@@ -39,7 +48,7 @@ export function rematchHtml(d: RematchData): string {
     .filter((s) => s !== d.mySeat)
     .map((s) => {
       const who = d.identityOf(s);
-      return `<div class="ready"><span class="avatar sm ${who.avatarClass}">${escapeHtml(who.initials)}</span>${escapeHtml(who.name)} muốn ${wantText}</div>`;
+      return `<div class="ready">${avatarHtml(who, "sm")}${escapeHtml(who.name)} muốn ${wantText}</div>`;
     })
     .join("");
   if (d.mySeat === null) return ready;

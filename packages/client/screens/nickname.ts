@@ -5,20 +5,18 @@ import { MAX_NAME_LENGTH, normalizeName } from "@playtogether/protocol";
 import { $, escapeHtml } from "../dom.ts";
 import { gameOf } from "../games/registry.ts";
 import { randomName } from "../identity.ts";
-import { avatarClassOf, initialsOf } from "./room-players.ts";
+import { avatarOfName } from "./room-players.ts";
 
 /** Hỏi tên rồi gọi `onSubmit` với tên đã chuẩn hoá */
 export function showNickname(root: HTMLElement, preview: RoomPreview, onSubmit: (name: string) => void): void {
   const suggestions = [randomName(), randomName()];
-  const avatars = preview.players
-    .map((name, seat) => `<span class="avatar ${avatarClassOf(seat)}">${escapeHtml(initialsOf(name))}</span>`)
-    .join("");
+  const avatars = preview.players.map((name, seat) => avatarOfName(name, seat)).join("");
   const seatsText = preview.freeSeats > 0 ? `Còn ${preview.freeSeats} ghế trống` : "Phòng đã đủ người, bạn sẽ vào xem";
   root.innerHTML = `
     <div class="screen nickname">
       <header class="topbar"><a class="logo" href="/"><span class="logo-mark"><i></i></span>PlayTogether</a></header>
       <section class="invite-head">
-        <div class="avatar ${avatarClassOf(0)} host-av">${escapeHtml(initialsOf(preview.hostName))}</div>
+        ${avatarOfName(preview.hostName, 0, "host-av")}
         <h1>${escapeHtml(preview.hostName)} mời bạn<br>chơi ${gameOf(preview.gameId).info.name}</h1>
         <div class="card room-card">
           <span class="mini">${gameOf(preview.gameId).info.icon}</span>

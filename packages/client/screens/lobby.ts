@@ -8,7 +8,7 @@ import { gameOf } from "../games/registry.ts";
 import { BACK_ICON } from "../icons.ts";
 import { qrSvg } from "../qr.ts";
 import { showHistory, showRules } from "../rules/rules-dialog.ts";
-import { avatarClassOf, initialsOf } from "./room-players.ts";
+import { avatarOfName } from "./room-players.ts";
 
 export interface LobbyActions {
   takeSeat(seat: SeatId): void;
@@ -193,7 +193,7 @@ export class LobbyView {
         ? '<span class="badge host">Chủ phòng</span>'
         : '<span class="badge live">● Đã vào</span>';
     return `<div class="seat">
-      <span class="avatar ${avatarClassOf(seat)}">${escapeHtml(initialsOf(m.name))}</span>
+      ${avatarOfName(m.name, seat)}
       <div class="who"><b>${escapeHtml(m.name)}${me ? ' <span class="small muted">(bạn)</span>' : ""}</b><span class="small muted">Ghế ${seat + 1}</span></div>
       ${badge}
     </div>`;
@@ -261,7 +261,7 @@ export class LobbyView {
 function spectatorsHtml(list: PublicMember[]): string {
   if (list.length === 0) return "";
   const names = list.map((m) => escapeHtml(m.name)).join(", ");
-  const avatars = list.map((m) => `<span class="avatar sm av2">${escapeHtml(initialsOf(m.name))}</span>`).join("");
+  const avatars = list.map((m) => avatarOfName(m.name, null, "sm")).join("");
   return `<div class="spect small muted">${avatars}<span>${names} đang xem</span></div>`;
 }
 

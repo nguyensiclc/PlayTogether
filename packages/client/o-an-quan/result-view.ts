@@ -5,7 +5,7 @@ import type { GameResult, SeatId } from "@playtogether/engine";
 import type { EndReason, ScoreDetail } from "@playtogether/engine/o-an-quan";
 import type { MatchScore } from "@playtogether/protocol";
 import { escapeHtml } from "../dom.ts";
-import { type PlayerIdentity, rematchHtml, resultTitle, resultTrophy } from "../game-ui/result-parts.ts";
+import { avatarHtml, type PlayerIdentity, rematchHtml, resultTitle, resultTrophy } from "../game-ui/result-parts.ts";
 
 export interface ResultViewData {
   result: GameResult;
@@ -54,7 +54,7 @@ export function resultHtml(d: ResultViewData): string {
   const vsPlayer = (seat: SeatId) => {
     const who = d.identityOf(seat);
     const isWinner = isMatchWon ? matchWinner === seat : result.winner === seat;
-    return `<div class="p${isWinner ? " win" : ""}"><span class="avatar ${who.avatarClass}">${escapeHtml(who.initials)}</span><span class="small">${label(seat)}</span><b>${detailOf(seat).total}</b></div>`;
+    return `<div class="p${isWinner ? " win" : ""}">${avatarHtml(who)}<span class="small">${label(seat)}</span><b>${detailOf(seat).total}</b></div>`;
   };
   const why = explainReason(reason, result.winner, (seat) => label(seat));
 

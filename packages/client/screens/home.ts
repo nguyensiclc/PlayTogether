@@ -10,7 +10,7 @@ import type { Category } from "../games/types.ts";
 import { getClientId, getName, randomName, recentRooms, setName } from "../identity.ts";
 import { GameSocket } from "../net/socket.ts";
 import { showRules } from "../rules/rules-dialog.ts";
-import { initialsOf } from "./room-players.ts";
+import { avatarOfName } from "./room-players.ts";
 
 /** Thẻ trong lưới trò chơi: game chơi được (có `gameId`) lẫn game sắp có */
 interface GameCardInfo {
@@ -147,7 +147,7 @@ function currentName(): string {
 function setupNickname(chip: HTMLElement): void {
   const show = () => {
     const name = currentName();
-    chip.innerHTML = `<span class="avatar sm av1">${escapeHtml(initialsOf(name))}</span>${escapeHtml(name)}<span aria-hidden="true">✎</span>`;
+    chip.innerHTML = `${avatarOfName(name, 0, "sm")}${escapeHtml(name)}<span aria-hidden="true">✎</span>`;
   };
   show();
   chip.addEventListener("click", () => {
