@@ -21,10 +21,8 @@ interface GameCardInfo {
   icon: string;
 }
 
-const CARDS: GameCardInfo[] = [
-  ...PLAYABLE_GAMES.map((g) => ({ ...g.info, gameId: g.id, icon: g.info.cardIcon })),
-  ...UPCOMING_GAMES,
-];
+const PLAYABLE_CARDS: GameCardInfo[] = PLAYABLE_GAMES.map((g) => ({ ...g.info, gameId: g.id, icon: g.info.cardIcon }));
+const CARDS: GameCardInfo[] = [...PLAYABLE_CARDS, ...UPCOMING_GAMES];
 
 /** Game được giới thiệu ở khối "Nổi bật" và nút Tạo phòng ở đầu trang: game đầu tiên có hình nổi bật */
 const FEATURED = PLAYABLE_GAMES.find((g) => g.info.featuredArt) ?? PLAYABLE_GAMES[0];
@@ -61,7 +59,10 @@ export function mountHome(root: HTMLElement): void {
           <div class="hero-feat">
             <div class="section-head mobile-only"><h2>Nổi bật</h2></div>
             <article class="card featured">
-              <div class="art"><span class="badge live">● Chơi được ngay</span>${FEATURED?.info.featuredArt ?? ""}</div>
+              <div class="art"><span class="badge live">● Chơi được ngay</span>${FEATURED?.info.featuredArt ?? ""}
+                <span class="link-chip" aria-hidden="true">playtogether.vn/AB12</span>
+                <span class="bubble b1" aria-hidden="true"><b>LA</b>Lan vừa vào phòng</span>
+                <span class="bubble b2" aria-hidden="true"><b>MI</b>Đến lượt bạn!</span></div>
               <div class="body">
                 <div class="info">
                   <h2>${FEATURED?.info.name}</h2>
@@ -90,7 +91,11 @@ export function mountHome(root: HTMLElement): void {
               .join("")}
           </div>
         </div>
-        <div class="games">${CARDS.map(gameCard).join("")}</div>
+        <div class="games">${PLAYABLE_CARDS.map(gameCard).join("")}</div>
+        <section class="soon-strip" aria-label="Sắp có">
+          <div class="section-head"><h2>Sắp có</h2><span class="small muted">Đang làm</span></div>
+          <div class="soon-list">${UPCOMING_GAMES.map(soonItem).join("")}</div>
+        </section>
         <section class="rules-row" aria-label="Luật chơi">
           <div class="section-head"><h2>Đọc luật trước khi chơi</h2></div>
           <div class="rules-chips">${CARDS.flatMap((g) => (g.gameId ? [`<button class="btn sm" type="button" data-rules="${g.gameId}">📖 ${g.name}</button>`] : [])).join("")}</div>
@@ -263,20 +268,24 @@ function recentHtml(): string {
 function filterGames(root: HTMLElement, chip: HTMLButtonElement): void {
   const cat = chip.dataset.cat ?? "";
   for (const c of root.querySelectorAll(".filters .chip")) c.setAttribute("aria-pressed", String(c === chip));
-  for (const g of root.querySelectorAll<HTMLElement>(".games .game")) g.hidden = cat !== "" && g.dataset.cat !== cat;
+  for (const g of root.querySelectorAll<HTMLElement>(".games .game, .soon-list .soon-item"))
+    g.hidden = cat !== "" && g.dataset.cat !== cat;
+}
+
+/** Thẻ "Sắp có": chip nét đứt trong dải cuộn ngang, không chiếm chỗ của game chơi được */
+function soonItem(g: GameCardInfo): string {
+  return `<div class="soon-item" data-cat="${g.category}" aria-disabled="true"><span class="soon-ico">${g.icon}</span><span class="nm">${g.name}</span><span class="tag">${g.players}</span></div>`;
 }
 
 function gameCard(g: GameCardInfo): string {
-  // Mỗi phần của meta là một cụm không ngắt giữa chừng ("2 người", "Dân gian"); thiếu chỗ thì cả cụm xuống dòng
+  const info = g.gameId ? gameOf(g.gameId) : undefined;
   const meta = `<span>${g.players}</span><span>${CATEGORY_NAME[g.category]}</span>`;
-  const ico = `<div class="ico ${CATEGORY_BG[g.category]}">${g.gameId ? "" : `<span class="badge">Sắp có</span>`}${g.icon}</div>`;
-  if (!g.gameId) {
-    return `<div class="game soon" data-cat="${g.category}" aria-disabled="true">${ico}
-      <div class="row"><div class="info"><div class="nm">${g.name}</div><div class="mt">${meta}</div></div></div></div>`;
-  }
-  const hasBot = gameOf(g.gameId).botSupported;
-  const botBtn = hasBot ? `<span class="btn ghost sm" data-create-bot="${g.gameId}">🤖 Với máy</span>` : "";
-  return `<button type="button" class="game playable" data-create="${g.gameId}" data-cat="${g.category}">${ico}
+  const badge = info?.botSupported ? "● Có bot" : "● Chơi được ngay";
+  const botBtn = info?.botSupported
+    ? `<button type="button" class="btn ghost sm bot" data-create-bot="${g.gameId}" aria-label="Chơi với máy">🤖</button>`
+    : "";
+  return `<article class="game playable" data-cat="${g.category}">
+    <div class="ico" style="background:${info?.info.cardBg}"><span class="badge live">${badge}</span>${info?.info.cardArt ?? ""}</div>
     <div class="row"><div class="info"><div class="nm">${g.name}</div><div class="mt">${meta}</div></div>
-    <div class="acts desk-only">${botBtn}<span class="btn primary sm">Tạo phòng</span></div></div></button>`;
+    <div class="acts"><button type="button" class="btn primary sm" data-create="${g.gameId}">Tạo phòng</button>${botBtn}</div></div></article>`;
 }

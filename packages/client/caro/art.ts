@@ -6,3 +6,9 @@ export const ICON_SMALL =
 
 /** SVG 56 × 56 cho thẻ trong lưới trò chơi */
 export const ICON_CARD = `<svg viewBox="0 0 56 56" aria-hidden="true"><g stroke="#2f6b5a" stroke-width="1.6" opacity=".5"><path d="M8 19h40M8 28h40M8 37h40M19 8v40M28 8v40M37 8v40"/></g><path d="M11 11l6 6M17 11l-6 6M29 29l6 6M35 29l-6 6" stroke="#b5462f" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="14" r="3.6" fill="none" stroke="#3a4f8f" stroke-width="2.6"/><circle cx="14" cy="32" r="3.6" fill="none" stroke="#3a4f8f" stroke-width="2.6"/></svg>`;
+
+/** Hình trên thẻ game ở trang chủ (SVG 160 × 80) và nền của vùng hình */
+export const CARD_ART = `<svg viewBox="0 0 160 80" aria-hidden="true"><g fill="none" stroke-width="5" stroke-linecap="round"><path d="M42 20l16 16M58 20L42 36" stroke="#b5462f"/><path d="M96 50l16 16M112 50L96 66" stroke="#b5462f"/><circle cx="104" cy="28" r="8" stroke="#3a4f8f"/><circle cx="62" cy="54" r="8" stroke="#3a4f8f"/><circle cx="80" cy="41" r="8" stroke="#3a4f8f"/></g></svg>`;
+
+export const CARD_BG =
+  "linear-gradient(#cfdcec 1px, transparent 1px) 0 0 / 14px 14px, linear-gradient(90deg, #cfdcec 1px, transparent 1px) 0 0 / 14px 14px, #fbf8ee";

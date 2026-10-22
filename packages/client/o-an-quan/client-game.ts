@@ -1,7 +1,7 @@
 // Mô tả Ô ăn quan cho nền tảng (client). Đăng ký ở games/registry.ts.
 
 import type { ClientGame } from "../games/types.ts";
-import { FEATURED_ART, ICON_CARD, ICON_SMALL } from "./art.ts";
+import { CARD_ART, CARD_BG, FEATURED_ART, ICON_CARD, ICON_SMALL } from "./art.ts";
 import { GameView } from "./game-view.ts";
 import { oAnQuanHistoryHtml } from "./history-html.ts";
 import { lobbyOptions } from "./lobby-options.ts";
@@ -16,6 +16,8 @@ export const oAnQuanGame: ClientGame = {
     duration: "10–15 phút",
     icon: ICON_SMALL,
     cardIcon: ICON_CARD,
+    cardArt: CARD_ART,
+    cardBg: CARD_BG,
     featuredArt: FEATURED_ART,
   },
   lobbyOptions,

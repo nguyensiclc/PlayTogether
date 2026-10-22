@@ -514,6 +514,7 @@ kbd {
 .home .hero h1 em {
   font-style: normal;
   color: var(--primary);
+  background: linear-gradient(transparent 62%, rgba(242, 179, 61, 0.5) 62%);
 }
 
 .home .hero .lead {
@@ -552,6 +553,69 @@ kbd {
   height: 26px;
   padding: 0 12px;
   font-size: 12px;
+}
+
+/* Chip link và bong bóng minh hoạ "bạn bè vào phòng" trên hình nổi bật (chỉ trang trí) */
+.featured .art .link-chip {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(43, 33, 24, 0.82);
+  color: var(--on-dark);
+  font:
+    600 11px ui-monospace,
+    monospace;
+}
+
+.featured .art .link-chip::before {
+  content: "🔗";
+  font-size: 10px;
+}
+
+.featured .art .bubble {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 5px;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.5);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.featured .art .bubble b {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--on-dark);
+  font-size: 9px;
+}
+
+.featured .art .bubble.b1 {
+  top: 10px;
+  right: 10px;
+}
+
+.featured .art .bubble.b1 b {
+  background: var(--cat-co);
+}
+
+.featured .art .bubble.b2 {
+  bottom: 10px;
+  right: 10px;
+}
+
+.featured .art .bubble.b2 b {
+  background: var(--cat-bai);
 }
 
 .featured .body {
@@ -617,49 +681,32 @@ kbd {
 
 .game {
   background: var(--surface);
+  border: 1px solid var(--card-line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 10px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-height: 150px;
-  text-decoration: none;
   color: inherit;
 }
 
-a.game {
-  cursor: pointer;
-  transition:
-    transform 0.12s,
-    box-shadow 0.12s;
-}
-
-a.game:hover {
-  box-shadow:
-    0 0 0 2px var(--ink),
-    var(--shadow);
-  transform: translateY(-2px);
-}
-
+/* Mỗi game một chất liệu riêng: nền do game khai báo (`cardBg`), hình SVG 160 × 80 (`cardArt`) */
 .game .ico {
-  height: 76px;
-  border-radius: 10px;
+  height: 112px;
   display: grid;
   place-items: center;
   position: relative;
 }
 
 .game .ico svg {
-  width: 56px;
-  height: 56px;
+  width: 86%;
+  height: 88%;
 }
 
 .game .ico .badge {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  background: rgba(255, 250, 240, 0.92);
+  top: 8px;
+  left: 8px;
 }
 
 /* Hai tầng: tên + meta ở trên, nhóm nút ở dưới; `flex: 1` để nút luôn dính đáy thẻ dù thẻ cùng hàng cao hơn */
@@ -670,6 +717,7 @@ a.game:hover {
   justify-content: space-between;
   gap: 10px;
   min-width: 0;
+  padding: 12px;
   text-align: left;
 }
 
@@ -679,15 +727,27 @@ a.game:hover {
 
 .game .acts {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
   gap: 6px;
   margin-top: auto;
 }
 
+.game .acts .btn.primary {
+  flex: 1;
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+.game .acts .btn.bot {
+  flex: none;
+  width: 44px;
+  padding: 0;
+  border-color: var(--line);
+  background: var(--surface);
+}
+
 .game .nm {
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 800;
+  font-size: 16px;
   line-height: 1.2;
 }
 
@@ -696,7 +756,7 @@ a.game:hover {
   flex-wrap: wrap;
   column-gap: 0;
   margin-top: 2px;
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--muted);
 }
 
@@ -710,9 +770,41 @@ a.game:hover {
   margin: 0 5px;
 }
 
-.game.soon .ico {
-  filter: grayscale(0.35);
-  opacity: 0.85;
+/* Dải "Sắp có": chip nét đứt, cuộn ngang trên điện thoại */
+.soon-list {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin: 0 -16px;
+  padding: 0 16px 6px;
+  scrollbar-width: none;
+}
+
+.soon-item {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px dashed #c9b894;
+  border-radius: 14px;
+  padding: 8px 14px 8px 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.soon-item .soon-ico svg {
+  width: 32px;
+  height: 32px;
+  display: block;
+  opacity: 0.8;
+}
+
+.soon-item .tag {
+  font-size: 11px;
+  background: var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
 }
 
 .c-dg {
@@ -860,32 +952,28 @@ a.game:hover {
     gap: 16px;
   }
 
-  .game {
-    padding: 12px;
-    gap: 10px;
-  }
-
   .game .ico {
-    height: 120px;
-    border-radius: 12px;
-  }
-
-  .game .ico svg {
-    width: 72px;
-    height: 72px;
+    height: 150px;
   }
 
   .game .ico .badge {
-    top: 8px;
-    right: 8px;
+    top: 10px;
+    left: 10px;
   }
 
   .game .nm {
-    font-size: 15px;
+    font-size: 17px;
   }
 
   .game .mt {
     font-size: 13px;
+  }
+
+  .soon-list {
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
   }
 
   .home footer {

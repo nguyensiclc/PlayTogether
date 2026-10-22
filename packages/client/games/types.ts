@@ -54,6 +54,10 @@ export interface GameInfo {
   icon: string;
   /** SVG 56 × 56 cho thẻ trong lưới trò chơi */
   cardIcon: string;
+  /** SVG 160 × 80 vẽ trên thẻ game ở trang chủ (mỗi game một chất liệu riêng) */
+  cardArt: string;
+  /** Giá trị CSS `background` của vùng hình trên thẻ game, vd gradient gỗ hay hoạ tiết giấy */
+  cardBg: string;
   /** SVG rộng cho thẻ "Nổi bật" ở trang chủ; chỉ game được giới thiệu mới có */
   featuredArt?: string;
 }
