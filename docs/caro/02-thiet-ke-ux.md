@@ -4,6 +4,8 @@ Mục tiêu giống Ô ăn quan: **từ lúc bấm link đến lúc đặt quân
 
 ## 1. Luồng tổng thể
 
+> **Quân 3D bóng (cập nhật):** X đỏ và O xanh vẽ có bóng đổ, viền tối, thân gradient và vệt phản chiếu (`board-svg.ts` và `caro.css`). Hình dạng X và O vẫn khác nhau nên không chỉ phân biệt bằng màu. Mặt giấy chuyển gradient kem nhẹ.
+
 Giống Ô ăn quan (xem `docs/o-an-quan/02-thiet-ke-ux.md` mục 1):
 
 ```

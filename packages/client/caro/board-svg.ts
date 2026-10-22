@@ -31,12 +31,23 @@ function starPoints(size: number): [number, number][] {
   return size === 19 ? all : all.filter(([x, y]) => (x === 7) === (y === 7));
 }
 
+/** Quân 3D bóng: bóng đổ, viền tối, thân gradient, vệt phản chiếu; gradient ở `MARK_DEFS` */
 function markSvg(mark: Mark, x: number, y: number): string {
   if (mark === 0) {
-    return `<path class="mx" d="M${x + 0.24} ${y + 0.24}L${x + 0.76} ${y + 0.76}M${x + 0.76} ${y + 0.24}L${x + 0.24} ${y + 0.76}"/>`;
+    const d = `M${x + 0.27} ${y + 0.27}L${x + 0.73} ${y + 0.73}M${x + 0.73} ${y + 0.27}L${x + 0.27} ${y + 0.73}`;
+    const shine = `M${x + 0.27} ${y + 0.25}L${x + 0.46} ${y + 0.44}M${x + 0.73} ${y + 0.25}L${x + 0.58} ${y + 0.4}`;
+    return `<g class="mx"><path class="sh" d="${d}"/><path class="bd" d="${d}"/><path class="bo" d="${d}"/><path class="hl" d="${shine}"/></g>`;
   }
-  return `<circle class="mo" cx="${x + 0.5}" cy="${y + 0.5}" r="0.27"/>`;
+  const [cx, cy] = [x + 0.5, y + 0.5];
+  const arc = `M${cx - 0.21} ${cy - 0.06}A0.22 0.22 0 0 1 ${cx - 0.04} ${cy - 0.21}`;
+  return `<g class="mo"><circle class="sh" cx="${cx}" cy="${cy}" r="0.27"/><circle class="bd" cx="${cx}" cy="${cy}" r="0.27"/><circle class="bo" cx="${cx}" cy="${cy}" r="0.27"/><path class="hl" d="${arc}"/></g>`;
 }
+
+/** Gradient của hai loại quân, dùng chung cho mọi quân trong một SVG bàn */
+const MARK_DEFS = `<defs>
+  <linearGradient id="cr-x" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a62"/><stop offset="1" stop-color="#c22d1b"/></linearGradient>
+  <linearGradient id="cr-o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b95ff"/><stop offset="1" stop-color="#2a4cae"/></linearGradient>
+</defs>`;
 
 function cellRect(cls: string, x: number, y: number): string {
   return `<rect class="${cls}" x="${x + 0.07}" y="${y + 0.07}" width="0.86" height="0.86" rx="0.16"/>`;
@@ -82,6 +93,7 @@ export function boardSvg(p: BoardPaint): string {
   const win = new Set(p.winLine);
   const parts: string[] = [
     `<svg class="caro-svg" viewBox="${p.viewBox ?? `0 0 ${n} ${n}`}" role="img" aria-label="Bàn cờ caro ${n} × ${n}">`,
+    MARK_DEFS,
     `<path class="grid" d="${gridPath(n)}"/>`,
     starPoints(n)
       .map(([x, y]) => `<circle class="star" cx="${x + 0.5}" cy="${y + 0.5}" r="0.1"/>`)

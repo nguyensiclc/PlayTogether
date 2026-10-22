@@ -20,7 +20,7 @@
 .caro-board > div:first-child {
   overflow: hidden;
   border-radius: 12px;
-  background: var(--surface);
+  background: linear-gradient(135deg, #fffaf0, #f3e6c8);
 }
 .caro-svg {
   display: block;
@@ -38,16 +38,39 @@
   fill: var(--board-edge);
   opacity: 0.5;
 }
-.caro-svg .mx {
-  stroke: var(--primary);
-  stroke-width: 0.13;
+/* Quân 3D bóng: .sh bóng đổ (lệch xuống phải), .bd viền tối, .bo thân gradient, .hl vệt sáng */
+.caro-svg .mx path,
+.caro-svg .mo circle {
+  fill: none;
   stroke-linecap: round;
-  fill: none;
 }
-.caro-svg .mo {
-  stroke: var(--cat-bai);
-  stroke-width: 0.13;
+.caro-svg .sh {
+  stroke: rgba(40, 20, 8, 0.3);
+  stroke-width: 0.2;
+  transform: translate(0.03px, 0.05px);
+}
+.caro-svg .mx .bd {
+  stroke: #7d1a0e;
+  stroke-width: 0.2;
+}
+.caro-svg .mx .bo {
+  stroke: url(#cr-x);
+  stroke-width: 0.14;
+}
+.caro-svg .mo .bd {
+  stroke: #1a3277;
+  stroke-width: 0.2;
+}
+.caro-svg .mo .bo {
+  stroke: url(#cr-o);
+  stroke-width: 0.14;
+}
+.caro-svg .hl {
   fill: none;
+  stroke: #fff;
+  stroke-opacity: 0.6;
+  stroke-width: 0.035;
+  stroke-linecap: round;
 }
 .caro-svg .last {
   fill: rgba(242, 179, 61, 0.34);
