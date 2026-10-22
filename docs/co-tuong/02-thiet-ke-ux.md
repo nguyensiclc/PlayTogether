@@ -4,6 +4,8 @@ Luồng phòng (tạo phòng, link mời, QR, ghế, người xem, mất kết n
 
 ## 1. Phòng chờ
 
+> **Quân 3D bóng (cập nhật):** quân vẽ như đĩa gỗ có cạnh dày, bóng đổ và vệt phản chiếu (gradient khai báo trong `board-svg.ts`, kiểu ở `co-tuong.css`). Chữ Hán và màu vòng vẫn phân biệt Đỏ và Đen. Mặt bàn kem chuyển gradient nhẹ.
+
 Tuỳ chọn (chủ phòng sửa, khách chỉ xem), theo `04-ke-hoach-prototype.md` mục 6:
 
 - Chưa có tuỳ chọn nào để chỉnh: phòng chờ chỉ ghi "Đỏ đi trước; ván đầu chọn ngẫu nhiên, ván sau người thua cầm Đỏ" *(T1)*.

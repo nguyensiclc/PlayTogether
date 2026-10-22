@@ -22,7 +22,7 @@
   width: 100%;
   height: auto;
   border-radius: 12px;
-  background: var(--accent-soft);
+  background: linear-gradient(135deg, #fcf1d6, #f1ddae);
 }
 .ct-svg .grid,
 .ct-svg .markers {
@@ -41,15 +41,23 @@
   pointer-events: none;
 }
 
-/* Quân: nền sáng, chữ và viền theo bên. Phân biệt bằng chữ, không chỉ bằng màu */
+/* Quân 3D bóng: đĩa gỗ có cạnh dày, bóng đổ và vệt sáng. Phân biệt bằng chữ, không chỉ bằng màu */
 .ct-svg .pc {
   cursor: pointer;
 }
+.ct-svg .pc .drop {
+  fill: rgba(40, 22, 6, 0.3);
+  pointer-events: none;
+}
+.ct-svg .pc .edge {
+  fill: url(#ct-edge);
+  stroke: rgba(60, 33, 10, 0.55);
+  stroke-width: 0.03;
+}
 .ct-svg .pc .disc {
-  fill: var(--surface);
-  stroke: var(--ink);
-  stroke-width: 0.06;
-  filter: drop-shadow(0 0.03px 0.05px rgba(60, 35, 10, 0.5));
+  fill: url(#ct-disc);
+  stroke: rgba(90, 55, 20, 0.5);
+  stroke-width: 0.03;
 }
 .ct-svg .pc .ring {
   fill: none;
@@ -61,23 +69,21 @@
   font-family: inherit;
   pointer-events: none;
 }
+.ct-svg .pc .shine {
+  fill: url(#ct-shine);
+  pointer-events: none;
+}
 .ct-svg .pc.red .ring {
   stroke: var(--primary);
 }
 .ct-svg .pc.red text {
   fill: var(--primary);
 }
-.ct-svg .pc.red .disc {
-  stroke: var(--primary);
-}
 .ct-svg .pc.black .ring {
   stroke: var(--quan);
 }
 .ct-svg .pc.black text {
   fill: var(--quan);
-}
-.ct-svg .pc.black .disc {
-  stroke: var(--quan);
 }
 .ct-svg .pc,
 .ct-svg .pc .disc {
@@ -88,8 +94,8 @@
   transform: translateY(-0.07px) scale(1.12);
 }
 .ct-svg .pc.sel .disc {
-  fill: var(--accent-soft);
-  stroke-width: 0.1;
+  stroke: var(--accent);
+  stroke-width: 0.09;
 }
 
 /* Gợi ý nước đi và nước vừa đi */

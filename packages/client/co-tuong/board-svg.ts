@@ -30,6 +30,15 @@ const GLYPH_SIZE = 0.52;
 const MARGIN = 0.7;
 export const VIEW_BOX = { x: -MARGIN, y: -MARGIN, width: COLS - 1 + 2 * MARGIN, height: ROWS - 1 + 2 * MARGIN };
 const PIECE_RADIUS = 0.43;
+/** Độ dày cạnh đĩa quân (dịch xuống dưới mặt đĩa) */
+const PIECE_THICKNESS = 0.07;
+
+/** Gradient của quân: mặt gỗ ngà, cạnh gỗ sẫm, vệt phản chiếu; chèn một lần trong mỗi SVG bàn */
+const PIECE_DEFS = `<defs>
+  <radialGradient id="ct-disc" cx="0.35" cy="0.3" r="0.85"><stop offset="0" stop-color="#fffdf2"/><stop offset="0.6" stop-color="#f3e1b8"/><stop offset="1" stop-color="#d1a76c"/></radialGradient>
+  <linearGradient id="ct-edge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c79a5c"/><stop offset="1" stop-color="#7b4f25"/></linearGradient>
+  <radialGradient id="ct-shine"><stop offset="0" stop-color="#fff" stop-opacity="0.95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+</defs>`;
 
 export interface BoardPaint {
   cells: readonly (Piece | null)[];
@@ -109,9 +118,13 @@ function pieceSvg(piece: Piece, i: number, p: BoardPaint): string {
   const classes = ["pc", side, i === p.selected ? "sel" : "", p.fresh && i === p.last?.to ? "fresh" : ""];
   const glyph = PIECE_GLYPH[piece.side][piece.kind];
   const { dx, dy } = glyphOffset(glyph);
+  // Quân 3D bóng, vẽ từ dưới lên: bóng đổ, cạnh dày (đĩa gỗ nhìn nghiêng), mặt đĩa, vòng màu, vệt sáng (dưới chữ để chữ vẫn rõ), chữ
   return `<g class="${classes.filter(Boolean).join(" ")}" data-cell="${i}">
+    <ellipse class="drop" cx="${x + 0.04}" cy="${y + 0.2}" rx="${PIECE_RADIUS}" ry="0.2"/>
+    <circle class="edge" cx="${x}" cy="${y + PIECE_THICKNESS}" r="${PIECE_RADIUS}"/>
     <circle class="disc" cx="${x}" cy="${y}" r="${PIECE_RADIUS}"/>
     <circle class="ring" cx="${x}" cy="${y}" r="${PIECE_RADIUS - 0.07}"/>
+    <ellipse class="shine" cx="${x - 0.1}" cy="${y - 0.2}" rx="0.22" ry="0.1" transform="rotate(-25 ${x - 0.1} ${y - 0.2})"/>
     <text x="${x}" y="${y}" dx="${dx.toFixed(3)}em" dy="${dy.toFixed(3)}em" font-size="${GLYPH_SIZE}">${glyph}</text>
   </g>`;
 }
@@ -146,7 +159,7 @@ export function boardSvg(p: BoardPaint): string {
   const { x, y, width, height } = VIEW_BOX;
   const pieces = p.cells.map((piece, i) => (piece ? pieceSvg(piece, i, p) : "")).join("");
   return `<svg class="ct-svg" viewBox="${x} ${y} ${width} ${height}" role="img" aria-label="Bàn cờ tướng">
-    <path class="grid" d="${GRID}"/><path class="markers" d="${MARKERS}"/>${RIVER}
+    ${PIECE_DEFS}<path class="grid" d="${GRID}"/><path class="markers" d="${MARKERS}"/>${RIVER}
     ${lastSvg(p.last, p.flipped)}${pieces}${targetsSvg(p)}${checkSvg(p.checkCell, p.flipped)}
   </svg>`;
 }

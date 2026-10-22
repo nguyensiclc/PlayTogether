@@ -87,19 +87,27 @@
 
 /* Khung bàn cờ. Khung gỗ vẽ bằng box-shadow (không phải padding) để getBoundingClientRect của khung vẫn đúng là mặt bàn khi tính ô chạm */
 .chess-board-wrap {
-  width: calc(100% - 12px);
+  width: calc(100% - 20px);
   aspect-ratio: 1 / 1;
   max-width: 384px;
   max-height: 384px;
-  margin: 6px;
+  margin: 10px;
   position: relative;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
+  /* Khung gỗ nhiều lớp: viền sáng, thân gỗ, viền tối, rồi bóng đổ xuống mặt bàn */
   box-shadow:
-    0 0 0 6px var(--frame-lo),
-    0 0 0 7px rgba(0, 0, 0, 0.25),
-    0 12px 24px rgba(60, 35, 10, 0.3);
+    0 0 0 2px #d9a566,
+    0 0 0 8px var(--frame-hi),
+    0 0 0 9px #5a3416,
+    0 0 0 10px rgba(0, 0, 0, 0.3),
+    0 18px 28px rgba(0, 0, 0, 0.45);
   cursor: pointer;
+}
+
+.chess-svg .coord {
+  font: 700 9px var(--font);
+  opacity: 0.85;
 }
 
 .chess-svg {
@@ -164,7 +172,7 @@
   height: 52px;
   border-radius: 6px;
   border: 1px solid var(--card-line);
-  background: #fffaf0;
+  background: linear-gradient(150deg, #c5956a, #a47044);
   cursor: pointer;
   display: flex;
   align-items: center;

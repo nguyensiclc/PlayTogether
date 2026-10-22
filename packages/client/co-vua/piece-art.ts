@@ -46,9 +46,9 @@ const SHAPES: Record<
     extra: `<path d="M21.6 15.6l4.6-4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>`,
   },
   n: {
-    d: "M33.6 35c0-4.4-1.4-6.6-1.4-11.2c0-6-3.6-11.6-10.6-12.6L19.2 7.4l-1.6 4.6c-3.2 1.8-6.8 5.6-8 9.8c-0.5 1.8 0.8 3.2 2.5 2.7L18 22.6c-1.6 2.2-3.4 4-4.8 6.2c-1.4 2.2-1.4 4.2-0.4 6.2z",
-    shine: [22.6, 15.2, 2.2, 1.6],
-    extra: `<circle cx="20.4" cy="16.4" r="1.2" fill="currentColor"/>`,
+    d: "M33.6 35c0-7-0.6-11-2.6-16c-1.5-5-5.5-8.2-9.5-9.2L21 6.8l-2.8 2.6c-3.7 3.1-7.4 7.6-9.6 12c-0.6 1.2-0.2 2.6 1 3c1.4 0.4 3.2-0.8 4.6-2.2c1.4-1.4 2.8-2.4 4.4-3c-2 3-5 6.8-5.4 10.3c-0.2 2.1 0.4 4.1 1.2 5.5z",
+    shine: [23.4, 14.8, 2.4, 1.5],
+    extra: `<circle cx="17.4" cy="14.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="10.2" cy="22.7" r="0.7" fill="currentColor" stroke="none"/><path d="M26.4 12.6c-1.2 3.2-1.4 6.6-0.4 10M29.6 15.4c-0.8 3-0.8 6 0 9" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.55"/>`,
   },
   q: {
     d: "M12.6 15.6l4.4 10.2h14l4.4-10.2l-5.2 4.4l-1.8-9l-4.4 8.4l-4.4-8.4l-1.8 9zM16.4 26.4h15.2a1.5 1.5 0 0 1 0 3h-1.2c0.4 2.4 2.2 4 3.1 5.6H14.5c0.9-1.6 2.7-3.2 3.1-5.6h-1.2a1.5 1.5 0 0 1 0-3z",
