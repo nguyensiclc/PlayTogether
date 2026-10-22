@@ -17,7 +17,7 @@ const SHORTCUTS: [keys: string, action: string][] = [
 
 export function gamePageHtml(options: Options): string {
   return `
-    <div class="screen game-page">
+    <div class="screen game-page oaq-page">
       <header class="topbar g-top">
         <a class="icon-btn" href="/" aria-label="Về trang chủ">${BACK_ICON}</a>
         <span class="logo-mark desk-only"><i></i></span>

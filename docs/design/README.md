@@ -95,6 +95,14 @@ Bóng đổ và lớp phủ trong suốt (`rgba`) được viết trực tiếp,
 
 Trạng thái: **Bản nháp 1** → chờ duyệt. Khi duyệt xong thì đổi thành **Đã chốt**, từ đó code UI phải theo đúng thiết kế.
 
+### Thiết kế v2 (hướng "Quán trà / bàn chơi dân gian") — **Đã chốt**, đã áp vào code
+
+Ba mockup v2 thay cho bản cũ của cùng màn hình: `nen-tang/trang-chu-v2.html`, `nen-tang/phong-cho-v2.html`, `o-an-quan/ban-choi-v2.html` (chung `shared/v2.css`). Mỗi file tự co theo điện thoại và desktop. Các bản cũ (`trang-chu.html`, `phong-cho.html`, `ban-choi.html`…) giữ làm lịch sử. Khác biệt có chủ ý giữa mockup v2 và code:
+
+- **Trang chủ:** mỗi game một chất liệu riêng ở thẻ (`cardBg` + `cardArt` trong `GameInfo`); game "Sắp có" gom thành dải ở cuối. Mockup có dải "Có người đang chờ" nhưng **chưa làm** vì server chưa có API liệt kê phòng mở. Bong bóng "Lan vừa vào phòng", chip link trên hình nổi bật chỉ là minh hoạ.
+- **Phòng chờ:** ô hình đầu phòng lấy chất liệu của game thay cho biển gỗ cố định (mỗi game một màu nền, chữ phải đọc được trên mọi nền). Không có nút "Thêm máy" cho game chưa có bot.
+- **Bàn chơi:** nền gỗ tối chỉ áp cho Ô ăn quan (class `oaq-page`, CSS trong `o-an-quan.css`). Ba game cờ giữ nền giấy cho tới khi có mockup riêng. Chưa có hàng biểu cảm emoji (M5).
+
 ### Bản code tạm khác mockup (đến M4–M5)
 
 Những chỗ dưới đây cố ý khác mockup và sẽ làm đúng mockup khi tới mốc tương ứng (Q20, Q22):
