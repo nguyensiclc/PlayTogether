@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trang chủ v2</title>
+<!-- Mockup: Trang chủ, bản làm lại (hướng "Quán trà / bàn chơi dân gian") · một file, tự co theo điện thoại và desktop -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4ead8; --ink: #2b2118; --muted: #6f5f4f; --line: #e2d4bb;
+    --surface: #fffaf0; --primary: #b5462f; --accent: #f2b33d; --live: #23704a; --live-bg: #e3f3e9;
+    --wood-1: #a76c39; --wood-2: #6e4220;
+    --paper: #efe2c6; --ox: #2f6b5a; --ink-blue: #3a4f8f;
+    --radius: 18px; --shadow: 0 1px 0 rgba(43,33,24,.06), 0 8px 24px -12px rgba(43,33,24,.28);
+    --font: "Be Vietnam Pro", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: var(--font); color: var(--ink); background: var(--bg);
+    background-image: radial-gradient(rgba(111,95,79,.09) 1px, transparent 1.2px);
+    background-size: 14px 14px;
+  }
+  button { font: inherit; cursor: pointer; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 16px; }
+
+  /* Thanh trên */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; }
+  .brand i { width: 32px; height: 32px; border-radius: 10px; background: var(--primary); display: grid; place-items: center; }
+  .brand i svg { width: 20px; }
+  .me { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px 0 5px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 13px; font-weight: 600; }
+  .me b { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 11px; }
+  .join { display: none; }
+
+  /* Hero */
+  .hero { display: grid; gap: 20px; padding: 8px 0 28px; }
+  h1 { font-size: 30px; line-height: 1.15; font-weight: 800; letter-spacing: -.01em; }
+  h1 em { font-style: normal; color: var(--primary); background: linear-gradient(transparent 62%, rgba(242,179,61,.5) 62%); }
+  .lead { margin-top: 10px; color: var(--muted); font-size: 15px; line-height: 1.55; }
+  .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .btn { height: 48px; padding: 0 20px; border-radius: 14px; border: 0; font-weight: 700; font-size: 15px; }
+  .btn.primary { background: linear-gradient(#c55338, #a53f29); color: #fff; box-shadow: 0 3px 0 #7d2d1c, 0 10px 18px -8px rgba(125,45,28,.6); }
+  .btn.ghost { background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
+  .join-m { display: flex; margin-top: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 4px; }
+  .join-m input { flex: 1; min-width: 0; border: 0; background: none; font: 600 14px var(--font); letter-spacing: .14em; padding: 0 12px; outline: 0; }
+  .join-m button { height: 40px; padding: 0 18px; border-radius: 10px; border: 0; background: var(--ink); color: #fff; font-weight: 700; }
+
+  /* Cảnh hero: bàn gỗ + lời mời link */
+  .scene { position: relative; border-radius: 24px; overflow: hidden; min-height: 230px; background: linear-gradient(150deg, var(--wood-1), var(--wood-2)); box-shadow: var(--shadow); }
+  .scene::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(100deg, rgba(255,255,255,.035) 0 2px, transparent 2px 9px); }
+  .scene svg.board { position: absolute; left: 50%; top: 54%; width: min(86%, 470px); transform: translate(-50%,-50%); filter: drop-shadow(0 12px 14px rgba(0,0,0,.35)); }
+  .bubble { position: absolute; display: flex; align-items: center; gap: 8px; background: var(--surface); border-radius: 14px; padding: 7px 12px 7px 8px; font-size: 12.5px; font-weight: 600; box-shadow: 0 8px 18px -8px rgba(0,0,0,.5); }
+  .bubble b { width: 26px; height: 26px; border-radius: 50%; color: #fff; display: grid; place-items: center; font-size: 10px; }
+  .bubble.b1 { top: 14px; left: 14px; } .bubble.b1 b { background: var(--ox); }
+  .bubble.b2 { bottom: 14px; right: 14px; } .bubble.b2 b { background: var(--ink-blue); }
+  .link-chip { position: absolute; bottom: 14px; left: 14px; background: rgba(43,33,24,.82); color: #fff; font: 600 12px ui-monospace, monospace; padding: 7px 11px; border-radius: 999px; display: flex; gap: 6px; align-items: center; }
+  .link-chip::before { content: "🔗"; font-size: 11px; }
+  .steps { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+  .step b { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 12px; }
+  .step + .step::before { content: ""; width: 18px; border-top: 2px dotted var(--muted); margin-right: 2px; }
+
+  /* Phòng đang mở */
+  .live { display: flex; gap: 10px; overflow-x: auto; padding: 2px 16px 6px; margin: 0 -16px; scrollbar-width: none; }
+  .room { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px 10px 10px; }
+  .room .ic { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-size: 18px; }
+  .room strong { display: block; font-size: 13.5px; }
+  .room span { font-size: 12px; color: var(--muted); }
+  .room em { font-style: normal; font-size: 12px; font-weight: 700; color: var(--live); background: var(--live-bg); border-radius: 999px; padding: 4px 10px; margin-left: 6px; }
+
+  .sec { display: flex; align-items: baseline; justify-content: space-between; margin: 28px 0 12px; }
+  .sec h2 { font-size: 20px; font-weight: 800; }
+  .sec small { color: var(--muted); font-size: 13px; }
+  .sec h2 + small.mock { display: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2fa561; margin-right: 6px; box-shadow: 0 0 0 4px rgba(47,165,97,.2); }
+
+  /* Thẻ game: mỗi game một chất liệu */
+  .games { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .game { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; }
+  .game .art { height: 112px; position: relative; display: grid; place-items: center; }
+  .game .art svg { width: 86%; height: 88%; }
+  .game .tag { position: absolute; top: 8px; left: 8px; font-size: 11px; font-weight: 700; background: rgba(255,250,240,.94); border-radius: 999px; padding: 3px 9px; color: var(--live); }
+  .game .body { padding: 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .game h3 { font-size: 16px; font-weight: 800; }
+  .game p { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+  .game .acts { margin-top: auto; padding-top: 10px; display: flex; gap: 6px; }
+  .game .acts .btn { height: 44px; padding: 0 12px; font-size: 14px; border-radius: 12px; }
+  .game .acts .btn.primary { flex: 1; white-space: nowrap; padding: 0 8px; }
+  .game .acts .btn.ghost { width: 44px; padding: 0; flex: none; }
+  .art.wood { background: linear-gradient(150deg, var(--wood-1), var(--wood-2)); }
+  .art.giay { background: var(--paper); background-image: radial-gradient(rgba(111,95,79,.18) 1px, transparent 1.2px); background-size: 9px 9px; }
+  .art.vo { background: #fbf8ee; background-image: linear-gradient(#cfdcec 1px, transparent 1px), linear-gradient(90deg, #cfdcec 1px, transparent 1px); background-size: 14px 14px; }
+  .art.reu { background: linear-gradient(150deg, #3f7a67, #2a5546); }
+
+  /* Sắp có */
+  .soon { display: flex; gap: 10px; overflow-x: auto; margin: 0 -16px; padding: 0 16px 6px; scrollbar-width: none; }
+  .soon div { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; border: 1.5px dashed #c9b894; border-radius: 14px; padding: 10px 14px; font-size: 13.5px; font-weight: 600; color: var(--muted); }
+  .soon small { font-weight: 600; font-size: 11px; background: var(--line); border-radius: 999px; padding: 2px 8px; color: var(--muted); }
+
+  .trust { display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: center; margin: 34px 0 30px; font-size: 13px; color: var(--muted); }
+  .trust span::before { content: "✓ "; color: var(--live); font-weight: 800; }
+
+  @media (min-width: 760px) {
+    .wrap { padding: 0 32px; }
+    .join { display: flex; width: 280px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 3px; }
+    .join input { flex: 1; min-width: 0; border: 0; background: none; font: 600 13px var(--font); letter-spacing: .14em; padding: 0 10px; outline: 0; }
+    .join button { height: 34px; padding: 0 16px; border-radius: 9px; border: 0; background: var(--ink); color: #fff; font-weight: 700; }
+    .join-m { display: none; }
+    .top { padding: 18px 0; }
+    .hero { grid-template-columns: 1fr 1.05fr; align-items: center; gap: 44px; padding: 30px 0 40px; }
+    h1 { font-size: 44px; }
+    .link-chip { top: 14px; right: 14px; bottom: auto; left: auto; }
+    .lead { font-size: 17px; }
+    .scene { min-height: 380px; }
+    .games { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .game .art { height: 150px; }
+    .sec h2 + small.mock { display: inline; }
+    .live, .soon { margin: 0; padding-left: 0; padding-right: 0; flex-wrap: wrap; overflow: visible; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <i><svg viewBox="0 0 20 8"><circle cx="3" cy="4" r="2.2" fill="#fffaf0"/><circle cx="10" cy="4" r="2.2" fill="#fffaf0"/><circle cx="17" cy="4" r="2.2" fill="#fffaf0"/></svg></i>
+      PlayTogether
+    </div>
+    <label class="join"><input placeholder="MÃ PHÒNG" aria-label="Mã phòng"><button>Vào</button></label>
+    <div class="me"><b>CH</b>Cáo Hồng 72 ✎</div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>Rủ bạn chơi,<br><em>chỉ cần một đường link.</em></h1>
+      <p class="lead">Chọn trò, tạo phòng, gửi link qua Zalo hay Messenger. Bạn bè bấm là vào chơi, không cần đăng ký.</p>
+      <div class="cta">
+        <button class="btn primary">Tạo phòng Ô ăn quan</button>
+        <button class="btn ghost">Xem tất cả trò chơi ↓</button>
+      </div>
+      <label class="join-m"><input placeholder="CÓ MÃ PHÒNG? VD: ABCD" aria-label="Mã phòng"><button>Vào</button></label>
+      <div class="steps">
+        <div class="step"><b>1</b>Chọn trò</div>
+        <div class="step"><b>2</b>Gửi link</div>
+        <div class="step"><b>3</b>Chơi ngay</div>
+      </div>
+    </div>
+
+    <div class="scene" aria-hidden="true">
+      <div class="link-chip">playtogether.vn/AB12</div>
+      <div class="bubble b1"><b>LA</b>Lan vừa vào phòng</div>
+      <svg class="board" viewBox="0 0 320 150">
+        <rect x="4" y="4" width="312" height="142" rx="71" fill="#6e4220" stroke="#54310f" stroke-width="3"/>
+        <rect x="14" y="14" width="292" height="122" rx="61" fill="#b07a45"/>
+        <ellipse cx="46" cy="75" rx="24" ry="38" fill="#7d4f26"/><ellipse cx="274" cy="75" rx="24" ry="38" fill="#7d4f26"/>
+        <circle cx="46" cy="75" r="13" fill="#33251b"/><circle cx="274" cy="75" r="13" fill="#33251b"/>
+        <g fill="#8e5b2c"><rect x="78" y="22" width="32" height="50" rx="9"/><rect x="114" y="22" width="32" height="50" rx="9"/><rect x="150" y="22" width="32" height="50" rx="9"/><rect x="186" y="22" width="32" height="50" rx="9"/><rect x="222" y="22" width="32" height="50" rx="9"/>
+        <rect x="78" y="78" width="32" height="50" rx="9"/><rect x="114" y="78" width="32" height="50" rx="9"/><rect x="150" y="78" width="32" height="50" rx="9"/><rect x="186" y="78" width="32" height="50" rx="9"/><rect x="222" y="78" width="32" height="50" rx="9"/></g>
+        <g fill="#eee6d4"><circle cx="90" cy="38" r="4.5"/><circle cx="99" cy="46" r="4.5"/><circle cx="92" cy="56" r="4.5"/><circle cx="126" cy="40" r="4.5"/><circle cx="136" cy="54" r="4.5"/><circle cx="162" cy="36" r="4.5"/><circle cx="170" cy="48" r="4.5"/><circle cx="160" cy="58" r="4.5"/><circle cx="174" cy="60" r="4.5"/><circle cx="198" cy="44" r="4.5"/><circle cx="234" cy="38" r="4.5"/><circle cx="242" cy="52" r="4.5"/>
+        <circle cx="90" cy="96" r="4.5"/><circle cx="100" cy="108" r="4.5"/><circle cx="126" cy="94" r="4.5"/><circle cx="136" cy="106" r="4.5"/><circle cx="128" cy="116" r="4.5"/><circle cx="162" cy="100" r="4.5"/><circle cx="198" cy="96" r="4.5"/><circle cx="208" cy="108" r="4.5"/><circle cx="234" cy="98" r="4.5"/><circle cx="244" cy="112" r="4.5"/></g>
+        <circle cx="46" cy="75" r="5" fill="#6b5644"/>
+        <circle cx="262" cy="64" r="6" fill="#f2b33d"/>
+      </svg>
+      <div class="bubble b2"><b>MI</b>Đến lượt bạn!</div>
+    </div>
+  </section>
+
+  <div class="sec" style="margin-top:0"><h2><span class="dot"></span>Có người đang chờ</h2><small class="mock">Mockup: dữ liệu minh hoạ</small></div>
+  <div class="live">
+    <div class="room"><div class="ic" style="background:#f3d9cf">🪨</div><div><strong>Ô ăn quan</strong><span>Phòng của Lan · 1/2</span></div><em>Vào</em></div>
+    <div class="room"><div class="ic" style="background:#d3e6dd">♟</div><div><strong>Cờ tướng</strong><span>Phòng của Minh · 1/2</span></div><em>Vào</em></div>
+    <div class="room"><div class="ic" style="background:#d7deef">✕</div><div><strong>Cờ caro</strong><span>Phòng của Hà · 1/2</span></div><em>Vào</em></div>
+  </div>
+
+  <div class="sec"><h2>Chơi ngay</h2><small>4 trò</small></div>
+  <section class="games">
+    <article class="game">
+      <div class="art wood"><span class="tag">● Chơi được ngay</span>
+        <svg viewBox="0 0 160 80"><rect x="6" y="14" width="148" height="52" rx="26" fill="#54310f"/><rect x="11" y="19" width="138" height="42" rx="21" fill="#b07a45"/><circle cx="26" cy="40" r="9" fill="#33251b"/><circle cx="134" cy="40" r="9" fill="#33251b"/><g fill="#8e5b2c"><rect x="44" y="22" width="14" height="17" rx="5"/><rect x="62" y="22" width="14" height="17" rx="5"/><rect x="80" y="22" width="14" height="17" rx="5"/><rect x="98" y="22" width="14" height="17" rx="5"/><rect x="44" y="41" width="14" height="17" rx="5"/><rect x="62" y="41" width="14" height="17" rx="5"/><rect x="80" y="41" width="14" height="17" rx="5"/><rect x="98" y="41" width="14" height="17" rx="5"/></g><g fill="#eee6d4"><circle cx="49" cy="28" r="2.4"/><circle cx="54" cy="33" r="2.4"/><circle cx="67" cy="29" r="2.4"/><circle cx="85" cy="31" r="2.4"/><circle cx="90" cy="27" r="2.4"/><circle cx="103" cy="30" r="2.4"/><circle cx="49" cy="48" r="2.4"/><circle cx="68" cy="50" r="2.4"/><circle cx="73" cy="54" r="2.4"/><circle cx="86" cy="47" r="2.4"/><circle cx="104" cy="52" r="2.4"/></g></svg></div>
+      <div class="body"><h3>Ô ăn quan</h3><p>Rải sỏi, ăn quan. Trò dân gian 10–15 phút.</p>
+        <div class="acts"><button class="btn primary">Tạo phòng</button></div></div>
+    </article>
+    <article class="game">
+      <div class="art giay"><span class="tag">● Có bot</span>
+        <svg viewBox="0 0 160 80"><g stroke="#6f5f4f" stroke-width="1.4" fill="none"><rect x="14" y="10" width="132" height="60"/><path d="M14 30h132M14 50h132M44 10v60M74 10v60M104 10v60"/><path d="M60 10l20 20M80 10L60 30M60 70l20-20M80 70L60 50" stroke-width="1"/></g><rect x="14" y="36" width="132" height="8" fill="#efe2c6"/><text x="80" y="43" text-anchor="middle" font-size="7" fill="#6f5f4f" letter-spacing="6">SÔNG</text>
+        <circle cx="44" cy="30" r="11" fill="#fffaf0" stroke="#b5462f" stroke-width="2"/><text x="44" y="35" text-anchor="middle" font-size="12" font-weight="800" fill="#b5462f">Xe</text>
+        <circle cx="104" cy="50" r="11" fill="#fffaf0" stroke="#2b2118" stroke-width="2"/><text x="104" y="55" text-anchor="middle" font-size="12" font-weight="800" fill="#2b2118">Mã</text></svg></div>
+      <div class="body"><h3>Cờ tướng</h3><p>Hai phe Đỏ, Đen. Có thể đấu với máy.</p>
+        <div class="acts"><button class="btn primary">Tạo phòng</button><button class="btn ghost" aria-label="Chơi với máy">🤖</button></div></div>
+    </article>
+    <article class="game">
+      <div class="art vo"><span class="tag">● Chơi được ngay</span>
+        <svg viewBox="0 0 160 80"><g fill="none" stroke-width="5" stroke-linecap="round"><path d="M42 20l16 16M58 20L42 36" stroke="#b5462f"/><path d="M96 50l16 16M112 50L96 66" stroke="#b5462f"/><path d="M106 22l12 0" stroke="none"/><circle cx="104" cy="28" r="8" stroke="#3a4f8f"/><circle cx="62" cy="54" r="8" stroke="#3a4f8f"/><circle cx="80" cy="41" r="8" stroke="#3a4f8f"/></g></svg></div>
+      <div class="body"><h3>Cờ caro</h3><p>Năm quân liền hàng là thắng. Bàn 15×15.</p>
+        <div class="acts"><button class="btn primary">Tạo phòng</button></div></div>
+    </article>
+    <article class="game">
+      <div class="art reu"><span class="tag">● Có bot</span>
+        <svg viewBox="0 0 160 80"><g><rect x="30" y="8" width="100" height="64" fill="#f0e4c8"/><g fill="#a9c7b6"><rect x="30" y="8" width="16" height="16"/><rect x="62" y="8" width="16" height="16"/><rect x="94" y="8" width="16" height="16"/><rect x="46" y="24" width="16" height="16"/><rect x="78" y="24" width="16" height="16"/><rect x="110" y="24" width="16" height="16"/><rect x="30" y="40" width="16" height="16"/><rect x="62" y="40" width="16" height="16"/><rect x="94" y="40" width="16" height="16"/><rect x="46" y="56" width="16" height="16"/><rect x="78" y="56" width="16" height="16"/><rect x="110" y="56" width="16" height="16"/></g></g>
+        <g fill="#2b2118"><path d="M70 66c0-8 3-10 3-16-3-2-4-5-2-8 3-4 9-4 12 0 2 3 1 6-2 8 0 6 3 8 3 16z"/><rect x="66" y="64" width="26" height="5" rx="2"/></g></svg></div>
+      <div class="body"><h3>Cờ vua</h3><p>Luật chuẩn quốc tế. Đấu bạn hoặc đấu máy.</p>
+        <div class="acts"><button class="btn primary">Tạo phòng</button><button class="btn ghost" aria-label="Chơi với máy">🤖</button></div></div>
+    </article>
+  </section>
+
+  <div class="sec"><h2>Sắp có</h2><small>Đang làm</small></div>
+  <div class="soon">
+    <div>🃏 Tiến lên miền Nam <small>2–4 người</small></div>
+    <div>🔢 Lô tô <small>2–10 người</small></div>
+    <div>🎲 Cờ cá ngựa <small>2–4 người</small></div>
+    <div>🕸 Cờ gánh <small>2 người</small></div>
+    <div>🂱 Phỏm <small>2–4 người</small></div>
+  </div>
+
+  <div class="trust"><span>Không cần đăng ký</span><span>Miễn phí</span><span>Không tiền thật</span></div>
+</div>
+</body>
+</html>
