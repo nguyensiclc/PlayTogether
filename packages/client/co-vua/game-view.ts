@@ -8,9 +8,10 @@ import { $ } from "../dom.ts";
 import { type LogEntry, logListHtml } from "../game-ui/log-view.ts";
 import type { GameActions, GameScreen, RoomMessage } from "../games/types.ts";
 import { identityInRoom } from "../screens/room-players.ts";
-import { BOARD_PIXELS, displayCoordToSquare, pieceSvg, renderBoardSvg } from "./board-svg.ts";
+import { BOARD_PIXELS, displayCoordToSquare, renderBoardSvg } from "./board-svg.ts";
 import { coVuaPageHtml } from "./game-page.ts";
 import { formatAlgebraicMove } from "./move-log.ts";
+import { pieceSvg } from "./piece-art.ts";
 import { CoVuaPlayerCard } from "./player-card.ts";
 import { resultHtml } from "./result-view.ts";
 

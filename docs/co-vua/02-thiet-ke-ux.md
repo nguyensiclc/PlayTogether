@@ -65,6 +65,8 @@ Khi Tốt đi đến hàng cuối cùng:
 
 ## 3. Điểm nhấn thị giác & Hiệu ứng
 
+**Quân cờ 3D bóng:** 12 quân vẽ bằng SVG ở `packages/client/co-vua/piece-art.ts`: hình bóng từng loại quân, tô gradient ngang (cảm giác hình trụ), lớp bóng và chấm phản chiếu, đổ bóng dưới đế; Trắng màu ngà, Đen màu mun bóng. Gradient khai báo một lần (`PIECE_DEFS`) trong SVG bàn cờ. Quân phóng 1.12× quanh đáy cho đầy ô.
+
 | Tình huống | Hiển thị thị giác |
 |---|---|
 | **Nước đi vừa diễn ra** | Highlight màu vàng nhạt ở ô xuất phát và ô đích của nước đi gần nhất |
