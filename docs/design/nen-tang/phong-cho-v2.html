@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phòng chờ v2</title>
+<!-- Mockup: Phòng chờ, bản làm lại (hướng "Quán trà / bàn chơi dân gian") · một file, tự co theo điện thoại và desktop -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/v2.css">
+<style>
+  .bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+  .bar button.ic { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-size: 18px; }
+  .bar h1 { font-size: 16px; font-weight: 800; }
+
+  .layout { display: grid; gap: 16px; padding-bottom: 110px; }
+
+  /* Biển hiệu game + mã phòng */
+  .sign { position: relative; overflow: hidden; border-radius: 22px; padding: 18px; color: #fff; background: linear-gradient(150deg, var(--wood-1), var(--wood-2)); box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px; }
+  .sign::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(100deg, rgba(255,255,255,.04) 0 2px, transparent 2px 9px); }
+  .sign > * { position: relative; }
+  .sign svg { width: 64px; flex: none; filter: drop-shadow(0 6px 8px rgba(0,0,0,.35)); }
+  .sign h2 { font-size: 20px; font-weight: 800; white-space: nowrap; }
+  .sign small { display: block; font-size: 12px; opacity: .85; margin-top: 2px; }
+  .code { margin-left: auto; text-align: center; background: var(--surface); color: var(--ink); border-radius: 14px; padding: 8px 14px; }
+  .code span { display: block; font-size: 10.5px; font-weight: 700; color: var(--muted); letter-spacing: .08em; }
+  .code b { font-size: 24px; letter-spacing: .22em; margin-right: -.22em; }
+
+  .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+  .card h3 { font-size: 15px; font-weight: 800; display: flex; justify-content: space-between; align-items: baseline; }
+  .card h3 small { font-weight: 600; font-size: 12.5px; color: var(--muted); }
+
+  /* Thiếp mời */
+  .invite { position: relative; background: var(--paper); border: 2px dashed #c9b894; border-radius: var(--radius); padding: 16px; }
+  .invite::before, .invite::after { content: ""; position: absolute; top: 50%; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%; background: var(--bg); }
+  .invite::before { left: -10px; } .invite::after { right: -10px; }
+  .invite h3 { font-size: 15px; font-weight: 800; }
+  .invite p { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .url { display: flex; align-items: center; gap: 8px; margin-top: 12px; background: var(--surface); border-radius: 12px; padding: 5px 5px 5px 12px; font: 600 14px ui-monospace, monospace; }
+  .url span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .url button { height: 38px; padding: 0 14px; border: 0; border-radius: 9px; background: var(--ink); color: #fff; font: 700 13px var(--font); }
+  .share { display: grid; grid-template-columns: 1.3fr 1fr; gap: 8px; margin-top: 8px; }
+  .share .btn { height: 46px; font-size: 14px; border-radius: 12px; }
+  .btn.zalo { background: #0068ff; color: #fff; box-shadow: 0 3px 0 #0049b3; }
+  .btn.alt { background: var(--surface); border: 1px solid var(--line); }
+
+  /* Ghế */
+  .seats { display: grid; gap: 10px; margin-top: 12px; }
+  .seat { display: flex; align-items: center; gap: 12px; border-radius: 14px; padding: 10px 12px; background: var(--bg); background-image: repeating-linear-gradient(45deg, rgba(111,95,79,.06) 0 4px, transparent 4px 8px); border: 1px solid var(--line); }
+  .av { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px; flex: none; }
+  .seat.empty { border: 2px dashed #c9b894; background: none; }
+  .seat.empty .av { background: none; border: 2px dashed #c9b894; color: var(--muted); animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform: scale(1.07); opacity: .6; } }
+  .seat strong { display: block; font-size: 15px; }
+  .seat span { font-size: 12.5px; color: var(--muted); }
+  .seat .tag { margin-left: auto; font-size: 11.5px; font-weight: 700; background: #fbe9c4; color: #7a5410; border-radius: 999px; padding: 3px 10px; }
+  .watchers { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+  .watchers .av { width: 26px; height: 26px; font-size: 10px; }
+
+  /* Tuỳ chọn */
+  .opt { padding: 14px 0; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .opt:first-of-type { border-top: 0; }
+  .opt strong { font-size: 14.5px; display: block; }
+  .opt span { font-size: 12.5px; color: var(--muted); }
+  .seg { display: flex; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
+  .seg i { font-style: normal; font-weight: 700; font-size: 13.5px; padding: 9px 16px; border-radius: 9px; color: var(--muted); }
+  .seg i.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(43,33,24,.2); }
+  .sw { width: 50px; height: 30px; border-radius: 999px; background: var(--line); position: relative; flex: none; }
+  .sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .sw.on { background: var(--live); } .sw.on::after { left: 23px; }
+
+  /* Thanh bắt đầu */
+  .start { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--bg) 30%); }
+  .start .btn { width: 100%; max-width: 560px; display: block; margin: 0 auto; height: 54px; font-size: 16px; }
+  .start .btn[disabled] { background: var(--line); color: var(--muted); box-shadow: none; cursor: not-allowed; }
+  .start p { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+
+  @media (min-width: 900px) {
+    .wrap { padding: 0 32px; }
+    .layout { grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: start; padding-bottom: 130px; }
+    .col { display: grid; gap: 16px; }
+    .sign { grid-column: 1 / -1; padding: 22px 26px; } .sign svg { width: 120px; } .sign h2 { font-size: 28px; }
+    .code b { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <button class="ic" aria-label="Quay lại">‹</button>
+    <h1>Phòng chờ</h1>
+    <button class="ic" aria-label="Luật chơi">?</button>
+  </header>
+
+  <main class="layout">
+    <section class="sign">
+      <svg viewBox="0 0 160 80"><rect x="6" y="14" width="148" height="52" rx="26" fill="#54310f"/><rect x="11" y="19" width="138" height="42" rx="21" fill="#b07a45"/><circle cx="26" cy="40" r="9" fill="#33251b"/><circle cx="134" cy="40" r="9" fill="#33251b"/><g fill="#8e5b2c"><rect x="44" y="22" width="14" height="17" rx="5"/><rect x="62" y="22" width="14" height="17" rx="5"/><rect x="80" y="22" width="14" height="17" rx="5"/><rect x="98" y="22" width="14" height="17" rx="5"/><rect x="44" y="41" width="14" height="17" rx="5"/><rect x="62" y="41" width="14" height="17" rx="5"/><rect x="80" y="41" width="14" height="17" rx="5"/><rect x="98" y="41" width="14" height="17" rx="5"/></g></svg>
+      <div><h2>Ô ăn quan</h2><small>2 người · 10–15 phút</small></div>
+      <div class="code"><span>MÃ PHÒNG</span><b>ABCD</b></div>
+    </section>
+
+    <div class="col">
+      <section class="invite">
+        <h3>Mời bạn bè vào chơi</h3>
+        <p>Bạn bè bấm link là vào thẳng phòng, không cần đăng ký.</p>
+        <div class="url"><span>playtogether.vn/r/ABCD</span><button>Sao chép</button></div>
+        <div class="share"><button class="btn zalo">Chia sẻ</button><button class="btn alt">Mã QR</button></div>
+      </section>
+
+      <section class="card">
+        <h3>Người chơi <small>1/2</small></h3>
+        <div class="seats">
+          <div class="seat"><div class="av" style="background:#b5462f">CT</div><div><strong>Cò Trắng 42 <small style="font-weight:600;color:var(--muted)">(bạn)</small></strong><span>Ghế 1</span></div><span class="tag">Chủ phòng</span></div>
+          <div class="seat empty"><div class="av">2</div><div><strong style="color:var(--muted)">Đang chờ bạn bè…</strong><span>Ghế 2 · gửi link để mời</span></div></div>
+        </div>
+        <div class="watchers"><div class="av" style="background:#3a4f8f">MM</div>Mèo Mun đang xem</div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h3>Tuỳ chọn <small>Chủ phòng chỉnh</small></h3>
+      <div class="opt"><div><strong>Giá trị quan</strong><span>Số dân tương đương một quan</span></div><div class="seg"><i class="on">10 dân</i><i>5 dân</i></div></div>
+      <div class="opt"><div><strong>Quan Già</strong><span>Chỉ ăn được ô quan có từ 5 dân</span></div><div class="sw"></div></div>
+      <div class="opt"><div><strong>Lật bàn</strong><span>Người đi sau được đổi bên 1 lần</span></div><div class="sw on"></div></div>
+      <div class="opt"><div><strong>Thời gian mỗi lượt</strong><span>Hết giờ máy tự đi thay</span></div><div class="seg"><i>20s</i><i class="on">30s</i><i>Không</i></div></div>
+    </section>
+  </main>
+</div>
+
+<div class="start">
+  <button class="btn primary" disabled>Chờ đủ người để bắt đầu</button>
+  <p>Ván bắt đầu khi bạn bè vào phòng</p>
+</div>
+</body>
+</html>

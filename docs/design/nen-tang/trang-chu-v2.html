@@ -7,6 +7,7 @@
 <!-- Mockup: Trang chủ, bản làm lại (hướng "Quán trà / bàn chơi dân gian") · một file, tự co theo điện thoại và desktop -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/v2.css">
 <style>
   :root {
     --bg: #f4ead8; --ink: #2b2118; --muted: #6f5f4f; --line: #e2d4bb;
@@ -40,9 +41,6 @@
   h1 em { font-style: normal; color: var(--primary); background: linear-gradient(transparent 62%, rgba(242,179,61,.5) 62%); }
   .lead { margin-top: 10px; color: var(--muted); font-size: 15px; line-height: 1.55; }
   .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-  .btn { height: 48px; padding: 0 20px; border-radius: 14px; border: 0; font-weight: 700; font-size: 15px; }
-  .btn.primary { background: linear-gradient(#c55338, #a53f29); color: #fff; box-shadow: 0 3px 0 #7d2d1c, 0 10px 18px -8px rgba(125,45,28,.6); }
-  .btn.ghost { background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
   .join-m { display: flex; margin-top: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 4px; }
   .join-m input { flex: 1; min-width: 0; border: 0; background: none; font: 600 14px var(--font); letter-spacing: .14em; padding: 0 12px; outline: 0; }
   .join-m button { height: 40px; padding: 0 18px; border-radius: 10px; border: 0; background: var(--ink); color: #fff; font-weight: 700; }
@@ -70,11 +68,6 @@
   .room span { font-size: 12px; color: var(--muted); }
   .room em { font-style: normal; font-size: 12px; font-weight: 700; color: var(--live); background: var(--live-bg); border-radius: 999px; padding: 4px 10px; margin-left: 6px; }
 
-  .sec { display: flex; align-items: baseline; justify-content: space-between; margin: 28px 0 12px; }
-  .sec h2 { font-size: 20px; font-weight: 800; }
-  .sec small { color: var(--muted); font-size: 13px; }
-  .sec h2 + small.mock { display: none; }
-  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2fa561; margin-right: 6px; box-shadow: 0 0 0 4px rgba(47,165,97,.2); }
 
   /* Thẻ game: mỗi game một chất liệu */
   .games { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
