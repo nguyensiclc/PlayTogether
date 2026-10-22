@@ -285,7 +285,7 @@ function gameCard(g: GameCardInfo): string {
     ? `<button type="button" class="btn ghost sm bot" data-create-bot="${g.gameId}" aria-label="Chơi với máy">🤖</button>`
     : "";
   return `<article class="game playable" data-cat="${g.category}">
-    <div class="ico" style="background:${info?.info.cardBg}"><span class="badge live">${badge}</span>${info?.info.cardArt ?? ""}</div>
+    <div class="ico" style="background-image:url(${info?.info.cardImage})"><span class="badge live">${badge}</span></div>
     <div class="row"><div class="info"><div class="nm">${g.name}</div><div class="mt">${meta}</div></div>
     <div class="acts"><button type="button" class="btn primary sm" data-create="${g.gameId}">Tạo phòng</button>${botBtn}</div></div></article>`;
 }

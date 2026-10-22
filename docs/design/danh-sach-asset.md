@@ -26,7 +26,7 @@ Dùng để giao cho người vẽ hoặc để tạo ảnh. Nguồn tham chiế
 
 ## B. Thẻ game ở trang chủ (mỗi game một ảnh)
 
-Ảnh ngang 640 × 400 (tỉ lệ 8:5), nền trong suốt hoặc đặt trên chất liệu riêng. Khai báo qua `cardArt` / `cardBg` của `GameInfo` hoặc thêm trường ảnh mới (cập nhật `docs/kien-truc-module.md`).
+Ảnh ngang 640 × 400 (tỉ lệ 8:5), nền trong suốt hoặc đặt trên chất liệu riêng. Khai báo qua `cardImage` của `GameInfo` (**B1 đến B4 đã có** bản 200 × 133, xem `ban-quyen-asset.md`).
 
 | # | Game | Mô tả |
 |---|---|---|

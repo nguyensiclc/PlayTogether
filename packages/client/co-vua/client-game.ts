@@ -1,7 +1,8 @@
 // Mô tả Cờ vua cho nền tảng (client). Đăng ký ở games/registry.ts.
 
 import type { ClientGame } from "../games/types.ts";
-import { CARD_ART, CARD_BG, ICON_CARD, ICON_SMALL } from "./art.ts";
+import { ICON_CARD, ICON_SMALL } from "./art.ts";
+import cardImage from "./assets/card.webp";
 import { CoVuaGameView } from "./game-view.ts";
 import { coVuaHistoryHtml } from "./history-html.ts";
 import { lobbyOptions } from "./lobby-options.ts";
@@ -16,8 +17,7 @@ export const coVuaGame: ClientGame = {
     duration: "10–20 phút",
     icon: ICON_SMALL,
     cardIcon: ICON_CARD,
-    cardArt: CARD_ART,
-    cardBg: CARD_BG,
+    cardImage,
   },
   lobbyOptions,
   rulesHtml: coVuaRulesHtml,

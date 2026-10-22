@@ -692,17 +692,12 @@ kbd {
   color: inherit;
 }
 
-/* Mỗi game một chất liệu riêng: nền do game khai báo (`cardBg`), hình SVG 160 × 80 (`cardArt`) */
+/* Mỗi game một ảnh 3D riêng (`cardImage`), phủ kín vùng hình */
 .game .ico {
   height: 112px;
-  display: grid;
-  place-items: center;
   position: relative;
-}
-
-.game .ico svg {
-  width: 86%;
-  height: 88%;
+  background-position: center;
+  background-size: cover;
 }
 
 .game .ico .badge {
@@ -2056,18 +2051,15 @@ button.game:hover {
   color: var(--ink);
 }
 
-/* Ô hình đầu phòng chờ dùng chất liệu riêng của game (cardBg, cardArt) */
+/* Ô hình đầu phòng chờ dùng ảnh 3D của game (cardImage) */
 .game-head .mini.art-tile {
   width: 88px;
   height: 56px;
   border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--shadow);
-}
-
-.game-head .mini.art-tile svg {
-  width: 92%;
-  height: 92%;
+  background-position: center;
+  background-size: cover;
 }
 
 /* Thiếp mời: giấy kem viền nét đứt, hai khuyết tròn hai bên như vé */

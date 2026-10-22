@@ -58,8 +58,3 @@ export const FEATURED_ART = `<svg viewBox="0 0 250 92" aria-hidden="true">
   <circle cx="30" cy="46" r="8" fill="#33251b"/><circle cx="220" cy="46" r="8" fill="#33251b"/>
   ${scatterStones()}
 </svg>`;
-
-/** Hình trên thẻ game ở trang chủ (SVG 160 × 80) và nền của vùng hình */
-export const CARD_ART = `<svg viewBox="0 0 160 80" aria-hidden="true"><rect x="6" y="14" width="148" height="52" rx="26" fill="#54310f"/><rect x="11" y="19" width="138" height="42" rx="21" fill="#b07a45"/><circle cx="26" cy="40" r="9" fill="#33251b"/><circle cx="134" cy="40" r="9" fill="#33251b"/><g fill="#8e5b2c"><rect x="44" y="22" width="14" height="17" rx="5"/><rect x="62" y="22" width="14" height="17" rx="5"/><rect x="80" y="22" width="14" height="17" rx="5"/><rect x="98" y="22" width="14" height="17" rx="5"/><rect x="44" y="41" width="14" height="17" rx="5"/><rect x="62" y="41" width="14" height="17" rx="5"/><rect x="80" y="41" width="14" height="17" rx="5"/><rect x="98" y="41" width="14" height="17" rx="5"/></g><g fill="#eee6d4"><circle cx="49" cy="28" r="2.4"/><circle cx="54" cy="33" r="2.4"/><circle cx="67" cy="29" r="2.4"/><circle cx="85" cy="31" r="2.4"/><circle cx="90" cy="27" r="2.4"/><circle cx="103" cy="30" r="2.4"/><circle cx="49" cy="48" r="2.4"/><circle cx="68" cy="50" r="2.4"/><circle cx="73" cy="54" r="2.4"/><circle cx="86" cy="47" r="2.4"/><circle cx="104" cy="52" r="2.4"/></g></svg>`;
-
-export const CARD_BG = "linear-gradient(150deg, #a76c39, #6e4220)";

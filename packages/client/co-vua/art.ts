@@ -27,8 +27,3 @@ export const ICON_CARD = `<svg viewBox="0 0 56 56" aria-hidden="true">
   <rect x="18" y="38" width="20" height="5" rx="2" fill="#2b2118"/>
   <path d="M20 38c0-4 3-7 8-7s8 3 8 7z" fill="#2b2118"/>
 </svg>`;
-
-/** Hình trên thẻ game ở trang chủ (SVG 160 × 80) và nền của vùng hình */
-export const CARD_ART = `<svg viewBox="0 0 160 80" aria-hidden="true"><rect x="30" y="8" width="100" height="64" fill="#f0e4c8"/><g fill="#a9c7b6"><rect x="30" y="8" width="16" height="16"/><rect x="62" y="8" width="16" height="16"/><rect x="94" y="8" width="16" height="16"/><rect x="46" y="24" width="16" height="16"/><rect x="78" y="24" width="16" height="16"/><rect x="110" y="24" width="16" height="16"/><rect x="30" y="40" width="16" height="16"/><rect x="62" y="40" width="16" height="16"/><rect x="94" y="40" width="16" height="16"/><rect x="46" y="56" width="16" height="16"/><rect x="78" y="56" width="16" height="16"/><rect x="110" y="56" width="16" height="16"/></g><g fill="#2b2118"><path d="M70 66c0-8 3-10 3-16-3-2-4-5-2-8 3-4 9-4 12 0 2 3 1 6-2 8 0 6 3 8 3 16z"/><rect x="66" y="64" width="26" height="5" rx="2"/></g></svg>`;
-
-export const CARD_BG = "linear-gradient(150deg, #3f7a67, #2a5546)";

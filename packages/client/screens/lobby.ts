@@ -119,7 +119,7 @@ export class LobbyView {
           <span class="icon-btn mobile-only" aria-hidden="true"></span>
         </header>
         <div class="game-head">
-          <span class="mini art-tile" style="background:${game.cardBg}">${game.cardArt}</span>
+          <span class="mini art-tile" style="background-image:url(${game.cardImage})"></span>
           <div><h2>${game.name}</h2><div class="code-big"><span class="desk-only">Phòng chờ · </span>Mã phòng <b>${room.code}</b></div></div>
           <span style="margin-left:auto;display:flex;gap:6px">
             <button class="btn sm" type="button" data-act="rules" aria-label="Luật chơi">📖<span class="desk-only"> Luật chơi</span></button>
