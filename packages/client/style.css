@@ -2475,3 +2475,9 @@ body:has(.table-page) {
 .table-page .g-side .log {
   color: var(--ink);
 }
+
+/* Hộp kết quả, bảng trượt và hộp hỏi là giấy kem; có thể nằm ngoài khung trang chơi nên chữ phải tối, không thừa hưởng chữ sáng của mặt bàn */
+.sheet,
+.result {
+  color: var(--ink);
+}
