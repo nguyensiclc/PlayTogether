@@ -13,7 +13,7 @@ const SHORTCUTS: [keys: string, action: string][] = [
 export function caroPageHtml(options: Options): string {
   const n = options.kichThuoc;
   return `
-    <div class="screen game-page caro-page">
+    <div class="screen game-page caro-page table-page">
       <header class="topbar g-top">
         <a class="icon-btn" href="/" aria-label="Về trang chủ">${BACK_ICON}</a>
         <span class="logo-mark desk-only"><i></i></span>

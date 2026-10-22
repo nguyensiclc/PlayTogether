@@ -10,7 +10,7 @@ const SHORTCUTS: [keys: string, action: string][] = [
 
 export function coTuongPageHtml(): string {
   return `
-    <div class="screen game-page ct-page">
+    <div class="screen game-page ct-page table-page">
       <header class="topbar g-top">
         <a class="icon-btn" href="/" aria-label="Về trang chủ">${BACK_ICON}</a>
         <span class="logo-mark desk-only"><i></i></span>

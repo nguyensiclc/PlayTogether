@@ -18,7 +18,7 @@ export function coVuaPageHtml(options: Options): string {
         : `${options.thoiGianLuot} giây`;
 
   return `
-    <div class="screen game-page chess-page-root">
+    <div class="screen game-page chess-page-root table-page">
       <header class="topbar g-top">
         <a class="icon-btn" href="/" aria-label="Về trang chủ">${BACK_ICON}</a>
         <span class="logo-mark desk-only"><i></i></span>

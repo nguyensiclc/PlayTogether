@@ -50,7 +50,7 @@ Chiều phụ thuộc: **game → nền tảng / game-ui** (được), **nền t
 2. **Engine**: `packages/engine/<game>/` (`types.ts`, `rules.ts`, `index.ts`, test viết trước, có fuzz kiểm tra bất biến) và dòng `exports` trong `packages/engine/package.json`. Cài `GameModule` đầy đủ, gồm `parseMove`, `parseOptions`.
 3. **Protocol**: thêm id vào `GAME_IDS`, kiểu `<Game>Room`, thêm vào `PublicRoom` và nhánh `MoveApplied` của `ServerMessage`.
 4. **Server**: một dòng trong `MODULES` ở `room-manager.ts`. Không sửa gì khác ở server; nếu thấy phải sửa, đó là dấu hiệu `GameModule` thiếu điểm mở rộng: bổ sung vào interface.
-5. **Client**: tạo `packages/client/<game>/` với `client-game.ts` xuất một đối tượng `ClientGame`, rồi thêm **một dòng** vào `games/registry.ts`. `info` phải có `cardArt` (SVG 160 × 80) và `cardBg` (giá trị CSS `background`) để thẻ game ở trang chủ và ô hình đầu phòng chờ có chất liệu riêng; hãy chọn nền sao cho chữ đọc được trên đó. CSS riêng đặt trong `<game>/<game>.css` và import từ `game-view.ts`.
+5. **Client**: tạo `packages/client/<game>/` với `client-game.ts` xuất một đối tượng `ClientGame`, rồi thêm **một dòng** vào `games/registry.ts`. `info` phải có `cardArt` (SVG 160 × 80) và `cardBg` (giá trị CSS `background`) để thẻ game ở trang chủ và ô hình đầu phòng chờ có chất liệu riêng; hãy chọn nền sao cho chữ đọc được trên đó. Khung trang chơi của game thêm class `table-page` để dùng chủ đề mặt bàn gỗ tối chung. CSS riêng đặt trong `<game>/<game>.css` và import từ `game-view.ts`.
 6. **Kiểm tra**: `npm run check` (gồm `architecture.test.ts`). Chạy thử hai người chơi trên điện thoại 360px và desktop.
 7. **Cập nhật** `README.md`, `CLAUDE.md` (nếu có quy tắc mới) và bảng game ở `docs/design/README.md`.
 

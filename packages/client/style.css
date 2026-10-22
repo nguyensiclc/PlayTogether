@@ -2393,3 +2393,85 @@ button.game:hover {
     transform: rotate(360deg);
   }
 }
+
+/* Mặt bàn gỗ tối: vào ván thì nền chuyển tối để bàn nổi lên (docs/design/o-an-quan/ban-choi-v2.html); mọi trang chơi dùng chung bằng class `table-page`.
+   Thẻ người chơi, hộp Lật bàn, kết quả vẫn là giấy kem. */
+html:has(.table-page),
+body:has(.table-page) {
+  background:
+    radial-gradient(ellipse at 50% 30%, #4a2e17 0%, #2e1c0e 70%) fixed,
+    #2e1c0e;
+  color: #fff6e6;
+}
+
+.table-page::before {
+  display: none;
+}
+
+.table-page .topbar,
+.table-page .topbar .title,
+.table-page .muted,
+.table-page .hint,
+.table-page .log-line {
+  color: #fff6e6;
+}
+
+.table-page .topbar .title small,
+.table-page .muted,
+.table-page .hint,
+.table-page .log-line {
+  color: rgba(255, 246, 230, 0.7);
+}
+
+.table-page .topbar .icon-btn {
+  background: rgba(255, 246, 230, 0.08);
+  border-color: rgba(255, 246, 230, 0.18);
+  color: #fff6e6;
+}
+
+.table-page .row-label,
+.table-page .row-label.bottom,
+.table-page .row-label.right {
+  color: rgba(255, 246, 230, 0.65);
+}
+
+.table-page .player {
+  box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.6);
+}
+
+.table-page .player.active {
+  box-shadow:
+    0 0 0 3px var(--accent),
+    0 0 0 7px rgba(242, 179, 61, 0.22),
+    0 10px 20px -12px rgba(0, 0, 0, 0.6);
+}
+
+.table-page .board {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.18),
+    0 22px 30px -12px rgba(0, 0, 0, 0.7);
+}
+
+/* Chữ trong thẻ giấy kem phải tối, không thừa hưởng chữ sáng của mặt bàn */
+.table-page .player {
+  color: var(--ink);
+}
+
+.table-page .player .muted {
+  color: var(--muted);
+}
+
+.table-page .g-top {
+  background: rgba(20, 11, 4, 0.35);
+  border-bottom-color: rgba(255, 246, 230, 0.12);
+}
+
+.table-page .g-side {
+  background: rgba(255, 246, 230, 0.05);
+  border-left-color: rgba(255, 246, 230, 0.12);
+}
+
+.table-page .g-side .keys,
+.table-page .g-side .log {
+  color: var(--ink);
+}
