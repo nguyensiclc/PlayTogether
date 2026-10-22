@@ -40,3 +40,7 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 | Cờ tướng | Engine, đăng ký game và giao diện đã xong (T0, T-E, T-P, T-U), có bot Dễ, Vừa, Khó. Còn thử trên điện thoại thật (T-H) |
 | Cờ vua | Engine (V1), Protocol & Server (V2), Giao diện (V3), thử nghiệm (V4) và bot 3 cấp (V5) đã xong |
 | Tiến lên | Chưa bắt đầu |
+
+## Triển khai thử (Render)
+
+Repo có sẵn `render.yaml`. Trên render.com: **New → Blueprint**, chọn repo này và nhánh muốn chạy, bấm **Apply**. Render cài đặt, build client rồi chạy `npm start` (Node 24, cổng do Render cấp qua `PORT`). Sau vài phút có link `https://playtogether-….onrender.com` để chơi thật qua link mời. Gói miễn phí tự ngủ khi không có người dùng (lần mở đầu chậm) và phòng nằm trong RAM nên khởi động lại là mất phòng.

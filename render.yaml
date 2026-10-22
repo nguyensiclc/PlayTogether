@@ -1,0 +1,15 @@
+# Triển khai thử lên Render (https://render.com): Blueprint tạo một web service chạy `npm start`
+# (server Node phục vụ luôn client đã build, WebSocket ở /ws). Trạng thái phòng nằm trong RAM,
+# nên khởi động lại hoặc gói miễn phí tự ngủ thì các phòng đang mở sẽ mất.
+services:
+  - type: web
+    name: playtogether
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
