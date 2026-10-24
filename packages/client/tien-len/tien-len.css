@@ -46,8 +46,8 @@
   position: absolute;
   top: 7%;
   left: 9%;
-  font-size: calc(var(--cw) * 0.34);
-  letter-spacing: -0.04em;
+  font-size: calc(var(--cw) * 0.32);
+  letter-spacing: -0.05em;
 }
 
 .tl-card .st {
@@ -86,12 +86,51 @@
 
 /* ---------- Hàng đối thủ ---------- */
 
-.tl-opps {
+/* Bốn người quanh bàn: đối thủ trên / trái / phải, mình ở dưới. .tl-opps chỉ là vỏ, từng ghế là ô lưới của .tl-board */
+.tl-board {
   align-self: stretch;
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: 8px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "top top top"
+    "left table right";
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 10px;
+  padding-top: 12px;
+}
+
+.tl-opps {
+  display: contents;
+}
+
+.tl-opp.top {
+  grid-area: top;
+  justify-self: center;
+  min-width: 128px;
+}
+
+.tl-opp.left {
+  grid-area: left;
+}
+
+.tl-opp.right {
+  grid-area: right;
+}
+
+.tl-opp.left,
+.tl-opp.right {
+  width: 84px;
+}
+
+.tl-opp.left .info b,
+.tl-opp.right .info b {
+  font-size: 12px;
+}
+
+.tl-table {
+  grid-area: table;
 }
 
 .tl-opp {
@@ -180,8 +219,8 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 150px;
-  padding: 14px 10px;
+  min-height: 210px;
+  padding: 14px 8px;
   border: 5px solid #6b421f;
   border-radius: 24px;
   background: radial-gradient(ellipse at 50% 35%, #347f5b, #1c5a3e 75%);
@@ -192,17 +231,19 @@
 }
 
 .tl-table-cards {
+  --tstep: 30px;
+  align-self: stretch;
   display: flex;
   justify-content: center;
-  min-height: 70px;
+  min-height: 90px;
 }
 
 .tl-card.tbl {
-  --cw: 46px;
+  --cw: 58px;
 }
 
 .tl-card.tbl + .tl-card.tbl {
-  margin-left: calc(var(--cw) * -0.48);
+  margin-left: calc(var(--tstep) - var(--cw));
 }
 
 .tl-card.tbl.fresh {
@@ -216,12 +257,13 @@
   color: #f6ecd2;
   font-size: 12.5px;
   font-weight: 600;
+  text-align: center;
 }
 
 /* ---------- Tay bài ---------- */
 
 .tl-hand {
-  --cw: 52px;
+  --cw: 62px;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -382,7 +424,7 @@
 
 @media (min-width: 1024px) {
   .tl-stage {
-    max-width: 880px;
+    max-width: 960px;
     margin: 0 auto;
     width: 100%;
     gap: 10px;
@@ -390,15 +432,20 @@
   }
 
   .tl-hand {
-    --cw: 60px;
+    --cw: 76px;
   }
 
   .tl-card.tbl {
-    --cw: 56px;
+    --cw: 68px;
   }
 
   .tl-table {
-    min-height: 168px;
+    min-height: 210px;
+  }
+
+  .tl-opp.left,
+  .tl-opp.right {
+    width: 124px;
   }
 
   .tl-opp .avatar {

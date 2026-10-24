@@ -18,7 +18,7 @@ Làm cho điện thoại trước (360px), vùng chạm ≥ 44px. Màn hình và
 Từ trên xuống:
 
 1. **Thanh trên**: nút quay lại, tên phòng, nút `?` luật chơi.
-2. **Hàng đối thủ** (1 đến 3 thẻ nhỏ cạnh nhau): avatar, tên, **số lá còn lại** dạng chip `🂠 9`; viền vàng khi đến lượt; nhãn mờ "Bỏ lượt" khi đã bỏ vòng này; nhãn hạng (🥇🥈🥉) khi đã hết bài.
+2. **Đối thủ quanh bàn**: 4 người = trái, trên, phải (theo thứ tự đi: trái → trên → phải), 3 người = trái và phải, 2 người = trên. Mỗi thẻ có avatar, tên, **số lá còn lại** dạng chip `🂠 9`; viền vàng khi đến lượt; nhãn mờ "Bỏ lượt" khi đã bỏ vòng này; nhãn hạng khi đã hết bài. Bài trên tay to hơn (62px điện thoại, 76px desktop).
 3. **Mặt bàn** (giữa): bộ bài vừa đánh, xếp ngang các lá ngửa kèm tên người đánh; nếu bàn trống ghi "Đi tự do". Hiệu ứng lá bay từ ghế người đánh tới mặt bàn; chặt có nhãn "Chặt!".
 4. **Viên trạng thái**: "Lượt của bạn · chọn bài", "Lượt của Mèo Mun", "Bàn trống: bạn đi tự do".
 5. **Tay bài của bạn**: 13 lá xếp **quạt chồng nhau** theo thứ tự tăng dần (lá nhỏ bên trái), mỗi lá lộ ≥ 24px để chạm; lá lớn hơn rộng ~56 × 80px. Chạm một lá để **nâng lên** (chọn); chạm lại để bỏ chọn. Kéo ngón tay qua nhiều lá để chọn nhanh một đoạn.

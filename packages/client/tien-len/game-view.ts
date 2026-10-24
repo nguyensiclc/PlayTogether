@@ -17,6 +17,13 @@ import { TienLenPlayerCard } from "./player-card.ts";
 import { judge, smallestPlayWith, sortHand, usableCards } from "./plays.ts";
 import { resultHtml } from "./result-view.ts";
 
+/** Chỗ ngồi của đối thủ quanh bàn theo số đối thủ, thứ tự đi: từ trái sang trên rồi sang phải */
+const OPPONENT_PLACES: Record<number, string[]> = {
+  1: ["top"],
+  2: ["left", "right"],
+  3: ["left", "top", "right"],
+};
+
 export class TienLenGameView implements GameScreen {
   private room: TienLenRoom;
   private you: You;
@@ -37,6 +44,7 @@ export class TienLenGameView implements GameScreen {
   private readonly actions: GameActions;
   private readonly onKey = (e: KeyboardEvent): void => this.handleKey(e);
   private readonly resizeObserver: ResizeObserver | null;
+  private readonly tableEl: HTMLElement;
 
   constructor(root: HTMLElement, room: PublicRoom, you: You, actions: GameActions) {
     if (room.gameId !== "tien-len") throw new Error(`Cần phòng Tiến lên, nhận ${room.gameId}`);
@@ -53,6 +61,8 @@ export class TienLenGameView implements GameScreen {
     this.handEl = this.q("[data-hand]");
     this.resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => this.layoutHand());
     this.resizeObserver?.observe(this.handEl);
+    this.tableEl = this.q("[data-table-cards]");
+    this.resizeObserver?.observe(this.tableEl);
 
     this.initEvents();
     this.refresh();
@@ -241,12 +251,15 @@ export class TienLenGameView implements GameScreen {
 
   private renderOpponents(): void {
     const v = this.view;
-    this.q("[data-opps]").innerHTML = this.opponentSeats()
-      .map((seat) => {
+    const seats = this.opponentSeats();
+    const places = OPPONENT_PLACES[seats.length] ?? [];
+    this.q("[data-opps]").innerHTML = seats
+      .map((seat, i) => {
         const who = identityInRoom(this.room, seat);
         const gone = v.left.includes(seat);
         const cls = [
           "tl-opp",
+          places[i] ?? "top",
           v.status === "playing" && v.turn === seat ? "turn" : "",
           v.passed.includes(seat) ? "passed" : "",
           v.finished.includes(seat) ? "out" : "",
@@ -274,6 +287,7 @@ export class TienLenGameView implements GameScreen {
     }
     const last = this.fresh ? "fresh" : "";
     cardsEl.innerHTML = t.combo.cards.map((c) => cardHtml(c, { extra: `tbl ${last}` })).join("");
+    this.layoutTable();
     labelEl.textContent = `${this.nameOf(t.by)} · ${kindLabel(t.combo.kind)}`;
     this.fresh = false;
   }
@@ -319,6 +333,18 @@ export class TienLenGameView implements GameScreen {
     if (w === 0 || room === 0) return;
     const step = n > 1 ? Math.min(w * 0.85, (room - w) / (n - 1)) : 0;
     this.handEl.style.setProperty("--step", `${Math.max(step, 0)}px`);
+    this.layoutTable();
+  }
+
+  /** Bộ trên bàn dài (sảnh, đôi thông) co lại cho vừa khung */
+  private layoutTable(): void {
+    const cards = this.tableEl.querySelectorAll<HTMLElement>(".tl-card");
+    const n = cards.length;
+    const w = cards[0]?.getBoundingClientRect().width ?? 0;
+    const room = this.tableEl.clientWidth;
+    if (n < 2 || w === 0 || room === 0) return;
+    const step = Math.min(w * 0.52, (room - w) / (n - 1));
+    this.tableEl.style.setProperty("--tstep", `${Math.max(step, 6)}px`);
   }
 
   private renderButtons(): void {

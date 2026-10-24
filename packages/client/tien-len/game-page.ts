@@ -34,12 +34,13 @@ export function tienLenPageHtml(options: Options): string {
 
       <div class="g-layout">
         <main class="stage tl-stage">
-          <div class="tl-opps" data-opps></div>
-
-          <div class="tl-table" data-table>
-            <div class="tl-table-cards" data-table-cards></div>
-            <div class="tl-table-label" data-table-label></div>
-            <div class="locked" hidden><span>🔒 Bàn tạm khoá</span></div>
+          <div class="tl-board">
+            <div class="tl-opps" data-opps></div>
+            <div class="tl-table" data-table>
+              <div class="tl-table-cards" data-table-cards></div>
+              <div class="tl-table-label" data-table-label></div>
+              <div class="locked" hidden><span>🔒 Bàn tạm khoá</span></div>
+            </div>
           </div>
 
           <div class="status-row">
