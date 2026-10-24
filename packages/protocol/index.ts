@@ -159,6 +159,8 @@ export type ErrorCode =
   /** Đã là chủ của một phòng khác; `message` là mã phòng đó */
   | "ALREADY_HOSTING"
   | "SEAT_TAKEN"
+  /** Đổi số người nhưng còn quá nhiều người đang ngồi ghế */
+  | "SEATS_IN_USE"
   | "NOT_SEATED"
   | "NOT_ENOUGH_PLAYERS"
   | "WRONG_STATUS"

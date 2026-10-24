@@ -32,7 +32,7 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 | [Tiến lên miền Nam — Luật chơi](docs/tien-len/01-luat-choi.md) | Bộ bài, các bộ hợp lệ, chặt heo, tới trắng, xếp hạng (đề xuất, chờ chốt câu hỏi mở) |
 | [Tiến lên miền Nam — Thiết kế UX](docs/tien-len/02-thiet-ke-ux.md) | Phòng chờ 2–4 người, tay bài quạt, chọn bài, kết quả xếp hạng |
 | [Tiến lên miền Nam — Thiết kế kỹ thuật](docs/tien-len/03-thiet-ke-ky-thuat.md) | Kiểu dữ liệu, thuật toán bộ bài, bài giấu, đổi hợp đồng dùng chung cho nhiều người |
-| [Tiến lên miền Nam — Kế hoạch prototype](docs/tien-len/04-ke-hoach-prototype.md) | Phạm vi, các mốc TL0–TL-H, test case TL01–TL24, câu hỏi mở TL1–TL10 |
+| [Tiến lên miền Nam — Kế hoạch prototype](docs/tien-len/04-ke-hoach-prototype.md) | Phạm vi, các mốc TL0–TL-H, test case E01–E24, câu hỏi mở TL1–TL10 |
 
 ## Trạng thái
 
@@ -43,7 +43,7 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 | Cờ caro | Engine, nền tảng đa game và giao diện đã xong (C1–C3). Còn thử trên điện thoại thật (C4) |
 | Cờ tướng | Engine, đăng ký game và giao diện đã xong (T0, T-E, T-P, T-U), có bot Dễ, Vừa, Khó. Còn thử trên điện thoại thật (T-H) |
 | Cờ vua | Engine (V1), Protocol & Server (V2), Giao diện (V3), thử nghiệm (V4) và bot 3 cấp (V5) đã xong |
-| Tiến lên miền Nam | Đã viết tài liệu (luật, UX, kỹ thuật, kế hoạch). **Đang chờ trả lời câu hỏi mở TL1–TL10** trước khi làm nền tảng nhiều người và engine |
+| Tiến lên miền Nam | Đã viết tài liệu (luật, UX, kỹ thuật, kế hoạch). Câu hỏi mở TL1–TL10 đã chốt (theo đề xuất). Đang làm TL-P (nền tảng nhiều người), rồi engine, mockup, giao diện |
 
 ## Triển khai thử (Render)
 

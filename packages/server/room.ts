@@ -59,8 +59,8 @@ export class Room<S, M, O, E> {
   private readonly newMemberId: () => string;
   /** Theo clientId, giữ thứ tự vào phòng */
   private readonly members = new Map<string, Member>();
-  /** clientId người ngồi từng ghế */
-  private readonly seats: (string | null)[];
+  /** clientId người ngồi từng ghế; độ dài đổi theo tuỳ chọn của game có `seatCount` */
+  private seats: (string | null)[];
   private hostClientId: string;
   private status: RoomStatus = "lobby";
   private options: O;
@@ -79,9 +79,9 @@ export class Room<S, M, O, E> {
     this.gameId = init.gameId;
     this.module = init.module;
     this.newMemberId = init.newMemberId;
-    this.seats = Array.from({ length: init.module.maxPlayers }, () => null);
-    this.wins = this.seats.map(() => 0);
     this.options = init.module.parseOptions(init.options, init.module.defaultOptions);
+    this.seats = Array.from({ length: this.seatCountFor(this.options) }, () => null);
+    this.wins = this.seats.map(() => 0);
     this.hostClientId = init.host.clientId;
     this.lastActivity = init.now;
     this.join(init.host, init.now);
@@ -119,10 +119,7 @@ export class Room<S, M, O, E> {
     if (this.status === "playing" && seat !== null && this.game) {
       const r = this.module.forfeit(this.game, seat, "bo-cuoc");
       if (!("error" in r)) {
-        this.game = r.state;
-        this.status = "finished";
-        this.recordResult();
-        this.onGameFinished();
+        this.applyForfeit(r.state);
         forfeited = { events: r.events };
       }
     }
@@ -146,11 +143,7 @@ export class Room<S, M, O, E> {
     if (seat === null) throw new RoomError("NOT_SEATED");
     const r = this.module.forfeit(this.game, seat, "bo-cuoc");
     if ("error" in r) throw new RoomError("WRONG_STATUS");
-    this.game = r.state;
-    this.actionNo++;
-    this.status = "finished";
-    this.recordResult();
-    this.onGameFinished();
+    this.applyForfeit(r.state);
   }
 
   takeSeat(clientId: string, seat: SeatId): void {
@@ -211,11 +204,7 @@ export class Room<S, M, O, E> {
     if (seat === null) throw new RoomError("NOT_SEATED");
     const r = this.module.forfeit(this.game, seat, "bo-cuoc");
     if ("error" in r) throw new RoomError("INVALID_MOVE");
-    this.game = r.state;
-    this.status = "finished";
-    this.actionNo++;
-    this.recordResult();
-    this.onGameFinished();
+    this.applyForfeit(r.state);
     return { events: r.events };
   }
 
@@ -265,8 +254,44 @@ export class Room<S, M, O, E> {
   setOptions(clientId: string, raw: unknown): void {
     this.requireHost(clientId);
     this.requireNotPlaying();
-    this.options = this.module.parseOptions(raw, this.options);
+    const options = this.module.parseOptions(raw, this.options);
+    this.resizeSeats(this.seatCountFor(options));
+    this.options = options;
     this.match = null;
+    this.rematchVotes.clear();
+  }
+
+  /** Số ghế theo tuỳ chọn, kẹp trong [minPlayers, maxPlayers] */
+  private seatCountFor(options: O): number {
+    const n = this.module.seatCount ? this.module.seatCount(options) : this.module.maxPlayers;
+    return Math.min(Math.max(n, this.module.minPlayers), this.module.maxPlayers);
+  }
+
+  /** Đổi số ghế: thêm ghế trống, hoặc bớt ghế cuối (người đang ngồi ở đó dồn sang ghế trống phía trước; hết chỗ thì từ chối) */
+  private resizeSeats(count: number): void {
+    if (count === this.seats.length) return;
+    if (count > this.seats.length) {
+      while (this.seats.length < count) this.seats.push(null);
+    } else {
+      const occupants = this.seats.flatMap((c) => (c ? [c] : []));
+      if (occupants.length > count) throw new RoomError("SEATS_IN_USE", "Đang có quá nhiều người ngồi ghế");
+      const kept = this.seats.slice(0, count);
+      const moving = this.seats.slice(count).flatMap((c) => (c ? [c] : []));
+      for (const c of moving) kept[kept.indexOf(null)] = c;
+      this.seats = kept;
+    }
+    this.resetWins();
+  }
+
+  /** Áp trạng thái sau khi có người bị xử thua. Game nhiều người có thể còn tiếp tục; hai người thì ván xong ngay. */
+  private applyForfeit(state: S): void {
+    this.game = state;
+    this.actionNo++;
+    if (this.module.result(state)) {
+      this.status = "finished";
+      this.recordResult();
+      this.onGameFinished();
+    }
   }
 
   start(clientId: string, rng: Rng): void {
@@ -372,6 +397,7 @@ export class Room<S, M, O, E> {
     const result = this.game ? this.module.result(this.game) : null;
     if (!result || this.lastFirst === null) return null;
     const n = this.seats.length;
+    if (this.module.nextFirst) return this.module.nextFirst(result, this.lastFirst, n);
     if (result.winner === null) return (this.lastFirst + 1) % n;
     // Hai người chơi: người thua là ghế còn lại
     return (result.winner + 1) % n;

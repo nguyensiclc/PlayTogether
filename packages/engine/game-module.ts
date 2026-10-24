@@ -11,6 +11,8 @@ export interface GameResult {
   scores: number[];
   /** vd "het-quan", "khong-du-dan" */
   reason: string;
+  /** Thứ hạng từ nhất đến bét, cho game nhiều người; thiếu thì chỉ có `winner` */
+  ranking?: SeatId[];
   /** Chi tiết riêng của từng game */
   detail?: unknown;
 }
@@ -19,6 +21,10 @@ export interface GameModule<S, M, O, E> {
   id: string;
   minPlayers: number;
   maxPlayers: number;
+  /** Số ghế của phòng theo tuỳ chọn (vd chủ phòng chọn 3 người); thiếu thì `maxPlayers`. Nằm trong [minPlayers, maxPlayers] */
+  seatCount?(options: O): number;
+  /** Ghế đi trước ván sau khi ván vừa xong; thiếu thì người thua (hoà thì đổi lượt). null = chọn ngẫu nhiên */
+  nextFirst?(result: GameResult, lastFirst: SeatId | null, seatCount: number): SeatId | null;
   defaultOptions: O;
   setup(options: O, seats: SeatId[], firstPlayer: SeatId): S;
   validMoves(state: S, seat: SeatId): M[];
