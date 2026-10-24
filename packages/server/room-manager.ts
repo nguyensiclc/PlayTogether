@@ -8,10 +8,13 @@ import { oAnQuan } from "@playtogether/engine/o-an-quan";
 import { tienLen } from "@playtogether/engine/tien-len";
 import type { GameId } from "@playtogether/protocol";
 import { ROOM_CODE_ALPHABET, ROOM_CODE_LENGTH } from "@playtogether/protocol";
-import { type Joiner, Room } from "./room.ts";
+import { type Joiner, Room, RoomError } from "./room.ts";
 
 /** Phòng không còn ai kết nối trong chừng này thì bị xoá (kỹ thuật mục 6) */
 export const EMPTY_ROOM_TTL_MS = 10 * 60 * 1000;
+
+/** Số phòng tối đa cùng lúc, chặn tạo phòng hàng loạt làm đầy RAM */
+export const MAX_ROOMS = 1000;
 
 /** Game nào cũng dùng qua `GameModule`: lớp phòng không biết kiểu state, nước đi, tuỳ chọn của từng game */
 type AnyGameModule = GameModule<unknown, unknown, unknown, unknown>;
@@ -38,6 +41,7 @@ export class RoomManager {
   }
 
   create(host: Joiner, gameId: GameId, options: unknown, now: number): GameRoom {
+    if (this.rooms.size >= MAX_ROOMS) throw new RoomError("SERVER_BUSY", "Server đang đầy, thử lại sau");
     const room = new Room({
       code: this.newCode(),
       gameId,

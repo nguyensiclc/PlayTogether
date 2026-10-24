@@ -19,6 +19,15 @@ const MIME: Record<string, string> = {
   ".woff2": "font/woff2",
 };
 
+/** Header bảo mật cho mọi phản hồi. CSP chỉ cho tài nguyên cùng nguồn, font Google và ảnh data:/blob:; style inline có sẵn trong giao diện. */
+const SECURITY_HEADERS: Record<string, string> = {
+  "x-content-type-options": "nosniff",
+  "x-frame-options": "DENY",
+  "referrer-policy": "no-referrer",
+  "content-security-policy":
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' ws: wss:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
+};
+
 const ROOM_API = /^\/api\/rooms\/([^/]+)$/;
 
 /** Xử lý một request HTTP. `staticDir` là thư mục build của client; null khi chạy dev (Vite lo phần tĩnh). */
@@ -28,9 +37,10 @@ export async function handleHttp(
   rooms: RoomManager,
   staticDir: string | null,
 ): Promise<void> {
-  const path = new URL(req.url ?? "/", "http://localhost").pathname;
+  const path = safeDecode(new URL(req.url ?? "/", "http://localhost").pathname);
+  if (path === null) return send(res, 400, "text/plain; charset=utf-8", "Bad request");
   const api = ROOM_API.exec(path);
-  if (api) return sendPreview(res, rooms, decodeURIComponent(api[1] ?? ""));
+  if (api) return sendPreview(res, rooms, api[1] ?? "");
   if (path === "/healthz") return send(res, 200, "text/plain; charset=utf-8", "ok");
   if (path === "/api/lan-ip") {
     return send(res, 200, "application/json; charset=utf-8", JSON.stringify({ lanIp: getLanIp() }));
@@ -61,13 +71,13 @@ function sendPreview(res: ServerResponse, rooms: RoomManager, rawCode: string): 
 
 /** File tĩnh; đường dẫn không có đuôi (vd /r/ABCD) thì trả về index.html để client tự định tuyến */
 async function serveStatic(res: ServerResponse, root: string, path: string): Promise<void> {
-  const file = normalize(join(root, decodeURIComponent(path)));
+  const file = normalize(join(root, path));
   // Chặn đường dẫn thoát ra ngoài thư mục build (vd /../../)
   if (file !== root && !file.startsWith(root + sep)) return send(res, 403, "text/plain; charset=utf-8", "Forbidden");
   const target = extname(file) && (await isFile(file)) ? file : join(root, "index.html");
   try {
     const body = await readFile(target);
-    res.writeHead(200, { "content-type": MIME[extname(target)] ?? "application/octet-stream" });
+    res.writeHead(200, { "content-type": MIME[extname(target)] ?? "application/octet-stream", ...SECURITY_HEADERS });
     res.end(body);
   } catch {
     send(res, 404, "text/plain; charset=utf-8", "Not found");
@@ -82,7 +92,17 @@ async function isFile(file: string): Promise<boolean> {
   }
 }
 
+/** Giải mã %XX; chuỗi hỏng (vd "%E0%A4%A") hoặc có byte NUL thì trả về null thay vì ném lỗi làm sập server */
+function safeDecode(path: string): string | null {
+  try {
+    const decoded = decodeURIComponent(path);
+    return decoded.includes("\0") ? null : decoded;
+  } catch {
+    return null;
+  }
+}
+
 function send(res: ServerResponse, status: number, type: string, body: string): void {
-  res.writeHead(status, { "content-type": type });
+  res.writeHead(status, { "content-type": type, ...SECURITY_HEADERS });
   res.end(body);
 }

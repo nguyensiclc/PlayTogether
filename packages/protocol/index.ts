@@ -177,7 +177,9 @@ export type ErrorCode =
   | "INVALID_MOVE"
   | "STALE_MOVE"
   | "RATE_LIMITED"
-  | "BOT_NOT_SUPPORTED";
+  | "BOT_NOT_SUPPORTED"
+  /** Server đã đủ số phòng tối đa, thử lại sau */
+  | "SERVER_BUSY";
 
 /** Mã phòng: 4 ký tự, bỏ các ký tự dễ nhầm 0 O 1 I L (kỹ thuật mục 6) */
 export const ROOM_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";

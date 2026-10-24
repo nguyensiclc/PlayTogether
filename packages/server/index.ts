@@ -5,7 +5,7 @@ import { existsSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { fileURLToPath } from "node:url";
-import { WS_PATH } from "@playtogether/protocol";
+import { MAX_MESSAGE_BYTES, WS_PATH } from "@playtogether/protocol";
 import { WebSocketServer } from "ws";
 import { Gateway } from "./gateway.ts";
 import { handleHttp } from "./http.ts";
@@ -31,8 +31,15 @@ export function startServer(opts: ServerOptions): Promise<RunningServer> {
   // Server không phải engine nên được dùng Math.random trực tiếp (người đi trước ván đầu, mã phòng)
   const rooms = new RoomManager(Math.random);
   const gateway = new Gateway({ rooms, rng: Math.random, now: Date.now });
-  const server = createServer((req, res) => void handleHttp(req, res, rooms, opts.staticDir));
-  const wss = new WebSocketServer({ noServer: true });
+  const server = createServer((req, res) => {
+    // Lỗi bất ngờ ở một request chỉ làm hỏng request đó, không được làm sập cả server
+    handleHttp(req, res, rooms, opts.staticDir).catch(() => {
+      if (!res.headersSent) res.writeHead(500);
+      res.end();
+    });
+  });
+  // maxPayload chặn ngay ở tầng ws các gói lớn quá (mặc định ws nhận tới 100 MiB trước khi Gateway kiểm tra)
+  const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES * 4 });
 
   server.on("upgrade", (req, socket, head) => {
     if (new URL(req.url ?? "/", "http://localhost").pathname !== WS_PATH) {
@@ -46,6 +53,8 @@ export function startServer(opts: ServerOptions): Promise<RunningServer> {
       };
       gateway.open(conn);
       ws.on("message", (data) => gateway.message(conn, data.toString()));
+      // Gói quá lớn hoặc sai khung làm ws báo lỗi: ngắt kết nối đó, không để lỗi lan ra làm sập server
+      ws.on("error", () => ws.terminate());
       ws.on("close", () => gateway.close(conn));
     });
   });

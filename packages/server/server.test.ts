@@ -348,6 +348,27 @@ describe("server thật qua WebSocket", () => {
     await expect(new Promise((resolve, reject) => bad.on("error", reject).on("open", resolve))).rejects.toBeDefined();
   });
 
+  it("URL hỏng không làm sập server và mọi phản hồi có header bảo mật", async () => {
+    const bad = await fetch(`http://localhost:${srv.port}/%E0%A4%A`);
+    expect(bad.status).toBe(400);
+    const nul = await fetch(`http://localhost:${srv.port}/api/rooms/AB%00C`);
+    expect(nul.status).toBe(400);
+    const ok = await fetch(`http://localhost:${srv.port}/healthz`);
+    expect(ok.status).toBe(200);
+    expect(ok.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(ok.headers.get("x-frame-options")).toBe("DENY");
+    expect(ok.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
+  });
+
+  it("gói WebSocket quá lớn bị ngắt ngay", async () => {
+    const ws = new WebSocket(`ws://localhost:${srv.port}/ws`);
+    await new Promise((resolve) => ws.on("open", resolve));
+    ws.on("error", () => {}); // server ngắt giữa chừng làm ws phía test báo lỗi, bỏ qua
+    const closed = new Promise<number>((resolve) => ws.on("close", resolve));
+    ws.send("x".repeat(100_000));
+    expect(await closed).toBe(1009);
+  });
+
   it("GET /api/lan-ip trả về IP nội bộ của server", async () => {
     const res = await fetch(`http://localhost:${srv.port}/api/lan-ip`);
     expect(res.status).toBe(200);
