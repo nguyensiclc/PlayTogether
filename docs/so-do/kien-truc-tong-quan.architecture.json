@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "PlayTogether: kiến trúc tổng quan",
+    "locale": "vi",
+    "output": "kien-truc-tong-quan.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/nguyensiclc/PlayTogether",
+      "provider": "github",
+      "revision": "f487cf6e020180854564d2aa049aacaaf316179b"
+    }
+  },
+  "components": [
+    {
+      "id": "players",
+      "type": "external",
+      "label": "Người chơi",
+      "sublabel": "Điện thoại / máy tính",
+      "pos": [40, 240],
+      "size": [130, 64]
+    },
+    {
+      "id": "client",
+      "type": "frontend",
+      "label": "Client",
+      "sublabel": "Vite · screens/ + <game>/",
+      "pos": [240, 240],
+      "size": [150, 64],
+      "sources": [
+        {
+          "path": "packages/client/main.ts",
+          "line": 1,
+          "end_line": 21
+        },
+        {
+          "path": "packages/client/games/registry.ts",
+          "line": 12,
+          "end_line": 22
+        },
+        {
+          "path": "packages/client/net/socket.ts",
+          "line": 12,
+          "end_line": 45
+        }
+      ]
+    },
+    {
+      "id": "protocol",
+      "type": "messagebus",
+      "label": "Protocol",
+      "sublabel": "kiểu message dùng chung",
+      "pos": [520, 90],
+      "size": [150, 64],
+      "sources": [
+        {
+          "path": "packages/protocol/index.ts",
+          "line": 31,
+          "end_line": 35
+        },
+        {
+          "path": "packages/protocol/index.ts",
+          "line": 114,
+          "end_line": 135
+        },
+        {
+          "path": "packages/protocol/index.ts",
+          "line": 179,
+          "end_line": 179
+        }
+      ]
+    },
+    {
+      "id": "gateway",
+      "type": "backend",
+      "label": "Gateway",
+      "sublabel": "WebSocket /ws · kiểm tra · giới hạn tốc độ",
+      "pos": [520, 240],
+      "size": [170, 64],
+      "tag": "20 msg/giây",
+      "sources": [
+        {
+          "path": "packages/server/index.ts",
+          "line": 30,
+          "end_line": 51
+        },
+        {
+          "path": "packages/server/gateway.ts",
+          "line": 16,
+          "end_line": 17
+        },
+        {
+          "path": "packages/server/gateway.ts",
+          "line": 38,
+          "end_line": 60
+        }
+      ]
+    },
+    {
+      "id": "static",
+      "type": "backend",
+      "label": "HTTP tĩnh",
+      "sublabel": "phục vụ client đã build",
+      "pos": [520, 400],
+      "size": [170, 64],
+      "sources": [
+        {
+          "path": "packages/server/http.ts",
+          "line": 24,
+          "end_line": 40
+        },
+        {
+          "path": "packages/server/http.ts",
+          "line": 62,
+          "end_line": 64
+        }
+      ]
+    },
+    {
+      "id": "rooms",
+      "type": "backend",
+      "label": "Phòng chơi",
+      "sublabel": "RoomManager · Room (trong RAM)",
+      "pos": [790, 240],
+      "size": [170, 64],
+      "sources": [
+        {
+          "path": "packages/server/room-manager.ts",
+          "line": 19,
+          "end_line": 24
+        },
+        {
+          "path": "packages/server/room-manager.ts",
+          "line": 38,
+          "end_line": 50
+        },
+        {
+          "path": "packages/server/room.ts",
+          "line": 279,
+          "end_line": 297
+        }
+      ]
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "Engine từng game",
+      "sublabel": "GameModule: hàm thuần, không I/O",
+      "pos": [1090, 240],
+      "size": [170, 64],
+      "tag": "luật chơi",
+      "sources": [
+        {
+          "path": "packages/engine/game-module.ts",
+          "line": 18,
+          "end_line": 35
+        },
+        {
+          "path": "packages/server/room-manager.ts",
+          "line": 3,
+          "end_line": 7
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "packages/server (Node 24 + ws)",
+      "wraps": ["gateway", "static", "rooms"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "players-to-client",
+      "from": "players",
+      "to": "client",
+      "label": "chạm, bấm"
+    },
+    {
+      "id": "client-to-gateway",
+      "from": "client",
+      "to": "gateway",
+      "label": "move, createRoom",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "gateway-to-rooms",
+      "from": "gateway",
+      "to": "rooms",
+      "label": "gọi Room",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "rooms-to-engine",
+      "from": "rooms",
+      "to": "engine",
+      "label": "parseMove, applyMove",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "client-to-protocol",
+      "from": "client",
+      "to": "protocol",
+      "label": "kiểu",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "gateway-to-protocol",
+      "from": "gateway",
+      "to": "protocol",
+      "label": "kiểu",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "client-to-static",
+      "from": "client",
+      "to": "static",
+      "label": "tải trang (GET)",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Server quyết định mọi thứ",
+      "items": [
+        "Client chỉ gửi ý định (move)",
+        "Room kiểm tra bằng parseMove rồi applyMove",
+        "Server phát lại state và events cho cả phòng"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Nền tảng và game tách nhau",
+      "items": [
+        "Engine là hàm thuần, nhận RNG qua tham số",
+        "Lớp phòng không chứa luật của game cụ thể",
+        "architecture.test.ts kiểm tra các quy tắc tách module"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Thêm game = vài dòng đăng ký",
+      "items": [
+        "engine/package.json (exports)",
+        "protocol: GAME_IDS",
+        "server: MODULES ở room-manager.ts",
+        "client: games/registry.ts"
+      ]
+    }
+  ]
+}

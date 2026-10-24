@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "PlayTogether: luồng một nước đi",
+    "locale": "vi",
+    "output": "luong-mot-nuoc-di.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/nguyensiclc/PlayTogether",
+      "provider": "github",
+      "revision": "f487cf6e020180854564d2aa049aacaaf316179b"
+    }
+  },
+  "participants": [
+    {
+      "id": "client",
+      "type": "frontend",
+      "label": "Client",
+      "sublabel": "màn chơi của game",
+      "sources": [{ "path": "packages/client/screens/room.ts", "line": 131, "end_line": 134 }]
+    },
+    {
+      "id": "gateway",
+      "type": "backend",
+      "label": "Gateway",
+      "sublabel": "WebSocket /ws",
+      "sources": [
+        { "path": "packages/server/gateway.ts", "line": 57, "end_line": 80 },
+        { "path": "packages/server/gateway.ts", "line": 129, "end_line": 134 },
+        { "path": "packages/server/gateway.ts", "line": 180, "end_line": 194 }
+      ]
+    },
+    {
+      "id": "room",
+      "type": "backend",
+      "label": "Room",
+      "sublabel": "phòng trong RAM",
+      "sources": [{ "path": "packages/server/room.ts", "line": 279, "end_line": 297 }]
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "GameModule",
+      "sublabel": "luật của game",
+      "sources": [{ "path": "packages/engine/game-module.ts", "line": 18, "end_line": 35 }]
+    },
+    {
+      "id": "peers",
+      "type": "external",
+      "label": "Người khác",
+      "sublabel": "mọi tab trong phòng"
+    }
+  ],
+  "segments": [
+    { "from": 150, "to": 280, "label": "Kiểm tra" },
+    { "from": 290, "to": 410, "label": "Áp dụng luật" },
+    { "from": 420, "to": 520, "label": "Phát kết quả" }
+  ],
+  "messages": [
+    {
+      "id": "send-move",
+      "from": "client",
+      "to": "gateway",
+      "y": 175,
+      "label": "move + actionNo",
+      "variant": "emphasis"
+    },
+    { "id": "route-move", "from": "gateway", "to": "room", "y": 205, "label": "room.move(...)" },
+    { "id": "parse-move", "from": "room", "to": "engine", "y": 235, "label": "parseMove(raw)" },
+    { "id": "parsed", "from": "engine", "to": "room", "y": 265, "label": "nước đi hoặc null", "variant": "return" },
+    {
+      "id": "apply-move",
+      "from": "room",
+      "to": "engine",
+      "y": 320,
+      "label": "applyMove(state, seat, move)",
+      "variant": "emphasis"
+    },
+    { "id": "applied", "from": "engine", "to": "room", "y": 350, "label": "state mới + events", "variant": "return" },
+    {
+      "id": "room-result",
+      "from": "room",
+      "to": "gateway",
+      "y": 380,
+      "label": "seat, move, events",
+      "variant": "return"
+    },
+    {
+      "id": "broadcast-self",
+      "from": "gateway",
+      "to": "client",
+      "y": 445,
+      "label": "moveApplied",
+      "variant": "emphasis"
+    },
+    {
+      "id": "broadcast-peers",
+      "from": "gateway",
+      "to": "peers",
+      "y": 475,
+      "label": "moveApplied",
+      "variant": "emphasis"
+    },
+    {
+      "id": "reject",
+      "from": "gateway",
+      "to": "client",
+      "y": 505,
+      "label": "error nếu sai (STALE_MOVE…)",
+      "variant": "dashed"
+    }
+  ],
+  "activations": [
+    { "participant": "gateway", "from": 170, "to": 510, "type": "backend" },
+    { "participant": "room", "from": 200, "to": 385, "type": "backend" },
+    { "participant": "engine", "from": 230, "to": 355, "type": "backend" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Server là nguồn sự thật",
+      "items": [
+        "Client chỉ gửi ý định",
+        "actionNo cũ bị từ chối (STALE_MOVE)",
+        "Sai lượt hoặc sai luật cũng bị từ chối"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Mỗi người một góc nhìn",
+      "items": ["Gateway dựng state riêng cho từng người trong phòng", "Tất cả nhận moveApplied cùng events"]
+    }
+  ]
+}

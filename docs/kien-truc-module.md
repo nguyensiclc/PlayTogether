@@ -64,3 +64,7 @@ Chiều phụ thuộc: **game → nền tảng / game-ui** (được), **nền t
 - **Tải màn hình theo nhu cầu**: hiện mọi game được đóng gói chung một file JS. Khi có nhiều game, đổi `createScreen` của `ClientGame` thành `() => import("./game-view.ts")` để chia nhỏ bundle (kèm `room.ts` chờ bất đồng bộ).
 - **`style.css`** của nền tảng vẫn dài (khoảng 2100 dòng): tách tiếp theo màn hình (trang chủ, phòng chờ…) khi có thay đổi lớn ở đó.
 - **Khung HTML màn chơi** (`game-page.ts`) mỗi game có một bản vì bố cục khác nhau; nếu nhiều game giống bố cục (hai thẻ người chơi + bàn + viên trạng thái) thì rút thành khung chung trong `game-ui/`.
+
+## Sơ đồ
+
+Sơ đồ tương tác (tổng quan kiến trúc, luồng một nước đi) ở `docs/so-do/`, dựng bằng Archify; xem `docs/so-do/README.md`.
