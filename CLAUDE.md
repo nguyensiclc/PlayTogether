@@ -14,6 +14,7 @@ Game đầu tiên: **Ô ăn quan**. Sau đó sẽ có Tiến lên, Cờ tướng
 - Thiết kế màn hình (mockup, hệ màu): `docs/design/`. Màn hình đã có thiết kế thì code UI phải theo thiết kế đó.
 - Cờ caro: `docs/caro/` (luật, UX, kỹ thuật, kế hoạch). Câu hỏi mở của Caro đánh số `C1…` ở `docs/caro/04-ke-hoach-prototype.md` mục 6. Mockup đã chốt trong `docs/design/caro/` (Claude tự thiết kế), bản yêu cầu gốc ở `docs/design/caro/README.md`. Code UI Caro ở `packages/client/caro/` và `packages/client/screens/caro-game.ts`.
 - Cờ tướng: `docs/co-tuong/` (luật, UX, kỹ thuật, kế hoạch). Câu hỏi mở đánh số `T1…` ở `docs/co-tuong/04-ke-hoach-prototype.md` mục 6. Yêu cầu thiết kế và mockup Canva đã chốt ở `docs/design/co-tuong/`. Code UI ở `packages/client/co-tuong/`. Làm trên nhánh `feature/co-tuong`.
+- Tiến lên miền Nam: `docs/tien-len/` (luật, UX, kỹ thuật, kế hoạch). Câu hỏi mở đánh số `TL1…` ở `docs/tien-len/04-ke-hoach-prototype.md` mục 6; **chưa trả lời thì chưa viết code**. Game nhiều người đầu tiên (2–4), cần đổi hợp đồng dùng chung (mốc TL-P).
 - Kiến trúc module (cái gì dùng chung, cái gì riêng từng game, cách thêm game): `docs/kien-truc-module.md`. **Đọc trước khi thêm game hoặc thêm tính năng dùng cho nhiều game.**
 - Prompt bắt đầu session mới (nắm tình hình, các biến thể: thêm game, sửa lỗi, tiếp tục việc dở, rà soát trước khi gộp): `docs/prompt-bat-dau-session.md`.
 - Quy ước code, clean code: `docs/quy-uoc-code.md`. Code mới và code sửa phải theo quy ước này. Trước khi commit chạy `npm run check`.

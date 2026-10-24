@@ -29,6 +29,10 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 | [Cờ vua — Thiết kế UX](docs/co-vua/02-thiet-ke-ux.md) | Bàn cờ SVG, tap-to-move, phong cấp, lật bàn theo góc nhìn người chơi |
 | [Cờ vua — Thiết kế kỹ thuật](docs/co-vua/03-thiet-ke-ky-thuat.md) | Mô hình dữ liệu, sinh nước đi hợp lệ, kiểm tra chiếu, bất biến fuzz test |
 | [Cờ vua — Kế hoạch prototype](docs/co-vua/04-ke-hoach-prototype.md) | Phạm vi, các mốc V1–V4, test cases V01–V25, câu hỏi mở V1–V5 |
+| [Tiến lên miền Nam — Luật chơi](docs/tien-len/01-luat-choi.md) | Bộ bài, các bộ hợp lệ, chặt heo, tới trắng, xếp hạng (đề xuất, chờ chốt câu hỏi mở) |
+| [Tiến lên miền Nam — Thiết kế UX](docs/tien-len/02-thiet-ke-ux.md) | Phòng chờ 2–4 người, tay bài quạt, chọn bài, kết quả xếp hạng |
+| [Tiến lên miền Nam — Thiết kế kỹ thuật](docs/tien-len/03-thiet-ke-ky-thuat.md) | Kiểu dữ liệu, thuật toán bộ bài, bài giấu, đổi hợp đồng dùng chung cho nhiều người |
+| [Tiến lên miền Nam — Kế hoạch prototype](docs/tien-len/04-ke-hoach-prototype.md) | Phạm vi, các mốc TL0–TL-H, test case TL01–TL24, câu hỏi mở TL1–TL10 |
 
 ## Trạng thái
 
@@ -39,7 +43,7 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 | Cờ caro | Engine, nền tảng đa game và giao diện đã xong (C1–C3). Còn thử trên điện thoại thật (C4) |
 | Cờ tướng | Engine, đăng ký game và giao diện đã xong (T0, T-E, T-P, T-U), có bot Dễ, Vừa, Khó. Còn thử trên điện thoại thật (T-H) |
 | Cờ vua | Engine (V1), Protocol & Server (V2), Giao diện (V3), thử nghiệm (V4) và bot 3 cấp (V5) đã xong |
-| Tiến lên | Chưa bắt đầu |
+| Tiến lên miền Nam | Đã viết tài liệu (luật, UX, kỹ thuật, kế hoạch). **Đang chờ trả lời câu hỏi mở TL1–TL10** trước khi làm nền tảng nhiều người và engine |
 
 ## Triển khai thử (Render)
 
