@@ -359,7 +359,7 @@ export class Room<S, M, O, E> {
     }
     // Ván đầu chọn ngẫu nhiên; các ván sau người thua đi trước (luật mục 2)
     const first = this.nextFirst() ?? Math.floor(rng() * seated.length);
-    this.game = this.module.setup(this.options, seated, first);
+    this.game = this.module.setup(this.options, seated, first, rng, { firstGame: this.lastFirst === null });
     this.lastFirst = first;
     this.status = "playing";
     this.actionNo++;

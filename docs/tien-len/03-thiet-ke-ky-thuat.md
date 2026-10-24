@@ -62,6 +62,7 @@ Hiện nền tảng giả định: số ghế cố định theo `maxPlayers`, ph
 | c | **Người đi trước ván sau**: `GameModule.nextFirst?(result, seats): SeatId \| null` thay cho mặc định "người thua"; game hiện có giữ hành vi cũ | `engine/game-module.ts`, `server/room.ts` (đoạn tính `nextFirst`) |
 | d | **Lobby nhiều ghế**: lưới ghế 2 đến 4 thay cho cặp VS; thẻ đối thủ nhiều người ở màn chơi | `screens/lobby.ts`, `style.css`, `game-ui/player-card-base.ts` |
 | e | **Bot nhiều ghế**: "Chơi với máy" từ trang chủ lấp **mọi** ghế còn lại (thay vì cố định ghế 1) | `screens/home.ts`, `server/room.ts` (đã có `addBot(seat)`) |
+| g | **`setup` nhận RNG và ngữ cảnh**: `setup(options, seats, firstPlayer, rng, ctx?: { firstGame })` để game chia bài bằng RNG của phòng và biết đây có phải ván đầu không (game hiện có bỏ qua hai tham số mới) | `engine/game-module.ts`, `server/room.ts` |
 | f | **Bài giấu theo ghế**: `viewFor` đã có; kiểm tra gateway không phát `state` gốc, và `moveApplied.events` không rò bài | `server/gateway.ts`, test |
 
 Mỗi mục được bảo vệ bằng test của lớp phòng (`room.test.ts`, `gateway.test.ts`) và e2e hai người cho từng game hiện có.

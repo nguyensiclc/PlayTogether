@@ -31,7 +31,7 @@ Một nước đi là **một bộ hợp lệ** hoặc **bỏ lượt**.
 ## 4. Diễn biến một ván
 
 1. **Chia bài** ngẫu nhiên (RNG truyền vào engine).
-2. **Người đi trước**: ván đầu là người giữ **3♠**; ván sau là người về nhất ván trước (TL6). Người đi trước đánh một bộ hợp lệ bất kỳ; ở ván đầu, bộ đó phải chứa 3♠ (TL6).
+2. **Người đi trước**: ván đầu là người giữ **3♠** (với 2 hoặc 3 người mà 3♠ nằm trong phần bài không chia thì là người giữ **lá nhỏ nhất đã chia**); ván sau là người về nhất ván trước (TL6). Người đi trước đánh một bộ hợp lệ bất kỳ; ở ván đầu, bộ đó phải chứa lá nhỏ nhất đó (TL6).
 3. Người kế tiếp phải đánh **cùng loại bộ, cùng số lá, lớn hơn** bộ vừa rồi, hoặc **chặt** (mục 5), hoặc **bỏ lượt**.
 4. **Bỏ lượt** là mất quyền đánh cho tới hết vòng này.
 5. Khi mọi người còn bài (trừ người đánh gần nhất) đã bỏ lượt, **vòng kết thúc** và người đánh bộ cuối cùng được đi tự do: đánh một bộ bất kỳ, mở vòng mới. Nếu người đó đã hết bài thì quyền đi tự do thuộc người kế tiếp còn bài.

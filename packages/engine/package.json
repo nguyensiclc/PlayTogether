@@ -8,7 +8,8 @@
     "./o-an-quan": "./o-an-quan/index.ts",
     "./caro": "./caro/index.ts",
     "./co-tuong": "./co-tuong/index.ts",
-    "./co-vua": "./co-vua/index.ts"
+    "./co-vua": "./co-vua/index.ts",
+    "./tien-len": "./tien-len/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p ."

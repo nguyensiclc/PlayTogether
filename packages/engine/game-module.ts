@@ -26,7 +26,8 @@ export interface GameModule<S, M, O, E> {
   /** Ghế đi trước ván sau khi ván vừa xong; thiếu thì người thua (hoà thì đổi lượt). null = chọn ngẫu nhiên */
   nextFirst?(result: GameResult, lastFirst: SeatId | null, seatCount: number): SeatId | null;
   defaultOptions: O;
-  setup(options: O, seats: SeatId[], firstPlayer: SeatId): S;
+  /** Dựng ván mới. Game cần ngẫu nhiên (xáo bài) dùng `rng`; `ctx.firstGame` là true ở ván đầu tiên của phòng */
+  setup(options: O, seats: SeatId[], firstPlayer: SeatId, rng: Rng, ctx?: SetupContext): S;
   validMoves(state: S, seat: SeatId): M[];
   applyMove(state: S, seat: SeatId, move: M): { state: S; events: E[] } | { error: string };
   viewFor(state: S, seat: SeatId | null): unknown;
@@ -39,6 +40,12 @@ export interface GameModule<S, M, O, E> {
   parseMove(raw: unknown): M | null;
   /** Hỗ trợ đánh với máy nếu game có cài đặt bot */
   bot?: BotSupport<S, M>;
+}
+
+/** Thông tin phòng cho `setup` */
+export interface SetupContext {
+  /** Ván đầu tiên kể từ khi phòng tạo; các ván sau là Ván nữa */
+  firstGame: boolean;
 }
 
 export type BotLevelId = "easy" | "medium" | "hard";
