@@ -2,13 +2,14 @@
 
 import { createRng } from "@playtogether/engine";
 import { oAnQuan } from "@playtogether/engine/o-an-quan";
+import { playableCombos } from "@playtogether/engine/tien-len";
 import type { ClientMessage, ServerMessage } from "@playtogether/protocol";
 import { ROOM_CODE_ALPHABET } from "@playtogether/protocol";
 import { describe, expect, it } from "vitest";
 import { type Connection, Gateway, RATE_LIMIT_PER_SECOND } from "./gateway.ts";
 import { parseClientMessage } from "./parse.ts";
 import { EMPTY_ROOM_TTL_MS, RoomManager } from "./room-manager.ts";
-import { asCaro, asOAnQuan } from "./test-utils.ts";
+import { asCaro, asOAnQuan, asTienLen } from "./test-utils.ts";
 
 class FakeConn implements Connection {
   readonly inbox: ServerMessage[] = [];
@@ -135,6 +136,25 @@ describe("RoomManager", () => {
     expect(rooms.get(room.code)).toBeUndefined();
   });
 });
+
+/** Góc nhìn Tiến lên mới nhất mà kết nối nhận được */
+function latestTienLen(c: FakeConn): ReturnType<typeof asTienLen> {
+  const latest = [...c.inbox].reverse().find((m) => m.type === "gameStarted" || m.type === "moveApplied");
+  if (!latest || !("room" in latest)) throw new Error("chưa có góc nhìn ván");
+  return asTienLen(latest.room);
+}
+
+/** Nước đi đơn giản của người: đánh tổ hợp nhỏ nhất hợp lệ, không có thì bỏ lượt */
+function humanMove(room: ReturnType<typeof asTienLen>): ClientMessage {
+  const g = room.game;
+  if (!g?.hand) throw new Error("người chơi phải có bài");
+  const combo = playableCombos(g.hand, g.table?.combo ?? null, g.options, g.moveNo === 0 ? g.mustInclude : null)[0];
+  return {
+    type: "move",
+    move: combo ? { type: "play", cards: combo.cards } : { type: "pass" },
+    actionNo: room.actionNo,
+  };
+}
 
 describe("Gateway", () => {
   it("phải hello trước; tên rỗng bị từ chối", () => {
@@ -327,5 +347,33 @@ describe("Gateway", () => {
       expect(botMove.seat).toBe(1);
       expect(botMove.room.actionNo).toBe(started.room.actionNo + 2);
     }
+  });
+
+  it("Tiến lên: 3 bot lấp ghế, người chơi đánh và bot tự đánh trả cho tới hết ván", () => {
+    const rooms = new RoomManager(createRng(7));
+    let t = 1_000;
+    const gw = new Gateway({ rooms, rng: createRng(11), now: () => t, botDelayMs: 0 });
+    const c = new FakeConn();
+    gw.open(c);
+    const send = (m: ClientMessage) => gw.message(c, JSON.stringify(m));
+    send({ type: "hello", clientId: "client-host", name: "Người" });
+    send({ type: "createRoom", gameId: "tien-len", options: { toiTrang: false } });
+    expect(c.last("roomJoined").room.botSupported).toBe(true);
+    for (const seat of [1, 2, 3]) send({ type: "addBot", seat, level: "medium" });
+    expect(c.last("roomUpdated").room.seats.filter((m) => m?.isBot)).toHaveLength(3);
+
+    send({ type: "start" });
+    // Bot phản hồi ngay (botDelayMs = 0), nên mỗi lần dừng lại là đến lượt người
+    let view = latestTienLen(c);
+    for (let steps = 0; steps < 300 && view.status === "playing"; steps++) {
+      t += 100; // giãn thời gian để không dính giới hạn tốc độ
+      send(humanMove(view));
+      view = latestTienLen(c);
+    }
+    const last = [...c.inbox].reverse().find((m) => m.type === "moveApplied");
+    if (!last || !("room" in last)) throw new Error("chưa có nước đi");
+    const done = asTienLen(last.room);
+    expect(done.status).toBe("finished");
+    expect(done.game?.result?.ranking).toHaveLength(4);
   });
 });

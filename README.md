@@ -43,7 +43,7 @@ Nhóm game: bài, cờ, trò chơi dân gian Việt Nam.
 | Cờ caro | Engine, nền tảng đa game và giao diện đã xong (C1–C3). Còn thử trên điện thoại thật (C4) |
 | Cờ tướng | Engine, đăng ký game và giao diện đã xong (T0, T-E, T-P, T-U), có bot Dễ, Vừa, Khó. Còn thử trên điện thoại thật (T-H) |
 | Cờ vua | Engine (V1), Protocol & Server (V2), Giao diện (V3), thử nghiệm (V4) và bot 3 cấp (V5) đã xong |
-| Tiến lên miền Nam | Đã viết tài liệu (luật, UX, kỹ thuật, kế hoạch). Câu hỏi mở TL1–TL10 đã chốt. Nền tảng nhiều người, engine (30 test) và giao diện (2–4 người, tay bài quạt, xếp hạng) đã xong; còn bot (TL-B), thử trên điện thoại thật và chờ duyệt thiết kế |
+| Tiến lên miền Nam | Đã viết tài liệu (luật, UX, kỹ thuật, kế hoạch). Câu hỏi mở TL1–TL10 đã chốt. Nền tảng nhiều người, engine (30 test) và giao diện (2–4 người, tay bài quạt, xếp hạng) đã xong; bot Dễ/Vừa/Khó (TL-B) đã xong; còn thử trên điện thoại thật và chờ duyệt thiết kế |
 
 ## Triển khai thử (Render)
 

@@ -3,6 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { createRng, pickRandom } from "../game-module.ts";
 import { allCombos, beats, cardName, classify, rankOf } from "./combos.ts";
+import { tienLen } from "./index.ts";
 import {
   applyMove,
   DEFAULT_OPTIONS,
@@ -457,5 +458,47 @@ describe("kiểm tra chéo và fuzz", () => {
       expect("error" in applyMove(s, s.turn, mv) || legal.has(JSON.stringify(mv))).toBe(true);
     }
     expect(rankOf(0)).toBe(0);
+  });
+});
+
+/** Hai bot chơi cả ván với nhau (mọi ghế là bot cùng cấp độ); trả về trạng thái cuối */
+function playBotGame(level: "easy" | "medium" | "hard", n: 2 | 3 | 4, seed: number): State {
+  const rng = createRng(seed * 13 + n);
+  const seats = Array.from({ length: n }, (_, i) => i);
+  let s = setup({ soNguoi: n, chatHeo: true, toiTrang: false }, seats, 0, rng, { firstGame: seed % 2 === 0 });
+  for (let steps = 0; s.status === "playing"; steps++) {
+    expect(steps).toBeLessThan(600);
+    const move = tienLen.bot.chooseMove(s, s.turn, level, rng);
+    if (move === null) throw new Error("bot không chọn được nước dù có nước hợp lệ");
+    const r = applyMove(s, s.turn, move);
+    if ("error" in r) throw new Error(`bot đi nước bất hợp lệ: ${r.error}`);
+    s = r.state;
+  }
+  return s;
+}
+
+describe("bot", () => {
+  for (const level of ["easy", "medium", "hard"] as const) {
+    it(`E25: bot ${level} chỉ đánh nước hợp lệ và chơi hết ván 2, 3, 4 người`, () => {
+      for (const n of [2, 3, 4] as const) {
+        for (let seed = 0; seed < 30; seed++) expect(playBotGame(level, n, seed).result?.ranking).toHaveLength(n);
+      }
+    });
+  }
+
+  it("E26: bot Trung bình đánh bộ nhỏ nhất đè được và bỏ lượt thay vì phí heo khi chưa ai sắp thắng", () => {
+    const rng = createRng(1);
+    // đè lẻ 5♦ bằng bộ nhỏ nhất: 6♠, giữ heo
+    const s = mk(["6♠ 9♦ 2♠ K♠ K♦", "3♣ 4♣ 5♣ 6♣ 7♣ 8♣ 9♣", "3♦ 4♦ 5♦ 6♦ 7♦ 8♦ 9♦", "3♥ 4♥ 5♥ 6♥ 7♥ 8♥ 9♥"], {
+      table: { combo: table("5♦"), by: 3 },
+      turn: 0,
+    });
+    expect(tienLen.bot.chooseMove(s, 0, "medium", rng)).toEqual({ type: "play", cards: ks("6♠") });
+    // chỉ còn heo mà đối thủ còn nhiều bài: bỏ lượt
+    const t = mk(["2♠ 3♠", "3♣ 4♣ 5♣ 6♣ 7♣ 8♣ 9♣", "3♦ 4♦ 5♦ 6♦ 7♦ 8♦ 9♦", "3♥ 4♥ 5♥ 6♥ 7♥ 8♥ 9♥"], {
+      table: { combo: table("A♦"), by: 3 },
+      turn: 0,
+    });
+    expect(tienLen.bot.chooseMove(t, 0, "medium", rng)).toEqual({ type: "pass" });
   });
 });

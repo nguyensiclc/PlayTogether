@@ -23,4 +23,5 @@ export const tienLenGame: ClientGame = {
   rulesHtml: tienLenRulesHtml,
   historyHtml: tienLenHistoryHtml,
   createScreen: (root, room, you, actions) => new TienLenGameView(root, room, you, actions),
+  botSupported: true,
 };

@@ -18,7 +18,7 @@ Game thứ năm của PlayTogether và là **game nhiều người đầu tiên 
 | Xếp hạng nhất, nhì, ba, bét; điểm theo hạng | Giải đấu, trận nhiều ván tính tổng điểm |
 | Người rời giữa ván: loại khỏi ván, ván tiếp tục | Bot thay thế người rời |
 | Giao diện điện thoại 360px và desktop; lá bài SVG 3D bóng | Âm thanh, hiệu ứng chia bài nâng cao |
-| Bot Dễ/Vừa/Khó (mốc TL-B) | |
+| Bot Dễ/Vừa/Khó (mốc TL-B) | Đã xong |
 
 ## 3. Các mốc
 
@@ -29,7 +29,7 @@ Game thứ năm của PlayTogether và là **game nhiều người đầu tiên 
 | **TL-E — Engine** | `engine/tien-len` + test mục 4, viết test trước, fuzz | Test xanh; fuzz ngẫu nhiên đủ 2, 3, 4 người: bất biến mục 4 đúng | **Đã xong** (30 test, fuzz 200 ván cho mỗi cỡ 2, 3, 4 người) |
 | **TL-R — Đăng ký** | `exports`, `GAME_IDS`, `TienLenRoom`, `MODULES`, `registry.ts`, bỏ khỏi `catalog.ts` | `npm run check` xanh (gồm `architecture.test.ts`) | **Đã xong** |
 | **TL-U — Giao diện** | Phòng chờ, màn chơi (tay bài quạt, chọn bài), kết quả, luật, lịch sử | Chơi hết ván giữa 4 tab; e2e cho cả 5 game | **Đã xong**: chơi hết ván giữa 4 trình duyệt qua giao diện thật, e2e server 3 người, vào phòng thật cả 4 game cũ; chưa thử điện thoại thật |
-| **TL-B — Bot** | Bot 3 cấp trên hạ tầng bot chung | Bot lấp ghế trống, ván có bot chạy hết | Chưa bắt đầu |
+| **TL-B — Bot** | Bot 3 cấp trên hạ tầng bot chung | Bot lấp ghế trống, ván có bot chạy hết | Đã xong: bot Dễ/Vừa/Khó, "Chơi với máy" lấp mọi ghế còn lại, có test engine (E25, E26) và test gateway |
 | **TL-H — Hoàn thiện** | Thử trên điện thoại thật với 4 người | 3 đến 5 nhóm chơi thử, ghi nhận phản hồi | Chưa bắt đầu |
 
 ## 4. Test case cho engine

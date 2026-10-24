@@ -214,7 +214,8 @@ function createRoomWithBot(root: HTMLElement, gameId: GameId, level = "medium"):
   });
   socket.onMessage((m) => {
     if (m.type === "roomJoined") {
-      socket.send({ type: "addBot", seat: 1, level });
+      // Máy lấp mọi ghế còn lại (game hai người chỉ có ghế 1)
+      for (let seat = 1; seat < m.room.seats.length; seat++) socket.send({ type: "addBot", seat, level });
       location.assign(roomPath(m.room.code));
     }
     if (m.type === "error" && m.code === "ALREADY_HOSTING") {
