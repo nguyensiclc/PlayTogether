@@ -1,0 +1,414 @@
+/* Bàn chơi Tiến lên (docs/tien-len/02-thiet-ke-ux.md). Dùng lại .game-page, .player, .status-pill, .result của style.css;
+   nền mặt bàn gỗ tối do class chung `table-page`. */
+
+/* ---------- Lá bài ---------- */
+
+.tl-card {
+  --cw: 52px;
+  position: relative;
+  display: block;
+  flex: none;
+  width: var(--cw);
+  aspect-ratio: 5 / 7;
+  padding: 0;
+  border: 1px solid rgba(70, 45, 20, 0.4);
+  border-radius: calc(var(--cw) * 0.15);
+  background: linear-gradient(160deg, #fffefa, #f2e8d0 85%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -2px 0 rgba(120, 90, 40, 0.18),
+    0 2px 0 rgba(0, 0, 0, 0.18),
+    0 6px 10px rgba(0, 0, 0, 0.35);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  line-height: 1;
+  cursor: default;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Vệt sáng chéo cho cảm giác bóng */
+.tl-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.55), transparent 38%, transparent 70%, rgba(0, 0, 0, 0.08));
+  pointer-events: none;
+}
+
+.tl-card.red {
+  color: #c4372b;
+}
+
+.tl-card .rk {
+  position: absolute;
+  top: 7%;
+  left: 9%;
+  font-size: calc(var(--cw) * 0.34);
+  letter-spacing: -0.04em;
+}
+
+.tl-card .st {
+  position: absolute;
+  top: 31%;
+  left: 10%;
+  font-size: calc(var(--cw) * 0.26);
+  font-style: normal;
+}
+
+.tl-card .big {
+  position: absolute;
+  right: 10%;
+  bottom: 6%;
+  font-size: calc(var(--cw) * 0.5);
+  font-style: normal;
+  opacity: 0.92;
+}
+
+/* Mặt lưng: hoạ tiết kẻ chéo đỏ gạch, viền kem */
+.tl-card.back {
+  background: repeating-linear-gradient(45deg, #a8332a 0 3px, #8a2620 3px 6px);
+  border: calc(var(--cw) * 0.1) solid #fffaf0;
+}
+
+.tl-card.sm {
+  --cw: 22px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.tl-card.back.sm {
+  --cw: 13px;
+  border-width: 2px;
+  box-shadow: none;
+}
+
+/* ---------- Hàng đối thủ ---------- */
+
+.tl-opps {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.tl-opp {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px 6px 8px;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 0 8px 16px -10px rgba(0, 0, 0, 0.6);
+}
+
+.tl-opp .avatar {
+  width: 38px;
+  height: 38px;
+  font-size: 13px;
+}
+
+.tl-opp .info {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.tl-opp .info b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.tl-opp .sub {
+  font-size: 11.5px;
+  color: var(--muted);
+  min-height: 1.2em;
+}
+
+.tl-opp .cnt {
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 6px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12.5px;
+}
+
+.tl-opp.turn {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 4px rgba(242, 179, 61, 0.28),
+    0 8px 16px -10px rgba(0, 0, 0, 0.6);
+}
+
+.tl-opp.passed {
+  opacity: 0.72;
+}
+
+.tl-opp.out .cnt {
+  background: var(--live-ink);
+}
+
+.tl-opp.gone,
+.tl-opp.offline {
+  opacity: 0.55;
+}
+
+/* ---------- Mặt bàn (thảm xanh) ---------- */
+
+.tl-table {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 150px;
+  padding: 14px 10px;
+  border: 5px solid #6b421f;
+  border-radius: 24px;
+  background: radial-gradient(ellipse at 50% 35%, #347f5b, #1c5a3e 75%);
+  box-shadow:
+    inset 0 0 28px rgba(0, 0, 0, 0.45),
+    0 0 0 2px #a8723f,
+    0 18px 26px -14px rgba(0, 0, 0, 0.7);
+}
+
+.tl-table-cards {
+  display: flex;
+  justify-content: center;
+  min-height: 70px;
+}
+
+.tl-card.tbl {
+  --cw: 46px;
+}
+
+.tl-card.tbl + .tl-card.tbl {
+  margin-left: calc(var(--cw) * -0.48);
+}
+
+.tl-card.tbl.fresh {
+  animation: tl-drop 220ms ease-out;
+}
+
+.tl-table-label {
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #f6ecd2;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* ---------- Tay bài ---------- */
+
+.tl-hand {
+  --cw: 52px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: calc(var(--cw) * 1.4 + 22px);
+  padding: 22px 2px 4px;
+}
+
+.tl-hand .tl-card {
+  --cw: inherit;
+  width: var(--cw);
+  cursor: pointer;
+  transition:
+    transform 120ms ease-out,
+    filter 120ms;
+}
+
+.tl-hand .tl-card + .tl-card {
+  margin-left: calc(var(--step, 28px) - var(--cw));
+}
+
+.tl-hand .tl-card.sel {
+  transform: translateY(-18px);
+  box-shadow:
+    0 0 0 3px var(--accent),
+    0 10px 16px rgba(0, 0, 0, 0.45);
+  z-index: 2;
+}
+
+.tl-hand .tl-card.dim {
+  filter: brightness(0.62) saturate(0.7);
+}
+
+.tl-hand .tl-card:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  z-index: 3;
+}
+
+.tl-spectate {
+  align-self: center;
+  color: rgba(255, 246, 230, 0.7);
+}
+
+.tl-hint {
+  min-height: 1.4em;
+  text-align: center;
+  color: rgba(255, 246, 230, 0.78);
+}
+
+/* ---------- Nút ---------- */
+
+.tl-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tl-actions .btn {
+  flex: 1;
+  min-height: 48px;
+  padding: 0 8px;
+  font-size: 14px;
+}
+
+.tl-actions [data-sort] {
+  flex: 0 0 48px;
+  padding: 0;
+}
+
+.tl-actions .btn.primary {
+  flex: 1.5;
+}
+
+.tl-actions .btn[disabled] {
+  opacity: 0.45;
+}
+
+/* ---------- Thẻ của bạn ---------- */
+
+.tl-badge {
+  font-size: 22px;
+}
+
+/* ---------- Kết quả ---------- */
+
+.tl-ranking {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tl-rank-row {
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+
+.tl-rank-row.me {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.tl-rank-row .medal {
+  width: 28px;
+  font-size: 22px;
+  text-align: center;
+}
+
+.tl-rank-row .info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tl-rank-row .pts {
+  font-weight: 800;
+  color: var(--live-ink);
+}
+
+.tl-left {
+  display: flex;
+  margin-top: 6px;
+}
+
+.tl-left .tl-card.sm + .tl-card.sm {
+  margin-left: -9px;
+}
+
+/* ---------- Hiệu ứng ---------- */
+
+@keyframes tl-drop {
+  from {
+    transform: translateY(-26px) scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tl-card.tbl.fresh {
+    animation: none;
+  }
+
+  .tl-hand .tl-card {
+    transition: none;
+  }
+}
+
+/* ---------- Desktop ---------- */
+
+@media (min-width: 1024px) {
+  .tl-stage {
+    max-width: 880px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .tl-hand {
+    --cw: 68px;
+  }
+
+  .tl-card.tbl {
+    --cw: 60px;
+  }
+
+  .tl-table {
+    min-height: 210px;
+  }
+
+  .tl-opp .avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .tl-opp .info b {
+    font-size: 15px;
+  }
+
+  .tl-actions {
+    max-width: 520px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

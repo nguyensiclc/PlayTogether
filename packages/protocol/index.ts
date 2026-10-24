@@ -26,9 +26,15 @@ import type {
   Options as OAnQuanOptions,
   State as OAnQuanState,
 } from "@playtogether/engine/o-an-quan";
+import type {
+  GameEvent as TienLenEvent,
+  Move as TienLenMove,
+  Options as TienLenOptions,
+  View as TienLenView,
+} from "@playtogether/engine/tien-len";
 
 /** Các game đã có. Thêm game mới = thêm một giá trị ở đây, một module engine và một màn hình client. */
-export const GAME_IDS = ["o-an-quan", "caro", "co-tuong", "co-vua"] as const;
+export const GAME_IDS = ["o-an-quan", "caro", "co-tuong", "co-vua", "tien-len"] as const;
 export type GameId = (typeof GAME_IDS)[number];
 
 export function isGameId(value: unknown): value is GameId {
@@ -90,9 +96,11 @@ export type OAnQuanRoom = PublicRoomOf<OAnQuanState, OAnQuanOptions, "o-an-quan"
 export type CaroRoom = PublicRoomOf<CaroState, CaroOptions, "caro">;
 export type CoTuongRoom = PublicRoomOf<CoTuongState, CoTuongOptions, "co-tuong">;
 export type CoVuaRoom = PublicRoomOf<CoVuaState, CoVuaOptions, "co-vua">;
+/** Tiến lên giấu bài theo ghế nên phòng mang `View` (bài của người xem), không phải `State` đầy đủ */
+export type TienLenRoom = PublicRoomOf<TienLenView, TienLenOptions, "tien-len">;
 
 /** Phòng của một trong các game; client thu hẹp kiểu bằng `room.gameId` */
-export type PublicRoom = OAnQuanRoom | CaroRoom | CoTuongRoom | CoVuaRoom;
+export type PublicRoom = OAnQuanRoom | CaroRoom | CoTuongRoom | CoVuaRoom | TienLenRoom;
 
 /** Người nhận message là ai trong phòng */
 export interface You {
@@ -136,6 +144,7 @@ export type ServerMessage =
   | MoveApplied<"caro", CaroMove, CaroEvent, CaroRoom>
   | MoveApplied<"co-tuong", CoTuongMove, CoTuongEvent, CoTuongRoom>
   | MoveApplied<"co-vua", CoVuaMove, CoVuaEvent, CoVuaRoom>
+  | MoveApplied<"tien-len", TienLenMove, TienLenEvent, TienLenRoom>
   | { type: "leftRoom" }
   | { type: "error"; code: ErrorCode; message: string };
 

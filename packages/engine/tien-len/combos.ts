@@ -15,9 +15,15 @@ export const byValue = (a: Card, b: Card): number => a - b;
 const SO_TEN = ["3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A", "2"];
 const CHAT_TEN = ["♠", "♣", "♦", "♥"];
 
+/** "3", "10", "J", "2" */
+export const rankLabel = (c: Card): string => SO_TEN[rankOf(c)] ?? "?";
+
+/** "♠", "♣", "♦", "♥" */
+export const suitSymbol = (c: Card): string => CHAT_TEN[suitOf(c)] ?? "?";
+
 /** "3♠", "10♦", "2♥" */
 export function cardName(c: Card): string {
-  return `${SO_TEN[rankOf(c)] ?? "?"}${CHAT_TEN[suitOf(c)] ?? "?"}`;
+  return `${rankLabel(c)}${suitSymbol(c)}`;
 }
 
 const SAME_RANK_KIND: readonly (ComboKind | undefined)[] = [undefined, "le", "doi", "ba", "tuQuy"];

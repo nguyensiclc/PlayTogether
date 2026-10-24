@@ -2,7 +2,7 @@
 
 import type { ForfeitReason, GameModule, GameResult, Rng, SeatId, SetupContext } from "../game-module.ts";
 import { allCombos, beats, byValue, classify, groupByRank, HEO } from "./combos.ts";
-import type { Card, GameEvent, Move, Options, State, ToiTrangKind, View } from "./types.ts";
+import type { Card, Combo, GameEvent, Move, Options, State, ToiTrangKind, View } from "./types.ts";
 
 export const DEFAULT_OPTIONS: Options = { soNguoi: 4, chatHeo: true, toiTrang: true };
 
@@ -116,17 +116,30 @@ function applyToiTrang(s: State): void {
 
 // ---------- Nước đi hợp lệ ----------
 
+/**
+ * Các bộ `hand` có thể đánh lên bộ `table` (null = đi tự do). `mustInclude` là lá bắt buộc có trong bộ (bộ đầu ván đầu).
+ * Client dùng hàm này với `View` để biết nút Đánh có bật không.
+ */
+export function playableCombos(
+  hand: readonly Card[],
+  table: Combo | null,
+  options: Pick<Options, "chatHeo">,
+  mustInclude: Card | null,
+): Combo[] {
+  return allCombos(hand).filter(
+    (c) => beats(table, c, options) && (mustInclude === null || c.cards.includes(mustInclude)),
+  );
+}
+
 /** Mọi nước đi hợp lệ của `seat`: các bộ đánh được và bỏ lượt (khi bàn có bộ) */
 export function validMoves(state: State, seat: SeatId): Move[] {
   if (state.status !== "playing" || state.turn !== seat) return [];
-  const hand = state.hands[seat] ?? [];
   const table = state.table?.combo ?? null;
-  const moves: Move[] = [];
-  for (const combo of allCombos(hand)) {
-    if (!beats(table, combo, state.options)) continue;
-    if (state.moveNo === 0 && state.mustInclude !== null && !combo.cards.includes(state.mustInclude)) continue;
-    moves.push({ type: "play", cards: combo.cards });
-  }
+  const must = state.moveNo === 0 ? state.mustInclude : null;
+  const moves: Move[] = playableCombos(state.hands[seat] ?? [], table, state.options, must).map((c) => ({
+    type: "play",
+    cards: c.cards,
+  }));
   if (table !== null) moves.push({ type: "pass" });
   return moves;
 }

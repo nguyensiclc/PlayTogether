@@ -7,6 +7,7 @@ import { caroGame } from "../caro/client-game.ts";
 import { coTuongGame } from "../co-tuong/client-game.ts";
 import { coVuaGame } from "../co-vua/client-game.ts";
 import { oAnQuanGame } from "../o-an-quan/client-game.ts";
+import { tienLenGame } from "../tien-len/client-game.ts";
 import type { Category, ClientGame } from "./types.ts";
 
 export const CLIENT_GAMES: Record<GameId, ClientGame> = {
@@ -14,6 +15,7 @@ export const CLIENT_GAMES: Record<GameId, ClientGame> = {
   caro: caroGame,
   "co-tuong": coTuongGame,
   "co-vua": coVuaGame,
+  "tien-len": tienLenGame,
 };
 
 /** Game theo thứ tự hiển thị trên trang chủ */

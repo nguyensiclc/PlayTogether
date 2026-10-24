@@ -5,6 +5,7 @@ import { caro } from "@playtogether/engine/caro";
 import { coTuong } from "@playtogether/engine/co-tuong";
 import { coVua } from "@playtogether/engine/co-vua";
 import { oAnQuan } from "@playtogether/engine/o-an-quan";
+import { tienLen } from "@playtogether/engine/tien-len";
 import type { GameId } from "@playtogether/protocol";
 import { ROOM_CODE_ALPHABET, ROOM_CODE_LENGTH } from "@playtogether/protocol";
 import { type Joiner, Room } from "./room.ts";
@@ -21,6 +22,7 @@ const MODULES: Record<GameId, AnyGameModule> = {
   caro,
   "co-tuong": coTuong,
   "co-vua": coVua,
+  "tien-len": tienLen,
 };
 
 export type GameRoom = Room<unknown, unknown, unknown, unknown>;
