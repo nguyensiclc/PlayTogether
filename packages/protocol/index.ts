@@ -75,7 +75,7 @@ export interface PublicRoomOf<S, O, G extends GameId = GameId> {
   actionNo: number;
   /** `id` công khai của những người đã bấm Ván nữa */
   rematchVotes: string[];
-  /** Ghế đi trước ở ván sau (người thua ván trước, hoà thì đổi lượt — luật mục 2). null khi chưa có ván nào */
+  /** Ghế đi trước ở ván sau (mặc định người thua ván trước, hoà thì đổi lượt; game có thể tự quyết qua `GameModule.nextFirst`). null khi chưa có ván nào */
   nextFirst: SeatId | null;
   /** Số ván thắng của từng ghế trong phòng (theo thứ tự ghế); hoà không tính */
   wins: number[];

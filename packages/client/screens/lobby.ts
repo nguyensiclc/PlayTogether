@@ -129,7 +129,7 @@ export class LobbyView {
         <div class="lobby-cols">
           <div class="lobby-main">
             <div class="section-head"><h2>Người chơi</h2><span class="small muted">${seated}/${room.seats.length}${seated === room.seats.length ? " · đủ người" : ""}</span></div>
-            <section class="card seats">${room.seats.map((m, seat) => this.seatHtml(m, seat, room, you)).join('<span class="vs desk-only">VS</span>')}</section>
+            <section class="card seats${room.seats.length > 2 ? " many" : ""}" style="--n:${room.seats.length}">${room.seats.map((m, seat) => this.seatHtml(m, seat, room, you)).join(room.seats.length === 2 ? '<span class="vs desk-only">VS</span>' : "")}</section>
             ${spectatorsHtml(room.spectators)}
             <div class="section-head"><h2>Tuỳ chọn</h2><span class="small muted">${isHost ? "Bạn là chủ phòng" : "Chủ phòng chỉnh"}</span></div>
             <section class="card opts">${gameOf(room.gameId).lobbyOptions.html(room, isHost)}</section>
@@ -207,7 +207,7 @@ export class LobbyView {
     const first =
       room.nextFirst === null
         ? "Người đi trước được chọn ngẫu nhiên khi bắt đầu"
-        : `${escapeHtml(room.seats[room.nextFirst]?.name ?? "")} đi trước (thua ván trước)`;
+        : `${escapeHtml(room.seats[room.nextFirst]?.name ?? "")} đi trước`;
     return `<button class="btn primary block" type="button" data-act="start">Bắt đầu ván</button><p class="small muted">${first}</p>`;
   }
 

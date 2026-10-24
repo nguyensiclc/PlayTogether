@@ -63,7 +63,7 @@ Giao diện: `docs/design/nen-tang/phong-cho.html`, `phong-cho-desktop.html` (Đ
 - Thẻ **Mời bạn bè vào chơi**: link (tự động thay `localhost` bằng địa chỉ IP nội bộ của máy chủ để bạn bè cùng mạng Wi-Fi/LAN quét QR hoặc bấm link là vào được ngay), nút **Sao chép** (đổi thành "Đã chép"), **Chia sẻ** (Web Share API, chỉ hiện khi máy hỗ trợ), **Mã QR** (điện thoại bấm để mở; desktop hiện sẵn bên cột phải). Điện thoại đặt thẻ này ngay dưới tên phòng.
 - Danh sách ghế: avatar, tên, "(bạn)", nhãn **Chủ phòng** / **● Đã vào** / **Mất kết nối**. Ghế trống ghi "Đang chờ bạn bè…". Desktop hiện hai thẻ ghế kiểu VS.
 - **Tuỳ chọn:** Giá trị quan, Quan Già, Lật bàn, Mốc điểm thắng (Đấu trận: Từng ván, 70, 100, 200, 300, 500 điểm). Chỉ chủ phòng chỉnh được, người khác thấy nhưng không bấm được. "Thời gian mỗi lượt" ẩn cho tới M4 (Q22d).
-- Nút cuối: chủ phòng đủ người thì **Bắt đầu ván** (kèm "Người đi trước được chọn ngẫu nhiên" hoặc "… đi trước (thua ván trước)"); chưa đủ người thì "Cần thêm 1 người để bắt đầu"; khách thì "Chờ chủ phòng bắt đầu".
+- Nút cuối: chủ phòng đủ người thì **Bắt đầu ván** (kèm "Người đi trước được chọn ngẫu nhiên" hoặc "… đi trước"); chưa đủ người thì "Cần thêm 1 người để bắt đầu"; khách thì "Chờ chủ phòng bắt đầu".
 - Nút quay lại / **Rời phòng**: rời phòng thật (đang chơi thì bị xử thua — Q22f), về trang chủ.
 - Người vào phòng tự động ngồi ghế trống. Hết ghế thì vào làm **người xem**.
 - Người xem có thể bấm **Ngồi đây** ở ghế trống để ngồi.

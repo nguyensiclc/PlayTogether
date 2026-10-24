@@ -2325,6 +2325,11 @@ button.game:hover {
     border: 0;
   }
 
+  /* Phòng 3 đến 4 người: các ghế chia đều một hàng, không có chữ VS */
+  .seats.many {
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  }
+
   .vs {
     font-weight: 800;
     color: var(--muted);
