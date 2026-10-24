@@ -87,6 +87,7 @@
 /* ---------- Hàng đối thủ ---------- */
 
 .tl-opps {
+  align-self: stretch;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
@@ -172,6 +173,7 @@
 /* ---------- Mặt bàn (thảm xanh) ---------- */
 
 .tl-table {
+  align-self: stretch;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -383,27 +385,29 @@
     max-width: 880px;
     margin: 0 auto;
     width: 100%;
+    gap: 10px;
+    overflow-y: auto;
   }
 
   .tl-hand {
-    --cw: 68px;
-  }
-
-  .tl-card.tbl {
     --cw: 60px;
   }
 
+  .tl-card.tbl {
+    --cw: 56px;
+  }
+
   .tl-table {
-    min-height: 210px;
+    min-height: 168px;
   }
 
   .tl-opp .avatar {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
   }
 
   .tl-opp .info b {
-    font-size: 15px;
+    font-size: 14.5px;
   }
 
   .tl-actions {

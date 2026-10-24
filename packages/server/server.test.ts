@@ -3,11 +3,12 @@
 import { createRng, pickRandom } from "@playtogether/engine";
 import { caro } from "@playtogether/engine/caro";
 import { oAnQuan } from "@playtogether/engine/o-an-quan";
+import { playableCombos } from "@playtogether/engine/tien-len";
 import type { ClientMessage, PublicRoom, RoomPreview, ServerMessage } from "@playtogether/protocol";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { type RunningServer, startServer } from "./index.ts";
-import { asCaro, asCoVua, asOAnQuan } from "./test-utils.ts";
+import { asCaro, asCoVua, asOAnQuan, asTienLen } from "./test-utils.ts";
 
 let srv: RunningServer;
 
@@ -77,6 +78,67 @@ const roomOf = (m: ServerMessage): PublicRoom => {
   if (!("room" in m)) throw new Error(`message không có room: ${m.type}`);
   return m.room;
 };
+
+type TienLenView = ReturnType<typeof asTienLen>;
+
+/** Chủ tạo phòng Tiến lên 3 người (không tới trắng) và hai khách vào; trả về mã phòng */
+async function openTienLenRoom(clients: TestClient[]): Promise<string> {
+  const [host, ...guests] = clients as [TestClient, TestClient, TestClient];
+  host.send({ type: "hello", clientId: "tl-host-000000001", name: "Chủ" });
+  host.send({ type: "createRoom", gameId: "tien-len", options: { soNguoi: 3, toiTrang: false } });
+  const joined = asTienLen(roomOf(await host.waitFor((m) => m.type === "roomJoined")));
+  expect(joined.seats).toHaveLength(3);
+  for (const [i, g] of guests.entries()) {
+    g.send({ type: "hello", clientId: `tl-guest-0000000${i}`, name: `Khách ${i + 1}` });
+    g.send({ type: "joinRoom", code: joined.code });
+    await g.waitFor((m) => m.type === "roomJoined");
+  }
+  return joined.code;
+}
+
+type Started = Extract<ServerMessage, { type: "gameStarted" }>;
+
+async function startTienLen(clients: TestClient[]): Promise<Started[]> {
+  const marks = clients.map((c) => c.count);
+  (clients[0] as TestClient).send({ type: "start" });
+  return Promise.all(clients.map((c, i) => c.waitFor((m) => m.type === "gameStarted", marks[i]) as Promise<Started>));
+}
+
+/** Mỗi người chỉ có bài của mình (13 lá), ba tay bài không trùng và không lộ sang người khác */
+function expectPrivateHands(views: TienLenView[]): void {
+  const hands = views.map((r) => r.game?.hand ?? []);
+  for (const h of hands) expect(h).toHaveLength(13);
+  expect(new Set(hands.flat()).size).toBe(39);
+  views.forEach((r, i) => {
+    for (const [j, other] of hands.entries()) {
+      if (j !== i) expect(JSON.stringify(r.game)).not.toContain(JSON.stringify(other));
+    }
+  });
+}
+
+/** Người đến lượt đánh bộ nhỏ nhất đè được, không có thì bỏ lượt; trả về góc nhìn mới của mọi người */
+async function playOneTurn(
+  clients: TestClient[],
+  seatOf: (number | null)[],
+  views: TienLenView[],
+): Promise<TienLenView[]> {
+  // Giới hạn 20 message mỗi giây mỗi kết nối: chơi nhanh quá sẽ bị ngắt, nên chậm lại một chút
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  const i = seatOf.indexOf(views[0]?.game?.turn ?? -1);
+  const view = views[i] as TienLenView;
+  const g = view.game;
+  if (!g?.hand) throw new Error("người đến lượt phải có bài");
+  const must = g.moveNo === 0 ? g.mustInclude : null;
+  const combo = playableCombos(g.hand, g.table?.combo ?? null, g.options, must)[0];
+  const marks = clients.map((c) => c.count);
+  (clients[i] as TestClient).send({
+    type: "move",
+    move: combo ? { type: "play", cards: combo.cards } : { type: "pass" },
+    actionNo: view.actionNo,
+  });
+  const applied = await Promise.all(clients.map((c, k) => c.waitFor((m) => m.type === "moveApplied", marks[k])));
+  return applied.map((m) => asTienLen(roomOf(m)));
+}
 
 describe("server thật qua WebSocket", () => {
   it("tạo phòng, xem trước bằng HTTP, vào bằng mã, chơi hết ván, ván nữa", async () => {
@@ -256,6 +318,27 @@ describe("server thật qua WebSocket", () => {
 
     host.close();
     guest.close();
+  }, 30_000);
+
+  it("Tiến lên 3 người: số ghế theo tuỳ chọn, mỗi người chỉ thấy bài của mình, chơi hết ván", async () => {
+    const clients = [new TestClient(srv.port), new TestClient(srv.port), new TestClient(srv.port)];
+    await Promise.all(clients.map((c) => c.ready()));
+    const code = await openTienLenRoom(clients);
+    const started = await startTienLen(clients);
+    let views = started.map((m) => asTienLen(m.room));
+    expectPrivateHands(views);
+
+    const seatOf = started.map((m) => m.you.seat);
+    for (let steps = 0; views[0]?.game?.status === "playing" && steps < 400; steps++) {
+      views = await playOneTurn(clients, seatOf, views);
+    }
+    const room = views[0] as (typeof views)[number];
+    expect(code).toHaveLength(4);
+    expect(room.game?.status).toBe("finished");
+    expect(room.status).toBe("finished");
+    expect(room.game?.result?.ranking).toHaveLength(3);
+    expect(room.game?.revealed).not.toBeNull();
+    for (const c of clients) c.close();
   }, 30_000);
 
   it("đường dẫn WebSocket khác /ws bị từ chối; phòng không có thì HTTP 404", async () => {

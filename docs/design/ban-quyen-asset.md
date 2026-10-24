@@ -12,9 +12,9 @@ Ghi nguồn mọi asset hình ảnh của giao diện (xem `danh-sach-asset.md`)
 - **Giới hạn kỹ thuật:** bản lấy về chỉ là ảnh xem trước 200 px, không có nền trong suốt. Đủ để hiện trong vòng tròn tới ~64 px (màn 2×). Cần bản lớn hơn thì xuất từ Canva.
 - **Cách dùng trong code:** `packages/client/avatars.ts` gán con vật theo băm của tên người chơi (cùng tên luôn ra cùng một con). Máy (bot) không dùng avatar con vật, hiện biểu tượng 🤖.
 
-## Ảnh 3D của game (B1 đến B4)
+## Ảnh 3D của game (B1 đến B5)
 
-- **Vị trí:** `packages/client/<game>/assets/card.webp` (Ô ăn quan, Cờ tướng, Cờ caro, Cờ vua; 200 × 133).
+- **Vị trí:** `packages/client/<game>/assets/card.webp` (Ô ăn quan, Cờ tướng, Cờ caro, Cờ vua, Tiến lên; 200 × 133).
 - **Nguồn:** tạo bằng `generate-image` của Canva, ngày **2026-10-22**, phong cách "glossy 3D render for a mobile game card" (bàn cờ trên nền gỗ, giấy, kem hoặc nỉ xanh).
 - **Giấy phép:** **chưa xác nhận**, như avatar ở trên.
 - **Giới hạn:** chỉ có bản xem trước 200 px nên hơi mềm khi hiện trên desktop (thẻ ~266 px). Cần xuất bản lớn từ Canva nếu muốn nét hơn.

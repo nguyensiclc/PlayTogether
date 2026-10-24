@@ -24,11 +24,11 @@ Game thứ năm của PlayTogether và là **game nhiều người đầu tiên 
 
 | Mốc | Nội dung | Tiêu chí xong | Trạng thái |
 |---|---|---|---|
-| **TL0 — Tài liệu** | 4 tài liệu này, câu hỏi `TL1…TL10`, mockup | Mọi câu hỏi đã có trả lời; mockup được duyệt | TL1–TL10 **đã chốt** (theo đề xuất); mockup chờ làm và duyệt |
+| **TL0 — Tài liệu** | 4 tài liệu này, câu hỏi `TL1…TL10`, mockup | Mọi câu hỏi đã có trả lời; mockup được duyệt | TL1–TL10 **đã chốt**; mockup là ảnh chụp giao diện thật ở `docs/design/tien-len/`, **chờ bạn duyệt** |
 | **TL-P — Nền tảng nhiều người** | Mục 5 của tài liệu kỹ thuật (a đến g): số ghế theo tuỳ chọn, kết quả nhiều hạng, người đi trước, lobby nhiều ghế, bài giấu, `setup` nhận RNG. Bot nhiều ghế (e) làm ở TL-B | `npm run check` xanh; e2e hai người chơi cho **cả 4 game hiện có** vẫn chạy y như cũ | Đã xong phần server và lobby (a, b, c, d, f, g); còn chạy e2e cho 4 game ở TL-U |
 | **TL-E — Engine** | `engine/tien-len` + test mục 4, viết test trước, fuzz | Test xanh; fuzz ngẫu nhiên đủ 2, 3, 4 người: bất biến mục 4 đúng | **Đã xong** (30 test, fuzz 200 ván cho mỗi cỡ 2, 3, 4 người) |
-| **TL-R — Đăng ký** | `exports`, `GAME_IDS`, `TienLenRoom`, `MODULES`, `registry.ts`, bỏ khỏi `catalog.ts` | `npm run check` xanh (gồm `architecture.test.ts`) | Chưa bắt đầu |
-| **TL-U — Giao diện** | Phòng chờ, màn chơi (tay bài quạt, chọn bài), kết quả, luật, lịch sử | Chơi hết ván giữa 4 tab; e2e cho cả 5 game | Chưa bắt đầu |
+| **TL-R — Đăng ký** | `exports`, `GAME_IDS`, `TienLenRoom`, `MODULES`, `registry.ts`, bỏ khỏi `catalog.ts` | `npm run check` xanh (gồm `architecture.test.ts`) | **Đã xong** |
+| **TL-U — Giao diện** | Phòng chờ, màn chơi (tay bài quạt, chọn bài), kết quả, luật, lịch sử | Chơi hết ván giữa 4 tab; e2e cho cả 5 game | **Đã xong**: chơi hết ván giữa 4 trình duyệt qua giao diện thật, e2e server 3 người, vào phòng thật cả 4 game cũ; chưa thử điện thoại thật |
 | **TL-B — Bot** | Bot 3 cấp trên hạ tầng bot chung | Bot lấp ghế trống, ván có bot chạy hết | Chưa bắt đầu |
 | **TL-H — Hoàn thiện** | Thử trên điện thoại thật với 4 người | 3 đến 5 nhóm chơi thử, ghi nhận phản hồi | Chưa bắt đầu |
 

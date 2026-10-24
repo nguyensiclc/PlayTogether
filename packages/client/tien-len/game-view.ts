@@ -204,7 +204,7 @@ export class TienLenGameView implements GameScreen {
     this.renderButtons();
     this.renderMe();
     this.q("[data-log]").innerHTML = logListHtml(this.log);
-    this.q("[data-sub]").textContent = ` · Phòng ${this.room.code} · Vòng ${this.view.round}`;
+    this.q("[data-sub]").textContent = `Phòng ${this.room.code} · Vòng ${this.view.round}`;
     this.q("[data-resign]").hidden = !this.canResign();
     if (this.view.status === "finished" && this.view.result) this.showResult();
   }
