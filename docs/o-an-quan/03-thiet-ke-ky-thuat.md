@@ -265,7 +265,7 @@ Lớp `Room` (`packages/server/room.ts`) làm việc với game chỉ qua `GameM
 ```ts
 // Dạng công khai gửi cho mọi người trong phòng (packages/protocol)
 interface PublicRoom {
-  code: string;                    // 4 ký tự, bỏ các ký tự dễ nhầm: 0 O 1 I L
+  code: string;                    // 6 ký tự, bỏ các ký tự dễ nhầm: 0 O 1 I L
   gameId: "o-an-quan";
   hostId: string;                  // id công khai của chủ phòng
   seats: (PublicMember | null)[];  // độ dài = maxPlayers
@@ -289,7 +289,7 @@ interface PublicMember { id: string; name: string; connected: boolean; }
 ```
 
 - **Danh tính:** client tự sinh `clientId` (16 byte ngẫu nhiên bằng `crypto.getRandomValues`, vì `randomUUID` không có khi mở bằng http qua LAN) và lưu trong `localStorage`, gửi kèm khi kết nối. `clientId` là **bí mật**: server không bao giờ gửi `clientId` của người khác, mà cấp cho mỗi thành viên một `id` công khai. Prototype vẫn chấp nhận rủi ro mạo danh nếu lộ `clientId`. Bản sau server sẽ cấp token ký số.
-- **Mã phòng:** 4 ký tự từ bảng 31 ký tự, cho khoảng 920 nghìn tổ hợp. Mỗi lần sinh thì kiểm tra trùng.
+- **Mã phòng:** 6 ký tự từ bảng 31 ký tự, cho khoảng 887 triệu tổ hợp (đổi từ 4 ký tự để khó dò mã phòng). Mỗi lần sinh thì kiểm tra trùng.
 - **Ghế:** người vào phòng tự ngồi ghế trống nếu chưa vào ván, hết ghế thì xem. Chủ phòng rời đi thì người ngồi ghế còn lại làm chủ phòng.
 - **Bắt đầu:** ván đầu chọn ngẫu nhiên người đi trước (server dùng `Math.random`, server không phải engine); các ván sau theo `nextFirst`. Trạng thái `finished` cũng là phòng chờ: chủ phòng chỉnh tuỳ chọn và bắt đầu ván mới được.
 - **Ván nữa:** mọi người ngồi ghế đều bấm thì bắt đầu ngay.

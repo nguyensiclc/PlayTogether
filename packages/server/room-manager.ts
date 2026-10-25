@@ -85,7 +85,7 @@ export class RoomManager {
     return removed;
   }
 
-  /** Mã 4 ký tự từ bảng 31 ký tự; sinh lại tới khi không trùng phòng nào đang có */
+  /** Mã 6 ký tự từ bảng 31 ký tự; sinh lại tới khi không trùng phòng nào đang có */
   private newCode(): string {
     for (;;) {
       let code = "";

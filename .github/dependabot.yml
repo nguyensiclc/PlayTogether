@@ -1,0 +1,12 @@
+# Dependabot: mỗi tuần mở PR cập nhật thư viện npm và GitHub Actions khi có bản vá.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

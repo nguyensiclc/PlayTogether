@@ -15,6 +15,8 @@ Rà soát lần 1 (tay + `npm audit`), phạm vi: server (`packages/server`), gi
 | 6 | Thấp | Dò mã phòng và mở nhiều kết nối không bị giới hạn theo IP | `ip-guard.ts`: tối đa 20 kết nối đồng thời và 120 lượt mở WebSocket/hỏi xem trước phòng mỗi phút cho mỗi IP (HTTP 429). Sau proxy tin `X-Forwarded-For` khi có biến `RENDER` hoặc `TRUST_PROXY=1` |
 | 7 | Thấp | Không kiểm tra Origin khi mở WebSocket (trang web lạ dùng trình duyệt của người chơi để mở kết nối) | Origin phải cùng tên miền với `Host`, là máy cục bộ/mạng LAN, hoặc nằm trong biến `ALLOWED_ORIGINS` (cách nhau dấu phẩy). Không có Origin (công cụ, test) thì cho qua |
 
+| 8 | Thấp | Mã phòng 4 ký tự (khoảng 900 nghìn tổ hợp) dò được, lộ tên người chơi | Mã 6 ký tự (khoảng 887 triệu tổ hợp); cộng giới hạn 120 lần/phút/IP thì dò gần như không khả thi |
+
 Test: `ip-guard.test.ts`, `server.test.ts` (URL hỏng, header, gói lớn), `room-manager.test.ts` (trần số phòng).
 
 ## Đã kiểm tra, ổn
@@ -29,6 +31,5 @@ Test: `ip-guard.test.ts`, `server.test.ts` (URL hỏng, header, gói lớn), `ro
 ## Rủi ro còn lại (chấp nhận ở prototype)
 
 - `clientId` là bí mật duy nhất để giữ ghế, lưu trong `localStorage`; ai lấy được nó (XSS, máy dùng chung) vào lại được ghế. Chưa có đăng nhập.
-- Mã phòng 4 ký tự (khoảng 900 nghìn tổ hợp) vẫn dò được ở tốc độ 120 lần/phút/IP và lộ tên chủ phòng; muốn chặt hơn thì tăng độ dài mã.
 - Kẻ có nhiều IP vẫn vượt được giới hạn theo IP; cần dịch vụ chặn ở tầng ngoài nếu bị tấn công thật.
 - Ván trong RAM, restart là mất.

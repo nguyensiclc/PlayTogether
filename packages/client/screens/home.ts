@@ -34,7 +34,7 @@ export function mountHome(root: HTMLElement): void {
         <a class="logo" href="/"><span class="logo-mark"><i></i></span>PlayTogether</a>
         <div class="links desk-only"><a href="/" aria-current="page">Trò chơi</a></div>
         <div class="spacer"></div>
-        <form class="field code desk-only" data-join><input name="code" placeholder="Mã phòng" maxlength="4" autocomplete="off" aria-label="Mã phòng"><button class="btn dark sm" type="submit">Vào</button></form>
+        <form class="field code desk-only" data-join><input name="code" placeholder="Mã phòng" maxlength="6" autocomplete="off" aria-label="Mã phòng"><button class="btn dark sm" type="submit">Vào</button></form>
         <button type="button" class="chip nick" data-nick aria-label="Đổi tên"></button>
       </nav>
       <main class="wrap">
@@ -45,9 +45,9 @@ export function mountHome(root: HTMLElement): void {
             <p class="lead desk-only">Chọn trò, tạo phòng, gửi link qua Zalo hay Messenger. Bạn bè bấm là vào chơi, không cần đăng ký.</p>
             <form class="join mobile-only" data-join>
               <label class="lbl" for="join-code">Có mã phòng?</label>
-              <div class="field code"><input id="join-code" name="code" placeholder="VD: ABCD" maxlength="4" autocomplete="off"><button class="btn dark sm" type="submit">Vào phòng</button></div>
+              <div class="field code"><input id="join-code" name="code" placeholder="VD: ABC234" maxlength="6" autocomplete="off"><button class="btn dark sm" type="submit">Vào phòng</button></div>
             </form>
-            <p class="join-error small" hidden>Mã phòng gồm 4 ký tự, vd ABCD.</p>
+            <p class="join-error small" hidden>Mã phòng gồm 6 ký tự, vd ABC234.</p>
             <div class="cta desk-only">
               <button class="btn primary" type="button" data-create="${FEATURED?.id}">Tạo phòng ${FEATURED?.info.name}</button>
               ${FEATURED && gameOf(FEATURED.id).botSupported ? `<button class="btn secondary" type="button" data-create-bot="${FEATURED.id}">🤖 Chơi với máy</button>` : ""}

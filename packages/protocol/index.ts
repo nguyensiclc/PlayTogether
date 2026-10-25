@@ -181,9 +181,9 @@ export type ErrorCode =
   /** Server đã đủ số phòng tối đa, thử lại sau */
   | "SERVER_BUSY";
 
-/** Mã phòng: 4 ký tự, bỏ các ký tự dễ nhầm 0 O 1 I L (kỹ thuật mục 6) */
+/** Mã phòng: 6 ký tự, bỏ các ký tự dễ nhầm 0 O 1 I L (kỹ thuật mục 6) */
 export const ROOM_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-export const ROOM_CODE_LENGTH = 4;
+export const ROOM_CODE_LENGTH = 6;
 /** Nickname tối đa 20 ký tự (kỹ thuật mục 10) */
 export const MAX_NAME_LENGTH = 20;
 /** Message tối đa 4KB (kỹ thuật mục 10) */

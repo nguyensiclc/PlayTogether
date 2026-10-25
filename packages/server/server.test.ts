@@ -5,6 +5,7 @@ import { caro } from "@playtogether/engine/caro";
 import { oAnQuan } from "@playtogether/engine/o-an-quan";
 import { playableCombos } from "@playtogether/engine/tien-len";
 import type { ClientMessage, PublicRoom, RoomPreview, ServerMessage } from "@playtogether/protocol";
+import { ROOM_CODE_LENGTH } from "@playtogether/protocol";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { type RunningServer, startServer } from "./index.ts";
@@ -333,7 +334,7 @@ describe("server thật qua WebSocket", () => {
       views = await playOneTurn(clients, seatOf, views);
     }
     const room = views[0] as (typeof views)[number];
-    expect(code).toHaveLength(4);
+    expect(code).toHaveLength(ROOM_CODE_LENGTH);
     expect(room.game?.status).toBe("finished");
     expect(room.status).toBe("finished");
     expect(room.game?.result?.ranking).toHaveLength(3);

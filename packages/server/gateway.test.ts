@@ -4,7 +4,7 @@ import { createRng } from "@playtogether/engine";
 import { oAnQuan } from "@playtogether/engine/o-an-quan";
 import { playableCombos } from "@playtogether/engine/tien-len";
 import type { ClientMessage, ServerMessage } from "@playtogether/protocol";
-import { ROOM_CODE_ALPHABET } from "@playtogether/protocol";
+import { ROOM_CODE_ALPHABET, ROOM_CODE_LENGTH } from "@playtogether/protocol";
 import { describe, expect, it } from "vitest";
 import { type Connection, Gateway, RATE_LIMIT_PER_SECOND } from "./gateway.ts";
 import { parseClientMessage } from "./parse.ts";
@@ -117,14 +117,14 @@ describe("mỗi người chỉ làm chủ một phòng", () => {
 });
 
 describe("RoomManager", () => {
-  it("mã phòng 4 ký tự trong bảng 31 ký tự, không trùng", () => {
+  it("mã phòng 6 ký tự trong bảng 31 ký tự, không trùng", () => {
     const rooms = new RoomManager(createRng(1));
     const codes = new Set<string>();
     for (let k = 0; k < 500; k++)
       codes.add(rooms.create({ clientId: `host-${k}-xxxx`, name: "A" }, "o-an-quan", {}, 0).code);
     expect(codes.size).toBe(500);
     for (const code of codes)
-      expect([...code].every((c) => ROOM_CODE_ALPHABET.includes(c)) && code.length === 4).toBe(true);
+      expect([...code].every((c) => ROOM_CODE_ALPHABET.includes(c)) && code.length === ROOM_CODE_LENGTH).toBe(true);
   });
 
   it("dọn phòng không còn ai kết nối quá 10 phút", () => {

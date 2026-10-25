@@ -22,7 +22,7 @@ Giao diện: `docs/design/nen-tang/trang-chu.html` và `trang-chu-desktop.html` 
 - Thẻ **nổi bật** Ô ăn quan: hình bàn, nhãn "Chơi được ngay", số người, thời lượng, nhóm.
 - **Lưới tất cả trò chơi** (2 cột trên điện thoại, 4 cột trên desktop), lọc theo nhóm **Tất cả / Dân gian / Cờ / Bài**. Trò chưa làm có nhãn **Sắp có** và không bấm được.
 - **Thanh trên cùng:** chip **nickname** (lần đầu điền sẵn tên ngẫu nhiên kiểu "Cò Trắng 42", lưu `localStorage`). Bấm vào chip để sửa tên tại chỗ. Trên desktop có thêm ô **Mã phòng** + nút **Vào**.
-- **Điện thoại:** dưới khẩu hiệu có ô **Có mã phòng?** + nút **Vào phòng**. Mã sai định dạng thì báo "Mã phòng gồm 4 ký tự".
+- **Điện thoại:** dưới khẩu hiệu có ô **Có mã phòng?** + nút **Vào phòng**. Mã sai định dạng thì báo "Mã phòng gồm 6 ký tự".
 - **Phòng gần đây:** tối đa 5 phòng đã vào trên máy này (mã phòng, đã chơi với ai, bao lâu trước), nút **Vào lại**. Chưa vào phòng nào thì ẩn mục này.
 - Nút **Tạo phòng** (thẻ nổi bật, thẻ Ô ăn quan trong lưới, nút chính trên desktop) tạo phòng rồi chuyển thẳng sang `/r/MÃ`.
 - **M5:** nút **Luật chơi**.

@@ -1,0 +1,38 @@
+# Kiểm tra mỗi lần push và pull request: lint, typecheck, test, build và quét lỗ hổng phụ thuộc.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Quét lỗ hổng phụ thuộc mỗi tuần dù không có thay đổi mới
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      # Chỉ tính phụ thuộc chạy thật (server); lỗ hổng mức vừa trở lên làm CI đỏ
+      - run: npm audit --omit=dev --audit-level=moderate
