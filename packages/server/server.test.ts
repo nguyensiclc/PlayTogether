@@ -360,6 +360,14 @@ describe("server thật qua WebSocket", () => {
     expect(ok.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
   });
 
+  it("WebSocket từ trang lạ (Origin khác) bị từ chối, không Origin thì vào được", async () => {
+    const evil = new WebSocket(`ws://localhost:${srv.port}/ws`, { headers: { origin: "https://evil.example" } });
+    await expect(new Promise((resolve, reject) => evil.on("error", reject).on("open", resolve))).rejects.toBeDefined();
+    const ok = new WebSocket(`ws://localhost:${srv.port}/ws`);
+    await new Promise((resolve, reject) => ok.on("open", resolve).on("error", reject));
+    ok.close();
+  });
+
   it("gói WebSocket quá lớn bị ngắt ngay", async () => {
     const ws = new WebSocket(`ws://localhost:${srv.port}/ws`);
     await new Promise((resolve) => ws.on("open", resolve));

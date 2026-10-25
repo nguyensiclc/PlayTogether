@@ -12,7 +12,10 @@ Rà soát lần 1 (tay + `npm audit`), phạm vi: server (`packages/server`), gi
 | 4 | Thấp | Thiếu header bảo mật | `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Content-Security-Policy` (chỉ nguồn cùng gốc + Google Fonts) |
 | 5 | Thấp | Đường dẫn có byte NUL | Bị từ chối 400 |
 
-Test: `server.test.ts` (URL hỏng, header, gói lớn), `room-manager.test.ts` (trần số phòng).
+| 6 | Thấp | Dò mã phòng và mở nhiều kết nối không bị giới hạn theo IP | `ip-guard.ts`: tối đa 20 kết nối đồng thời và 120 lượt mở WebSocket/hỏi xem trước phòng mỗi phút cho mỗi IP (HTTP 429). Sau proxy tin `X-Forwarded-For` khi có biến `RENDER` hoặc `TRUST_PROXY=1` |
+| 7 | Thấp | Không kiểm tra Origin khi mở WebSocket (trang web lạ dùng trình duyệt của người chơi để mở kết nối) | Origin phải cùng tên miền với `Host`, là máy cục bộ/mạng LAN, hoặc nằm trong biến `ALLOWED_ORIGINS` (cách nhau dấu phẩy). Không có Origin (công cụ, test) thì cho qua |
+
+Test: `ip-guard.test.ts`, `server.test.ts` (URL hỏng, header, gói lớn), `room-manager.test.ts` (trần số phòng).
 
 ## Đã kiểm tra, ổn
 
@@ -26,7 +29,6 @@ Test: `server.test.ts` (URL hỏng, header, gói lớn), `room-manager.test.ts` 
 ## Rủi ro còn lại (chấp nhận ở prototype)
 
 - `clientId` là bí mật duy nhất để giữ ghế, lưu trong `localStorage`; ai lấy được nó (XSS, máy dùng chung) vào lại được ghế. Chưa có đăng nhập.
-- Mã phòng 4 ký tự (khoảng 900 nghìn tổ hợp) dò được qua `/api/rooms/:code`, lộ tên chủ phòng và người chơi. Muốn chặt hơn thì tăng độ dài mã hoặc giới hạn tốc độ theo IP.
-- Giới hạn tốc độ tính theo kết nối, chưa theo IP: mở nhiều kết nối vẫn vượt được. Sau proxy (Render) cần đọc `X-Forwarded-For`.
-- Không kiểm tra `Origin` khi nâng cấp WebSocket. Do không dùng cookie nên rủi ro thấp, nhưng nên thêm danh sách origin cho bản chạy thật.
+- Mã phòng 4 ký tự (khoảng 900 nghìn tổ hợp) vẫn dò được ở tốc độ 120 lần/phút/IP và lộ tên chủ phòng; muốn chặt hơn thì tăng độ dài mã.
+- Kẻ có nhiều IP vẫn vượt được giới hạn theo IP; cần dịch vụ chặn ở tầng ngoài nếu bị tấn công thật.
 - Ván trong RAM, restart là mất.
